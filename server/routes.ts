@@ -330,7 +330,46 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get("/api/admin/users", async (req, res) => {
     try {
-      // Get real users from database with enhanced details
+      console.log("🔍 Fetching users for admin panel...");
+      
+      // 🔥 GET REAL-TIME DATA FROM FIREBASE
+      try {
+        const { ref, get } = await import('firebase/database');
+        const { database } = await import('./db');
+        
+        const usersRef = ref(database, 'users');
+        const usersSnapshot = await get(usersRef);
+        
+        if (usersSnapshot.exists()) {
+          const firebaseUsers = usersSnapshot.val();
+          const usersArray = Object.entries(firebaseUsers).map(([id, userData]: [string, any]) => ({
+            id,
+            ...userData,
+            // Ensure all required fields exist
+            walletBalance: userData.walletBalance || 0,
+            totalEarnings: userData.totalEarnings || 0,
+            totalReferrals: userData.totalReferrals || 0,
+            totalPurchases: userData.totalPurchases || 0,
+            totalChannels: userData.totalChannels || 0,
+            isActive: userData.isActive !== false
+          }));
+          
+          console.log(`✅ Firebase users loaded: ${usersArray.length}`);
+          console.log("Real-time balances:", usersArray.map(u => ({ 
+            id: u.id, 
+            name: u.displayName, 
+            email: u.email,
+            wallet: u.walletBalance 
+          })));
+          
+          res.json(usersArray);
+          return;
+        }
+      } catch (firebaseError) {
+        console.error('Firebase fetch error:', firebaseError);
+      }
+      
+      // Fallback to memory storage if Firebase fails
       const users = await storage.getUsers();
       
       // Enhance each user with additional statistics
@@ -357,15 +396,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
       }));
 
-      console.log(`Enhanced users found: ${enhancedUsers.length}`);
-      console.log("Users data:", enhancedUsers.map(u => ({ 
-        id: u.id, 
-        name: u.displayName, 
-        email: u.email, 
-        channels: u.totalChannels,
-        wallet: u.walletBalance 
-      })));
-      
+      console.log(`Fallback - Enhanced users found: ${enhancedUsers.length}`);
       res.json(enhancedUsers);
     } catch (error) {
       console.error("Error fetching enhanced users:", error);
@@ -430,23 +461,68 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Enhanced User bonus system
+  // Enhanced User bonus system with Firebase integration
   app.post("/api/admin/users/:userId/bonus", async (req, res) => {
     try {
-      const userId = parseInt(req.params.userId);
+      const userId = req.params.userId; // Keep as string for Firebase
       const { amount, reason, type = 'admin_bonus', adminName } = req.body;
 
-      // Create bonus record
+      console.log(`🎁 Processing bonus for user ${userId}: ₹${amount}`);
+
+      // Create bonus record in memory storage
       const bonus = await storage.createUserBonus({
-        userId,
+        userId: parseInt(userId),
         amount,
         reason,
         type,
         adminName
       });
       
-      // Update user's wallet balance
-      const user = await storage.getUserById(userId);
+      // 🔥 FIREBASE UPDATE - Update user's wallet balance in Firebase
+      try {
+        const { ref, get, update } = await import('firebase/database');
+        const { database } = await import('./db');
+        
+        const userRef = ref(database, `users/${userId}`);
+        const userSnapshot = await get(userRef);
+        
+        if (userSnapshot.exists()) {
+          const userData = userSnapshot.val();
+          const currentBalance = userData.walletBalance || 0;
+          const currentEarnings = userData.totalEarnings || 0;
+          
+          const updates = {
+            walletBalance: currentBalance + amount,
+            totalEarnings: currentEarnings + amount,
+            lastBonusReceived: new Date().toISOString(),
+            lastUpdated: new Date().toISOString()
+          };
+          
+          await update(userRef, updates);
+          console.log(`✅ Firebase updated: User ${userId} balance: ${currentBalance} → ${currentBalance + amount}`);
+          
+          // Also create bonus record in Firebase
+          const { push } = await import('firebase/database');
+          const bonusRef = ref(database, 'userBonuses');
+          await push(bonusRef, {
+            userId,
+            amount,
+            reason,
+            type,
+            adminName,
+            createdAt: new Date().toISOString(),
+            status: 'completed'
+          });
+          
+        } else {
+          console.log(`❌ User ${userId} not found in Firebase`);
+        }
+      } catch (firebaseError) {
+        console.error('Firebase update error:', firebaseError);
+      }
+      
+      // Also update memory storage for consistency
+      const user = await storage.getUserById(parseInt(userId));
       if (user) {
         await storage.updateUser(userId, {
           walletBalance: (user.walletBalance || 0) + amount,
@@ -454,9 +530,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
       
-      res.json(bonus);
+      console.log(`✅ Bonus ₹${amount} given to user ${userId} successfully`);
+      res.json({ success: true, bonus, message: `₹${amount} bonus added successfully` });
     } catch (error) {
-      console.error('Error giving bonus:', error);
+      console.error('❌ Error giving bonus:', error);
       res.status(500).json({ error: 'Failed to give bonus' });
     }
   });
