@@ -86,22 +86,33 @@ export default function Withdrawal() {
         }
       ];
 
-      // Fetch bonus history from Firebase
-
+      // Fetch bonus history from Firebase - Fixed path and structure
       const bonusRef = ref(database, 'userBonuses');
       const bonusSnapshot = await get(bonusRef);
 
       let userBonuses = [];
       if (bonusSnapshot.exists()) {
         const allBonuses = bonusSnapshot.val();
+        console.log('All bonuses from Firebase:', allBonuses);
+        
         userBonuses = Object.entries(allBonuses)
-          .filter(([id, bonus]: [string, any]) => bonus.userId === user?.uid)
+          .filter(([id, bonus]: [string, any]) => {
+            console.log('Checking bonus:', bonus, 'Current user:', user?.uid);
+            return bonus.userId === user?.uid;
+          })
           .map(([id, bonus]: [string, any]) => ({
             id,
             ...bonus,
-            type: 'bonus'
+            type: bonus.type || 'bonus',
+            reason: bonus.reason || 'Bonus reward',
+            adminName: bonus.adminName || 'System',
+            transactionId: bonus.transactionId || `BONUS_${id.slice(-8)}`
           }))
           .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+        
+        console.log('User bonuses filtered:', userBonuses);
+      } else {
+        console.log('No bonuses found in Firebase');
       }
 
       setWithdrawalHistory(mockWithdrawals);

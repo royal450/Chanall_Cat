@@ -136,19 +136,38 @@ export default function Profile() {
       setLoading(false);
     });
 
-    // Load user's courses
-    const coursesRef = ref(database, 'courses');
-    const unsubscribeCourses = onValue(coursesRef, (snapshot) => {
+    // Load user's channels from services (NOT courses)
+    const servicesRef = ref(database, 'services');
+    const unsubscribeServices = onValue(servicesRef, (snapshot) => {
       const data = snapshot.val();
       if (data) {
-        const userCourses = Object.entries(data)
-          .filter(([id, course]: [string, any]) => course.instructorId === user.uid)
-          .map(([id, course]: [string, any]) => ({
+        const userChannels = Object.entries(data)
+          .filter(([id, service]: [string, any]) => service.instructorId === user.uid)
+          .map(([id, service]: [string, any]) => ({
             id,
-            ...course,
-            views: course.views || Math.floor(Math.random() * 50000) + 10000,
+            title: service.title,
+            description: service.description,
+            thumbnail: service.thumbnail,
+            price: service.price,
+            fakePrice: service.fakePrice,
+            category: service.category,
+            instructor: service.instructor,
+            instructorId: service.instructorId,
+            likes: service.likes || 0,
+            comments: service.comments || 0,
+            views: service.views || Math.floor(Math.random() * 50000) + 10000,
+            sales: service.sales || service.soldCount || 0,
+            approvalStatus: service.approvalStatus || 'pending',
+            blocked: service.blocked || false,
+            blockReason: service.blockReason,
+            rejectionReason: service.rejectionReason,
+            createdAt: service.createdAt,
           }));
-        setMyCourses(userCourses);
+        console.log('User channels loaded:', userChannels);
+        setMyCourses(userChannels);
+      } else {
+        console.log('No services found for user');
+        setMyCourses([]);
       }
     });
 
@@ -186,7 +205,7 @@ export default function Profile() {
 
     return () => {
       unsubscribeUser();
-      unsubscribeCourses();
+      unsubscribeServices();
       unsubscribeStats();
       unsubscribeWithdrawals();
     };
@@ -482,9 +501,9 @@ export default function Profile() {
                   <CardTitle>Quick Actions</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-3">
-                  <Button className="w-full" onClick={() => window.location.href = '/create-course'}>
+                  <Button className="w-full" onClick={() => window.location.href = '/create-channel'}>
                     <BookOpen className="w-4 h-4 mr-2" />
-                    Create New Course
+                    Create New Channel
                   </Button>
                   <Button variant="outline" className="w-full" onClick={shareReferralLink}>
                     <Share2 className="w-4 h-4 mr-2" />
@@ -668,7 +687,7 @@ export default function Profile() {
           <TabsContent value="courses" className="space-y-6">
             <div className="flex justify-between items-center">
               <h2 className="text-2xl font-bold">My Channels</h2>
-              <Button onClick={() => window.location.href = '/create-course'}>
+              <Button onClick={() => window.location.href = '/create-channel'}>
                 <BookOpen className="w-4 h-4 mr-2" />
                 Create New Channel
               </Button>
@@ -734,7 +753,7 @@ export default function Profile() {
                 <BookOpen className="w-16 h-16 text-gray-400 mx-auto mb-4" />
                 <h3 className="text-xl font-semibold text-gray-600 mb-2">No channels yet</h3>
                 <p className="text-gray-500 mb-4">Start creating your first channel to share your content</p>
-                <Button onClick={() => window.location.href = '/create-course'}>
+                <Button onClick={() => window.location.href = '/create-channel'}>
                   Create Your First Channel
                 </Button>
               </div>
