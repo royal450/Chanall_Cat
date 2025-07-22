@@ -190,34 +190,31 @@ export default function SuperAdmin() {
     channel.approvalStatus === 'pending' || channel.status === 'pending'
   );
 
-  // Real-time withdrawal requests from API
+  // Real-time withdrawal requests from Firebase
   const [withdrawalRequests, setWithdrawalRequests] = useState<any[]>([]);
-  const [loadingWithdrawals, setLoadingWithdrawals] = useState(false);
+  const [loadingWithdrawals, setLoadingWithdrawals] = useState(true);
   
-  // Fetch withdrawal requests
+  // Real-time Firebase withdrawal listener
   useEffect(() => {
-    const fetchWithdrawals = async () => {
-      try {
-        setLoadingWithdrawals(true);
-        const response = await fetch('/api/admin/withdrawals');
-        const data = await response.json();
-        setWithdrawalRequests(data);
-      } catch (error) {
-        console.error('Error fetching withdrawals:', error);
-        toast({
-          title: "Error",
-          description: "Failed to fetch withdrawal requests",
-          variant: "destructive"
-        });
-      } finally {
-        setLoadingWithdrawals(false);
-      }
-    };
+    const withdrawalsRef = ref(database, 'withdrawalRequests');
     
-    fetchWithdrawals();
-    // Refresh every 10 seconds for real-time updates
-    const interval = setInterval(fetchWithdrawals, 10000);
-    return () => clearInterval(interval);
+    const unsubscribe = onValue(withdrawalsRef, (snapshot) => {
+      const data = snapshot.val();
+      if (data) {
+        const withdrawalsArray = Object.entries(data).map(([id, withdrawal]: [string, any]) => ({
+          id,
+          ...withdrawal
+        })).sort((a, b) => new Date(b.createdAt || b.requestDate).getTime() - new Date(a.createdAt || a.requestDate).getTime());
+        
+        setWithdrawalRequests(withdrawalsArray);
+        console.log('🔥 Real-time withdrawals loaded:', withdrawalsArray.length);
+      } else {
+        setWithdrawalRequests([]);
+      }
+      setLoadingWithdrawals(false);
+    });
+
+    return () => off(withdrawalsRef, 'value', unsubscribe);
   }, []);
 
   // Approve withdrawal
@@ -1412,9 +1409,9 @@ export default function SuperAdmin() {
 
           {/* Enhanced Real-time Withdrawals Tab */}
           <TabsContent value="withdrawals" className="space-y-6">
-            <div className="flex justify-between items-center">
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
               <h2 className="text-2xl font-bold">Real-time Withdrawal Management 💸</h2>
-              <div className="flex gap-2">
+              <div className="flex flex-wrap gap-2">
                 <Badge className="bg-yellow-500 text-white animate-pulse">
                   {withdrawalRequests.filter(w => w.status === 'pending').length} Pending
                 </Badge>
@@ -1424,6 +1421,15 @@ export default function SuperAdmin() {
                 <Badge className="bg-red-500 text-white">
                   {withdrawalRequests.filter(w => w.status === 'rejected').length} Rejected
                 </Badge>
+                <Button 
+                  size="sm" 
+                  variant="outline"
+                  onClick={() => window.location.reload()}
+                  className="ml-2"
+                >
+                  <RefreshCw className="w-4 h-4 mr-1" />
+                  Refresh
+                </Button>
               </div>
             </div>
 
@@ -1436,108 +1442,244 @@ export default function SuperAdmin() {
               <Card className="p-4 md:p-8 text-center">
                 <DollarSign className="w-12 h-12 md:w-16 md:h-16 mx-auto text-gray-400 mb-4" />
                 <p className="text-gray-500 text-sm md:text-base">No withdrawal requests found</p>
+                <p className="text-xs text-gray-400 mt-2">Withdrawal requests from users will appear here</p>
               </Card>
             ) : (
               <div className="grid gap-3 md:gap-4">
                 {withdrawalRequests.map((withdrawal) => {
                   const user = users.find(u => u.id === withdrawal.userId);
                   return (
-                    <Card key={withdrawal.id} className={`p-3 md:p-6 border-l-4 ${
-                      withdrawal.status === 'pending' ? 'border-yellow-500 bg-yellow-50' :
-                      withdrawal.status === 'approved' ? 'border-green-500 bg-green-50' :
-                      'border-red-500 bg-red-50'
+                    <Card key={withdrawal.id} className={`p-4 md:p-6 border-l-4 shadow-lg hover:shadow-xl transition-shadow ${
+                      withdrawal.status === 'pending' ? 'border-yellow-500 bg-gradient-to-r from-yellow-50 to-orange-50' :
+                      withdrawal.status === 'approved' ? 'border-green-500 bg-gradient-to-r from-green-50 to-emerald-50' :
+                      'border-red-500 bg-gradient-to-r from-red-50 to-pink-50'
                     }`}>
-                      <div className="flex flex-col gap-3 md:gap-4">
-                        <div className="flex flex-col md:flex-row md:items-center justify-between gap-2">
-                          <div className="flex items-center gap-2">
-                            <h3 className="font-semibold text-base md:text-lg">
-                              {user?.displayName || 'Unknown User'}
-                            </h3>
-                            <Badge className={`text-xs md:text-sm ${
-                              withdrawal.status === 'pending' ? 'bg-yellow-500' :
-                              withdrawal.status === 'approved' ? 'bg-green-500' :
-                              'bg-red-500'
-                            }`}>
-                              {withdrawal.status.toUpperCase()}
-                            </Badge>
+                      <div className="space-y-4">
+                        {/* Header */}
+                        <div className="flex flex-col md:flex-row md:items-center justify-between gap-3">
+                          <div className="flex items-center gap-3">
+                            <div className="w-12 h-12 bg-gradient-to-r from-purple-500 to-blue-500 rounded-full flex items-center justify-center text-white font-bold text-lg">
+                              {withdrawal.userName?.charAt(0) || withdrawal.userEmail?.charAt(0)?.toUpperCase() || 'U'}
+                            </div>
+                            <div>
+                              <h3 className="font-bold text-lg text-gray-900">
+                                {withdrawal.userName || user?.displayName || 'Unknown User'}
+                              </h3>
+                              <p className="text-sm text-gray-600">{withdrawal.userEmail || user?.email}</p>
+                              <Badge className={`text-xs mt-1 ${
+                                withdrawal.status === 'pending' ? 'bg-yellow-500 text-white animate-pulse' :
+                                withdrawal.status === 'approved' ? 'bg-green-500 text-white' :
+                                'bg-red-500 text-white'
+                              }`}>
+                                {withdrawal.status === 'pending' ? '⏳ PROCESSING' :
+                                 withdrawal.status === 'approved' ? '✅ COMPLETED' :
+                                 '❌ REJECTED'}
+                              </Badge>
+                            </div>
                           </div>
                           <div className="text-right">
-                            <p className="font-semibold text-lg md:text-xl text-green-600">₹{withdrawal.amount}</p>
-                            <p className="text-xs text-gray-500">#{withdrawal.id}</p>
+                            <p className="text-3xl font-bold text-green-600">₹{withdrawal.amount}</p>
+                            <p className="text-xs text-gray-500">Request #{withdrawal.requestId || withdrawal.id}</p>
+                            <p className="text-xs text-blue-600">{new Date(withdrawal.createdAt || withdrawal.requestDate).toLocaleDateString()}</p>
                           </div>
                         </div>
                         
-                        <div className="grid grid-cols-2 gap-2 md:gap-4 text-xs md:text-sm">
-                          <div>
-                            <span className="text-gray-600">Method:</span>
-                            <p className="font-semibold">{withdrawal.method.toUpperCase()}</p>
+                        {/* Payment Details */}
+                        <div className="bg-white/60 backdrop-blur rounded-lg p-4 border border-gray-200">
+                          <h4 className="font-semibold text-gray-800 mb-3 flex items-center gap-2">
+                            💳 Payment Details
+                          </h4>
+                          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
+                            <div>
+                              <span className="text-gray-600 block">Method:</span>
+                              <p className="font-bold text-lg text-blue-600">{withdrawal.method}</p>
+                            </div>
+                            <div>
+                              <span className="text-gray-600 block">Account:</span>
+                              <p className="font-mono text-sm break-all bg-gray-100 p-2 rounded">
+                                {withdrawal.accountDetails || 'N/A'}
+                              </p>
+                            </div>
+                            <div>
+                              <span className="text-gray-600 block">Requested:</span>
+                              <p className="text-sm">{new Date(withdrawal.createdAt || withdrawal.requestDate).toLocaleString()}</p>
+                            </div>
                           </div>
-                          <div>
-                            <span className="text-gray-600">Account:</span>
-                            <p className="font-mono text-xs break-all">{withdrawal.accountDetails}</p>
-                          </div>
-                          <div className="col-span-2">
-                            <span className="text-gray-600">Requested:</span>
-                            <p className="text-xs">{new Date(withdrawal.createdAt).toLocaleString()}</p>
-                          </div>
+
+                          {/* Method-specific details */}
+                          {withdrawal.method === 'UPI' && withdrawal.phoneNumber && (
+                            <div className="mt-3 p-3 bg-blue-50 rounded-lg">
+                              <h5 className="font-medium text-blue-800 mb-2">🔹 UPI Details</h5>
+                              <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm">
+                                <div>
+                                  <span className="text-blue-600">UPI ID:</span>
+                                  <p className="font-mono">{withdrawal.upiId}</p>
+                                </div>
+                                <div>
+                                  <span className="text-blue-600">Mobile:</span>
+                                  <p className="font-mono">{withdrawal.phoneNumber}</p>
+                                </div>
+                              </div>
+                            </div>
+                          )}
+
+                          {withdrawal.method === 'BANK' && withdrawal.bankName && (
+                            <div className="mt-3 p-3 bg-green-50 rounded-lg">
+                              <h5 className="font-medium text-green-800 mb-2">🏦 Bank Details</h5>
+                              <div className="grid grid-cols-1 md:grid-cols-3 gap-2 text-sm">
+                                <div>
+                                  <span className="text-green-600">Bank:</span>
+                                  <p className="font-bold">{withdrawal.bankName}</p>
+                                </div>
+                                <div>
+                                  <span className="text-green-600">Account:</span>
+                                  <p className="font-mono">{withdrawal.accountNumber}</p>
+                                </div>
+                                <div>
+                                  <span className="text-green-600">IFSC:</span>
+                                  <p className="font-mono">{withdrawal.ifscCode}</p>
+                                </div>
+                              </div>
+                            </div>
+                          )}
+
+                          {withdrawal.method === 'CRYPTO' && withdrawal.cryptoAddress && (
+                            <div className="mt-3 p-3 bg-orange-50 rounded-lg">
+                              <h5 className="font-medium text-orange-800 mb-2">₿ Crypto Details</h5>
+                              <div>
+                                <span className="text-orange-600">USD Wallet Address:</span>
+                                <p className="font-mono text-xs break-all bg-white p-2 rounded mt-1">{withdrawal.cryptoAddress}</p>
+                              </div>
+                            </div>
+                          )}
                         </div>
 
-                        {withdrawal.bankName && (
-                          <div className="grid grid-cols-1 md:grid-cols-3 gap-2 text-xs text-gray-600 bg-gray-100 p-2 rounded">
-                            <span>Bank: {withdrawal.bankName}</span>
-                            <span>IFSC: {withdrawal.ifscCode}</span>
-                            <span>A/C: {withdrawal.accountNumber}</span>
-                          </div>
-                        )}
-
-                        {withdrawal.adminNotes && (
-                          <div className="p-2 bg-gray-100 rounded text-xs md:text-sm">
-                            <span className="font-medium">Admin Notes: </span>
-                            {withdrawal.adminNotes}
-                          </div>
-                        )}
-
-                        <div className="flex flex-col md:flex-row gap-2 md:gap-3">
+                        {/* Admin Actions & Status */}
+                        <div className="flex flex-col md:flex-row gap-3">
                           {withdrawal.status === 'pending' && (
                             <>
                               <Button 
                                 size="sm" 
-                                className="bg-green-500 hover:bg-green-600 text-xs md:text-sm flex-1"
-                                onClick={() => handleApproveWithdrawal(withdrawal.id, user?.displayName || 'User')}
+                                className="bg-green-500 hover:bg-green-600 text-white flex-1"
+                                onClick={async () => {
+                                  const transactionId = prompt(`Enter transaction ID for ${withdrawal.userName}'s ₹${withdrawal.amount} withdrawal:`);
+                                  if (!transactionId) return;
+                                  
+                                  const adminNotes = prompt("Add admin notes (optional):");
+                                  
+                                  try {
+                                    // Update Firebase withdrawal status
+                                    const withdrawalRef = ref(database, `withdrawalRequests/${withdrawal.id}`);
+                                    await update(withdrawalRef, {
+                                      status: 'approved',
+                                      transactionId,
+                                      adminNotes: adminNotes || 'Approved by Super Admin',
+                                      processedBy: 'Super Admin',
+                                      processedAt: new Date().toISOString()
+                                    });
+                                    
+                                    toast({
+                                      title: "✅ Withdrawal Approved!",
+                                      description: `₹${withdrawal.amount} approved for ${withdrawal.userName}`,
+                                    });
+                                    
+                                    setTimeout(() => window.location.reload(), 1000);
+                                  } catch (error) {
+                                    toast({
+                                      title: "Error",
+                                      description: "Failed to approve withdrawal",
+                                      variant: "destructive"
+                                    });
+                                  }
+                                }}
                               >
-                                <CheckCircle className="w-3 h-3 md:w-4 md:h-4 mr-1" />
-                                Approve
+                                <CheckCircle className="w-4 h-4 mr-2" />
+                                Approve & Send Payment
                               </Button>
                               <Button 
                                 size="sm" 
                                 variant="destructive"
-                                className="text-xs md:text-sm flex-1"
-                                onClick={() => handleRejectWithdrawal(withdrawal.id, user?.displayName || 'User')}
+                                className="flex-1"
+                                onClick={async () => {
+                                  const rejectionReason = prompt(`Enter reason for rejecting ${withdrawal.userName}'s withdrawal:`);
+                                  if (!rejectionReason) return;
+                                  
+                                  try {
+                                    // Update Firebase withdrawal status
+                                    const withdrawalRef = ref(database, `withdrawalRequests/${withdrawal.id}`);
+                                    await update(withdrawalRef, {
+                                      status: 'rejected',
+                                      rejectionReason,
+                                      adminNotes: rejectionReason,
+                                      processedBy: 'Super Admin',
+                                      processedAt: new Date().toISOString()
+                                    });
+                                    
+                                    // Return money to user's wallet
+                                    const userRef = ref(database, `users/${withdrawal.userId}`);
+                                    const userSnapshot = await get(userRef);
+                                    if (userSnapshot.exists()) {
+                                      const currentBalance = userSnapshot.val().walletBalance || 0;
+                                      await update(userRef, {
+                                        walletBalance: currentBalance + withdrawal.amount
+                                      });
+                                    }
+                                    
+                                    toast({
+                                      title: "❌ Withdrawal Rejected",
+                                      description: `${withdrawal.userName}'s withdrawal rejected. ₹${withdrawal.amount} returned to wallet.`,
+                                    });
+                                    
+                                    setTimeout(() => window.location.reload(), 1000);
+                                  } catch (error) {
+                                    toast({
+                                      title: "Error",
+                                      description: "Failed to reject withdrawal",
+                                      variant: "destructive"
+                                    });
+                                  }
+                                }}
                               >
-                                <XCircle className="w-3 h-3 md:w-4 md:h-4 mr-1" />
-                                Reject
+                                <XCircle className="w-4 h-4 mr-2" />
+                                Reject & Return Money
                               </Button>
                             </>
                           )}
 
                           {withdrawal.status === 'approved' && (
-                            <div className="text-green-600 flex items-center gap-2 bg-green-100 p-2 rounded">
-                              <CheckCircle className="w-4 h-4 md:w-5 md:h-5" />
-                              <div className="text-xs md:text-sm">
-                                <p>✅ Approved by {withdrawal.processedBy}</p>
-                                {withdrawal.transactionId && (
-                                  <p className="font-mono">TXN: {withdrawal.transactionId}</p>
-                                )}
+                            <div className="bg-green-100 border border-green-300 rounded-lg p-4 w-full">
+                              <div className="flex items-center gap-3 text-green-800">
+                                <CheckCircle className="w-6 h-6" />
+                                <div>
+                                  <p className="font-bold">✅ Payment Completed</p>
+                                  <p className="text-sm">Processed by {withdrawal.processedBy} on {new Date(withdrawal.processedAt).toLocaleString()}</p>
+                                  {withdrawal.transactionId && (
+                                    <p className="text-xs font-mono bg-green-200 px-2 py-1 rounded mt-1">
+                                      TXN: {withdrawal.transactionId}
+                                    </p>
+                                  )}
+                                  {withdrawal.adminNotes && (
+                                    <p className="text-xs mt-1">Notes: {withdrawal.adminNotes}</p>
+                                  )}
+                                </div>
                               </div>
                             </div>
                           )}
 
                           {withdrawal.status === 'rejected' && (
-                            <div className="text-red-600 flex items-center gap-2 bg-red-100 p-2 rounded">
-                              <XCircle className="w-4 h-4 md:w-5 md:h-5" />
-                              <div className="text-xs md:text-sm">
-                                <p>❌ Rejected by {withdrawal.processedBy}</p>
-                                <p>Funds returned to wallet</p>
+                            <div className="bg-red-100 border border-red-300 rounded-lg p-4 w-full">
+                              <div className="flex items-center gap-3 text-red-800">
+                                <XCircle className="w-6 h-6" />
+                                <div>
+                                  <p className="font-bold">❌ Withdrawal Rejected</p>
+                                  <p className="text-sm">Processed by {withdrawal.processedBy} on {new Date(withdrawal.processedAt).toLocaleString()}</p>
+                                  {withdrawal.rejectionReason && (
+                                    <p className="text-xs bg-red-200 px-2 py-1 rounded mt-1">
+                                      Reason: {withdrawal.rejectionReason}
+                                    </p>
+                                  )}
+                                  <p className="text-xs mt-1 text-green-600">✅ ₹{withdrawal.amount} returned to user's wallet</p>
+                                </div>
                               </div>
                             </div>
                           )}

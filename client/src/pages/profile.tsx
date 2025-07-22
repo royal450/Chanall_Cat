@@ -608,7 +608,7 @@ export default function Profile() {
                         level="M"
                         includeMargin={true}
                       />
-                      
+
                     </div>
                   )}
                   <p className="text-sm text-gray-600 text-center mt-2">
@@ -882,315 +882,225 @@ export default function Profile() {
             )}
           </TabsContent>
 
-          <TabsContent value="wallet" className="space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Wallet Balance</CardTitle>
-                  <CardDescription>Your current available balance</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="text-4xl font-bold text-green-600 mb-4">
-                    ₹{profile.walletBalance.toLocaleString()}
-                  </div>
-                  <div className="space-y-2 text-sm text-gray-600">
-                    <div className="flex justify-between">
-                      <span>Total Earnings:</span>
-                      <span>₹{profile.totalEarnings.toLocaleString()}</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span>Total Withdrawn:</span>
-                      <span>₹{(profile.totalEarnings - profile.walletBalance).toLocaleString()}</span>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardHeader>
-                  <CardTitle>Withdraw Funds</CardTitle>
-                  <CardDescription>Choose your preferred withdrawal method</CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-6">
+<TabsContent value="wallet" className="space-y-6">
+            {/* Wallet Balance Card */}
+            <Card className="bg-gradient-to-r from-green-500 to-emerald-600 text-white border-0">
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between">
                   <div>
-                    <Label htmlFor="amount">Amount (₹)</Label>
-                    <Input
-                      id="amount"
-                      type="number"
-                      value={withdrawalAmount}
-                      onChange={(e) => setWithdrawalAmount(e.target.value)}
-                      placeholder="Enter amount"
-                      max={profile.walletBalance}
-                      className="mb-4"
-                    />
+                    <h3 className="text-lg font-medium text-green-100">Available Balance</h3>
+                    <p className="text-3xl font-bold">₹{profile.walletBalance.toLocaleString()}</p>
+                    <p className="text-sm text-green-100 mt-1">Total Earnings: ₹{profile.totalEarnings.toLocaleString()}</p>
                   </div>
+                  <Wallet className="w-12 h-12 text-green-100" />
+                </div>
+              </CardContent>
+            </Card>
 
-                  <Tabs defaultValue="upi" className="w-full">
-                    <TabsList className="grid w-full grid-cols-3">
-                      <TabsTrigger value="upi">UPI</TabsTrigger>
-                      <TabsTrigger value="bank">Bank</TabsTrigger>
-                      <TabsTrigger value="crypto">Crypto (USD)</TabsTrigger>
-                    </TabsList>
+            {/* Quick Withdrawal Button */}
+            <Card>
+              <CardContent className="p-6 text-center">
+                <Button 
+                  onClick={() => window.location.href = '/withdrawal'}
+                  className="bg-gradient-to-r from-purple-600 to-pink-600 text-white py-3 px-8 text-lg"
+                >
+                  <Wallet className="w-5 h-5 mr-2" />
+                  Request Withdrawal
+                </Button>
+                <p className="text-sm text-gray-600 mt-2">
+                  Minimum withdrawal: ₹100 • Processing time: 1-3 business days
+                </p>
+              </CardContent>
+            </Card>
 
-                    <TabsContent value="upi" className="space-y-4">
-                      <div className="space-y-3">
-                        <div>
-                          <Label htmlFor="upi-id">Your UPI ID</Label>
-                          <Input
-                            id="upi-id"
-                            placeholder="yourname@paytm"
-                            className="mt-1"
-                          />
-                        </div>
-                        <div>
-                          <Label htmlFor="upi-password">UPI Password</Label>
-                          <Input
-                            id="upi-password"
-                            type="password"
-                            placeholder="Enter UPI password"
-                            className="mt-1"
-                          />
-                        </div>
-                        <div>
-                          <Label htmlFor="upi-number">Mobile Number</Label>
-                          <Input
-                            id="upi-number"
-                            placeholder="Enter mobile number"
-                            className="mt-1"
-                          />
-                        </div>
-                        <Button 
-                          onClick={async () => {
-                            setIsWithdrawing(true);
-                            await requestWithdrawal();
-                            setIs<replit_final_file>
-Withdrawing(false);
-                          }} 
-                          disabled={!withdrawalAmount || parseInt(withdrawalAmount) > profile.walletBalance || isWithdrawing}
-                          className="w-full bg-green-600 hover:bg-green-700"
-                        >
-                          {isWithdrawing ? "Processing..." : "Verify & Withdraw via UPI"}
-                        </Button>
-                      </div>
-                    </TabsContent>
-
-                    <TabsContent value="bank" className="space-y-4">
-                      <div className="space-y-3">
-                        <div>
-                          <Label htmlFor="bank-name">Bank Name (Verified)</Label>
-                          <Input
-                            id="bank-name"
-                            placeholder="State Bank of India"
-                            className="mt-1"
-                          />
-                        </div>
-                        <div>
-                          <Label htmlFor="account-number">Account Number</Label>
-                          <Input
-                            id="account-number"
-                            placeholder="I'm not responsible if wrong entry"
-                            className="mt-1"
-                          />
-                        </div>
-                        <div>
-                          <Label htmlFor="ifsc-code">IFSC Code</Label>
-                          <Input
-                            id="ifsc-code"
-                            placeholder="SBIN0000123"
-                            className="mt-1"
-                          />
-                        </div>
-                        <div>
-                          <Label htmlFor="bank-password">Password</Label>
-                          <Input
-                            id="bank-password"
-                            type="password"
-                            placeholder="Enter password"
-                            className="mt-1"
-                          />
-                        </div>
-                        <Button 
-                          onClick={async () => {
-                            setIsWithdrawing(true);
-                            await requestWithdrawal();
-                            setIsWithdrawing(false);
-                          }} 
-                          disabled={!withdrawalAmount || parseInt(withdrawalAmount) > profile.walletBalance || isWithdrawing}
-                          className="w-full bg-blue-600 hover:bg-blue-700"
-                        >
-                          {isWithdrawing ? "Processing..." : "Verify & Withdraw via Bank"}
-                        </Button>
-                        <Button 
-                          variant="link"
-                          onClick={() => {
-                            const subject = encodeURIComponent(`Password Reset - ${profile.displayName}`);
-                            const body = encodeURIComponent(`Username: ${profile.displayName}\nEmail: ${profile.email}\nReferral Code: ${profile.referralCode}\n\nI need password reset for withdrawal. Please provide me contact number I'll send your password on your WhatsApp securely.`);
-                            window.open(`mailto:programmerroyal6.in@gmail.com?subject=${subject}&body=${body}`);
-                          }}
-                          className="w-full text-sm"
-                        >
-                          Forgot Password? Email Admin
-                        </Button>
-                      </div>
-                    </TabsContent>
-
-                    <TabsContent value="crypto" className="space-y-4">
-                      <div className="space-y-3">
-                        <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3">
-                          <p className="text-yellow-800 text-sm font-medium">USD Only 😎</p>
-                        </div>
-                        <div>
-                          <Label htmlFor="crypto-address">USD Crypto Address</Label>
-                          <Input
-                            id="crypto-address"
-                            placeholder="Enter your USD crypto wallet address"
-                            className="mt-1"
-                          />
-                        </div>
-                        <div>
-                          <Label htmlFor="crypto-password">Password</Label>
-                          <Input
-                            id="crypto-password"
-                            type="password"
-                            placeholder="Enter password"
-                            className="mt-1"
-                          />
-                        </div>
-                        <Button 
-                          onClick={async () => {
-                            setIsWithdrawing(true);
-                            await requestWithdrawal();
-                            setIsWithdrawing(false);
-                          }} 
-                          disabled={!withdrawalAmount || parseInt(withdrawalAmount) > profile.walletBalance || isWithdrawing}
-                          className="w-full bg-orange-600 hover:bg-orange-700"
-                        >
-                          {isWithdrawing ? "Processing..." : "Submit Crypto Withdrawal"}
-                        </Button>
-                      </div>
-                    </TabsContent>
-                  </Tabs>
-
-                  <div className="text-sm text-gray-600 bg-gray-50 p-3 rounded-lg">
-                    <p>• Minimum withdrawal: ₹100</p>
-                    <p>• Processing time: 1-3 business days</p>
-                    <p>• All withdrawals require admin approval</p>
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
-
+            {/* Real-time Bonus & Transaction History */}
             <Card>
               <CardHeader>
-                <CardTitle>Withdrawal History</CardTitle>
-                <CardDescription>Your recent withdrawal requests with complete tracking</CardDescription>
+                <CardTitle className="flex items-center gap-2">
+                  <Gift className="w-5 h-5 text-purple-600" />
+                  Bonus & Transaction History (Real-time)
+                </CardTitle>
+                <CardDescription>
+                  All bonuses, withdrawals and transactions with live updates
+                </CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="space-y-4">
-                  {withdrawalHistory.length > 0 ? (
-                    withdrawalHistory.map((withdrawal) => (
-                      <Card key={withdrawal.id} className={`border-l-4 ${
-                        withdrawal.status === 'pending' ? 'border-yellow-500 bg-yellow-50' :
-                        withdrawal.status === 'approved' ? 'border-green-500 bg-green-50' :
-                        'border-red-500 bg-red-50'
-                      }`}>
-                        <CardContent className="p-4">
-                          <div className="flex flex-col md:flex-row md:items-center justify-between gap-3">
-                            <div className="flex-1">
-                              <div className="flex items-center gap-3 mb-2">
-                                {withdrawal.status === 'pending' && <Clock className="w-5 h-5 text-yellow-600" />}
-                                {withdrawal.status === 'approved' && <CheckCircle className="w-5 h-5 text-green-600" />}
-                                {withdrawal.status === 'rejected' && <XCircle className="w-5 h-5 text-red-600" />}
-                                <div>
-                                  <p className="font-semibold text-lg">₹{withdrawal.amount.toLocaleString()}</p>
-                                  <p className="text-sm text-gray-600">Withdrawal Request #{withdrawal.id}</p>
+                <Tabs defaultValue="bonuses" className="w-full">
+                  <TabsList className="grid w-full grid-cols-2">
+                    <TabsTrigger value="bonuses">🎁 Bonuses Received</TabsTrigger>
+                    <TabsTrigger value="withdrawals">💸 Withdrawal Requests</TabsTrigger>
+                  </TabsList>
+
+                  {/* Bonuses Tab */}
+                  <TabsContent value="bonuses" className="space-y-4 mt-4">
+                    <div className="space-y-3 max-h-96 overflow-y-auto">
+                      {profile.bonusHistory && profile.bonusHistory.length > 0 ? (
+                        profile.bonusHistory.map((bonus, index) => (
+                          <Card key={index} className="border-l-4 border-purple-500 bg-purple-50/50 hover:shadow-md transition-shadow">
+                            <CardContent className="p-4">
+                              <div className="flex items-center justify-between">
+                                <div className="flex-1">
+                                  <div className="flex items-center gap-2 mb-2">
+                                    <Gift className="w-5 h-5 text-purple-600" />
+                                    <span className="font-bold text-xl text-green-600">+₹{bonus.amount}</span>
+                                    <Badge className="bg-purple-100 text-purple-800">
+                                      🎁 {bonus.type === 'admin_bonus' ? 'Admin Bonus' : 'Referral Bonus'}
+                                    </Badge>
+                                  </div>
+                                  <p className="text-sm text-gray-700 font-medium mb-1">
+                                    {bonus.reason || 'Bonus reward'}
+                                  </p>
+                                  {bonus.adminName && (
+                                    <p className="text-xs text-gray-600 mb-1">
+                                      💼 Given by: {bonus.adminName}
+                                    </p>
+                                  )}
+                                  <p className="text-xs text-gray-500">
+                                    📅 Received: {new Date(bonus.createdAt).toLocaleDateString()} at {new Date(bonus.createdAt).toLocaleTimeString()}
+                                  </p>
+                                  {bonus.transactionId && (
+                                    <p className="text-xs text-purple-600 font-mono mt-1">
+                                      🆔 ID: {bonus.transactionId}
+                                    </p>
+                                  )}
                                 </div>
-                              </div>
-                              
-                              <div className="grid grid-cols-2 gap-3 text-sm">
-                                <div>
-                                  <span className="text-gray-600">Method:</span>
-                                  <p className="font-medium">{withdrawal.method.toUpperCase()}</p>
-                                </div>
-                                <div>
-                                  <span className="text-gray-600">Date:</span>
-                                  <p className="font-medium">{new Date(withdrawal.requestDate).toLocaleDateString()}</p>
-                                </div>
-                                <div>
-                                  <span className="text-gray-600">Time:</span>
-                                  <p className="font-medium">{new Date(withdrawal.requestDate).toLocaleTimeString()}</p>
-                                </div>
-                                <div>
-                                  <span className="text-gray-600">Status:</span>
-                                  <Badge 
-                                    className={
-                                      withdrawal.status === 'approved' ? 'bg-green-500 text-white' : 
-                                      withdrawal.status === 'rejected' ? 'bg-red-500 text-white' : 
-                                      'bg-yellow-500 text-white'
-                                    }
-                                  >
-                                    {withdrawal.status === 'pending' ? '⏳ Processing' :
-                                     withdrawal.status === 'approved' ? '✅ Completed' :
-                                     '❌ Rejected'}
+                                <div className="text-right">
+                                  <Badge className="bg-green-100 text-green-800">
+                                    ✅ Completed
                                   </Badge>
+                                  <p className="text-xs text-gray-500 mt-1">Instant</p>
                                 </div>
                               </div>
-
-                              {withdrawal.accountDetails && (
-                                <div className="mt-3 p-2 bg-gray-100 rounded text-sm">
-                                  <span className="text-gray-600">Account Details:</span>
-                                  <p className="font-mono">{withdrawal.accountDetails}</p>
-                                </div>
-                              )}
-
-                              {withdrawal.transactionId && (
-                                <div className="mt-2 p-2 bg-green-100 rounded text-sm">
-                                  <span className="text-green-700">Transaction ID:</span>
-                                  <p className="font-mono text-green-800">{withdrawal.transactionId}</p>
-                                </div>
-                              )}
-
-                              {withdrawal.adminNotes && (
-                                <div className="mt-2 p-2 bg-blue-100 rounded text-sm">
-                                  <span className="text-blue-700">Admin Notes:</span>
-                                  <p className="text-blue-800">{withdrawal.adminNotes}</p>
-                                </div>
-                              )}
-
-                              {withdrawal.processedBy && withdrawal.processedAt && (
-                                <div className="mt-2 text-xs text-gray-500">
-                                  Processed by {withdrawal.processedBy} on {new Date(withdrawal.processedAt).toLocaleString()}
-                                </div>
-                              )}
-                            </div>
-
-                            <div className="text-right">
-                              <div className={`text-2xl font-bold ${
-                                withdrawal.status === 'approved' ? 'text-green-600' :
-                                withdrawal.status === 'rejected' ? 'text-red-600' :
-                                'text-yellow-600'
-                              }`}>
-                                {withdrawal.status === 'pending' ? '⏳' :
-                                 withdrawal.status === 'approved' ? '✅' : '❌'}
-                              </div>
-                              <p className="text-xs text-gray-500 mt-1">
-                                {withdrawal.status === 'pending' ? 'Under Review' :
-                                 withdrawal.status === 'approved' ? 'Payment Sent' :
-                                 'Request Declined'}
-                              </p>
-                            </div>
-                          </div>
-                        </CardContent>
-                      </Card>
-                    ))
-                  ) : (
-                    <div className="text-center py-8">
-                      <Wallet className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-                      <p className="text-gray-500 font-medium">No withdrawal history</p>
-                      <p className="text-sm text-gray-400">Your withdrawal requests will appear here</p>
+                            </CardContent>
+                          </Card>
+                        ))
+                      ) : (
+                        <div className="text-center py-8">
+                          <Gift className="w-16 h-16 text-gray-400 mx-auto mb-4" />
+                          <p className="text-gray-500 font-medium">No bonuses received yet</p>
+                          <p className="text-sm text-gray-400">Bonuses from admin and referrals will appear here</p>
+                        </div>
+                      )}
                     </div>
-                  )}
-                </div>
+                  </TabsContent>
+
+                  {/* Withdrawals Tab */}
+                  <TabsContent value="withdrawals" className="space-y-4 mt-4">
+                    <div className="space-y-3 max-h-96 overflow-y-auto">
+                      {withdrawalHistory.length > 0 ? (
+                        withdrawalHistory.map((withdrawal) => (
+                          <Card key={withdrawal.id} className={`border-l-4 ${
+                            withdrawal.status === 'pending' ? 'border-yellow-500 bg-yellow-50' :
+                            withdrawal.status === 'approved' ? 'border-green-500 bg-green-50' :
+                            'border-red-500 bg-red-50'
+                          } hover:shadow-md transition-shadow`}>
+                            <CardContent className="p-4">
+                              <div className="flex items-start justify-between">
+                                <div className="flex-1">
+                                  <div className="flex items-center gap-2 mb-2">
+                                    {withdrawal.status === 'pending' && <Clock className="w-5 h-5 text-yellow-600" />}
+                                    {withdrawal.status === 'approved' && <CheckCircle className="w-5 h-5 text-green-600" />}
+                                    {withdrawal.status === 'rejected' && <XCircle className="w-5 h-5 text-red-600" />}
+                                    <span className="font-bold text-xl">₹{withdrawal.amount}</span>
+                                    <Badge className={`${
+                                      withdrawal.status === 'pending' ? 'bg-yellow-500 text-white animate-pulse' :
+                                      withdrawal.status === 'approved' ? 'bg-green-500 text-white' :
+                                      'bg-red-500 text-white'
+                                    }`}>
+                                      {withdrawal.status === 'pending' ? '⏳ Processing' :
+                                       withdrawal.status === 'approved' ? '✅ Completed' :
+                                       '❌ Rejected'}
+                                    </Badge>
+                                  </div>
+
+                                  <div className="grid grid-cols-2 gap-3 text-sm mb-3">
+                                    <div>
+                                      <span className="text-gray-600">💳 Method:</span>
+                                      <p className="font-medium">{withdrawal.method.toUpperCase()}</p>
+                                    </div>
+                                    <div>
+                                      <span className="text-gray-600">📱 Mobile:</span>
+                                      <p className="font-mono text-sm">{withdrawal.phoneNumber || 'N/A'}</p>
+                                    </div>
+                                    <div>
+                                      <span className="text-gray-600">🏦 Account:</span>
+                                      <p className="font-mono text-xs break-all">{withdrawal.accountDetails || withdrawal.upiId || withdrawal.cryptoAddress || 'N/A'}</p>
+                                    </div>
+                                    <div>
+                                      <span className="text-gray-600">📅 Date:</span>
+                                      <p className="text-xs">{new Date(withdrawal.requestDate || withdrawal.createdAt).toLocaleString()}</p>
+                                    </div>
+                                  </div>
+
+                                  {withdrawal.bankName && withdrawal.ifscCode && (
+                                    <div className="mb-2 p-2 bg-gray-100 rounded text-xs">
+                                      <span className="font-medium">🏦 Bank Details:</span>
+                                      <p>Bank: {withdrawal.bankName} | IFSC: {withdrawal.ifscCode}</p>
+                                      {withdrawal.accountNumber && <p>A/C: {withdrawal.accountNumber}</p>}
+                                    </div>
+                                  )}
+
+                                  {withdrawal.transactionId && (
+                                    <div className="mb-2 p-2 bg-green-100 rounded text-xs">
+                                      <span className="text-green-700 font-medium">💸 Transaction ID:</span>
+                                      <p className="font-mono text-green-800">{withdrawal.transactionId}</p>
+                                    </div>
+                                  )}
+
+                                  {withdrawal.adminNotes && (
+                                    <div className="mb-2 p-2 bg-blue-100 rounded text-xs">
+                                      <span className="text-blue-700 font-medium">💬 Admin Notes:</span>
+                                      <p className="text-blue-800">{withdrawal.adminNotes}</p>
+                                    </div>
+                                  )}
+
+                                  {withdrawal.rejectionReason && (
+                                    <div className="mb-2 p-2 bg-red-100 rounded text-xs">
+                                      <span className="text-red-700 font-medium">❌ Rejection Reason:</span>
+                                      <p className="text-red-800">{withdrawal.rejectionReason}</p>
+                                    </div>
+                                  )}
+
+                                  {withdrawal.processedBy && withdrawal.processedAt && (
+                                    <div className="text-xs text-gray-500">
+                                      👤 Processed by {withdrawal.processedBy} on {new Date(withdrawal.processedAt).toLocaleString()}
+                                    </div>
+                                  )}
+
+                                  <p className="text-xs text-gray-500 mt-1">
+                                    🆔 Request ID: #{withdrawal.id}
+                                  </p>
+                                </div>
+
+                                <div className="text-right ml-4">
+                                  <div className={`text-2xl font-bold ${
+                                    withdrawal.status === 'approved' ? 'text-green-600' :
+                                    withdrawal.status === 'rejected' ? 'text-red-600' :
+                                    'text-yellow-600'
+                                  }`}>
+                                    {withdrawal.status === 'pending' ? '⏳' :
+                                     withdrawal.status === 'approved' ? '✅' : '❌'}
+                                  </div>
+                                  <p className="text-xs text-gray-500 mt-1">
+                                    {withdrawal.status === 'pending' ? 'Under Review' :
+                                     withdrawal.status === 'approved' ? 'Payment Sent' :
+                                     'Request Declined'}
+                                  </p>
+                                </div>
+                              </div>
+                            </CardContent>
+                          </Card>
+                        ))
+                      ) : (
+                        <div className="text-center py-8">
+                          <Wallet className="w-16 h-16 text-gray-400 mx-auto mb-4" />
+                          <p className="text-gray-500 font-medium">No withdrawal requests yet</p>
+                          <p className="text-sm text-gray-400">Your withdrawal requests will appear here with full tracking</p>
+                        </div>
+                      )}
+                    </div>
+                  </TabsContent>
+                </Tabs>
               </CardContent>
             </Card>
           </TabsContent>
