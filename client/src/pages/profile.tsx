@@ -822,7 +822,8 @@ export default function Profile() {
                           onClick={async () => {
                             setIsWithdrawing(true);
                             await requestWithdrawal();
-                            setIsWithdrawing(false);
+                            setIs<replit_final_file>
+Withdrawing(false);
                           }} 
                           disabled={!withdrawalAmount || parseInt(withdrawalAmount) > profile.walletBalance || isWithdrawing}
                           className="w-full bg-green-600 hover:bg-green-700"

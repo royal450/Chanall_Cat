@@ -213,10 +213,13 @@ export default function ChannelCreation() {
       console.log('Firebase submission successful:', result);
       toast({
         title: "🎉 Channel Submitted Successfully!",
-        description: "Your channel is now under review. You'll be notified once it's approved.",
+        description: "Your channel is now under review. Check your profile to see it!",
       });
-      // Reset form
-      window.location.reload();
+      
+      // Redirect to profile page to see the channel
+      setTimeout(() => {
+        window.location.href = '/profile';
+      }, 2000);
     },
     onError: (error: any) => {
       console.error('Firebase submission error:', error);

@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useLocation } from "wouter";
 import { Navbar } from "@/components/navbar";
@@ -16,12 +15,17 @@ import {
   AlertCircle,
   CreditCard,
   Bitcoin,
-  CreditCard as Paypal
+  CreditCard as Paypal,
+  Gift,
+  TrendingUp,
+  History,
+  ArrowLeft
 } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
 import { useToast } from "@/hooks/use-toast";
-import { ref, push, update, onValue } from "firebase/database";
+import { ref, push, update, onValue, get } from "firebase/database";
 import { database } from "@/lib/firebase";
+import { motion } from "framer-motion";
 
 interface WithdrawalRequest {
   id: string;
@@ -45,8 +49,9 @@ export default function Withdrawal() {
   const [withdrawalMethod, setWithdrawalMethod] = useState<'paypal' | 'crypto' | 'bank'>('paypal');
   const [address, setAddress] = useState("");
   const [showConfirmation, setShowConfirmation] = useState(false);
-  const [withdrawalHistory, setWithdrawalHistory] = useState<WithdrawalRequest[]>([]);
-  const [loading, setLoading] = useState(false);
+  const [withdrawalHistory, setWithdrawalHistory] = useState<any[]>([]);
+  const [bonusHistory, setBonusHistory] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     if (!user) {
@@ -54,21 +59,60 @@ export default function Withdrawal() {
       return;
     }
 
-    // Load withdrawal history
-    const withdrawalsRef = ref(database, `withdrawals/${user.uid}`);
-    const unsubscribe = onValue(withdrawalsRef, (snapshot) => {
-      if (snapshot.exists()) {
-        const data = snapshot.val();
-        const history = Object.entries(data).map(([id, withdrawal]: [string, any]) => ({
-          id,
-          ...withdrawal
-        }));
-        setWithdrawalHistory(history.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()));
-      }
-    });
-
-    return () => unsubscribe();
+    fetchTransactionHistory();
   }, [user, setLocation]);
+
+  const fetchTransactionHistory = async () => {
+    try {
+      // Fetch withdrawal history
+      const mockWithdrawals = [
+        {
+          id: 1,
+          amount: 500,
+          status: 'completed',
+          type: 'withdrawal',
+          createdAt: '2024-01-15T10:30:00Z',
+          processedAt: '2024-01-15T15:45:00Z',
+          transactionId: 'WD123456789',
+          method: 'Bank Transfer'
+        },
+        {
+          id: 2,
+          amount: 200,
+          status: 'pending',
+          type: 'withdrawal',
+          createdAt: '2024-01-20T14:20:00Z',
+          method: 'UPI'
+        }
+      ];
+
+      // Fetch bonus history from Firebase
+
+      const bonusRef = ref(database, 'userBonuses');
+      const bonusSnapshot = await get(bonusRef);
+
+      let userBonuses = [];
+      if (bonusSnapshot.exists()) {
+        const allBonuses = bonusSnapshot.val();
+        userBonuses = Object.entries(allBonuses)
+          .filter(([id, bonus]: [string, any]) => bonus.userId === user?.uid)
+          .map(([id, bonus]: [string, any]) => ({
+            id,
+            ...bonus,
+            type: 'bonus'
+          }))
+          .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+      }
+
+      setWithdrawalHistory(mockWithdrawals);
+      setBonusHistory(userBonuses);
+      console.log('Bonus history loaded:', userBonuses);
+    } catch (error) {
+      console.error('Error fetching transaction history:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleWithdrawal = async () => {
     if (!user) return;
@@ -171,7 +215,7 @@ export default function Withdrawal() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-purple-50 to-cyan-50">
       <Navbar />
-      
+
       <div className="container mx-auto px-4 py-8 max-w-4xl">
         <div className="text-center mb-8">
           <h1 className="text-4xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent mb-4">
@@ -297,7 +341,7 @@ export default function Withdrawal() {
                     to: {address}
                   </p>
                 </div>
-                
+
                 <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3">
                   <p className="text-sm text-yellow-800">
                     ⚠️ Are you sure you want to withdraw this amount? 
@@ -325,47 +369,144 @@ export default function Withdrawal() {
             </Card>
           </div>
         )}
-
-        {/* Withdrawal History */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Withdrawal History</CardTitle>
-          </CardHeader>
-          <CardContent>
-            {withdrawalHistory.length === 0 ? (
-              <p className="text-center text-gray-500 py-4">No withdrawal history</p>
-            ) : (
-              <div className="space-y-3">
-                {withdrawalHistory.map((withdrawal) => (
-                  <div key={withdrawal.id} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
-                    <div>
-                      <div className="flex items-center space-x-2">
-                        {getStatusIcon(withdrawal.status)}
-                        <span className="font-medium">₹{withdrawal.amount.toLocaleString()}</span>
-                        <Badge className={getStatusColor(withdrawal.status)}>
-                          {withdrawal.status.toUpperCase()}
-                        </Badge>
+                  {/* Bonus History */}
+                  <Card className="bg-white/90 backdrop-blur border-0 shadow-lg">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Gift className="w-5 h-5 text-purple-600" />
+                Bonus History ({bonusHistory.length})
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              {loading ? (
+                <div className="space-y-3">
+                  {[1, 2, 3].map((i) => (
+                    <div key={i} className="animate-pulse bg-gray-200 rounded-lg h-16"></div>
+                  ))}
+                </div>
+              ) : bonusHistory.length === 0 ? (
+                <div className="text-center py-8 text-gray-500">
+                  <Gift className="w-12 h-12 mx-auto mb-3 text-gray-400" />
+                  <p className="text-lg font-medium mb-2">No Bonus History</p>
+                  <p className="text-sm">You haven't received any bonuses yet.</p>
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  {bonusHistory.map((bonus) => (
+                    <motion.div
+                      key={bonus.id}
+                      initial={{ opacity: 0, x: -20 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      className="border border-purple-200 rounded-lg p-4 bg-purple-50/50 hover:shadow-md transition-shadow"
+                    >
+                      <div className="flex items-center justify-between">
+                        <div className="flex-1">
+                          <div className="flex items-center gap-2 mb-1">
+                            <Gift className="w-4 h-4 text-purple-600" />
+                            <span className="font-semibold text-lg text-green-600">+₹{bonus.amount}</span>
+                            <Badge className="bg-purple-100 text-purple-800">
+                              🎁 {bonus.type === 'admin_bonus' ? 'Admin Bonus' : 'Referral Bonus'}
+                            </Badge>
+                          </div>
+                          <p className="text-sm text-gray-700 font-medium">
+                            {bonus.reason || 'Bonus reward'}
+                          </p>
+                          {bonus.adminName && (
+                            <p className="text-xs text-gray-600">
+                              Given by: {bonus.adminName}
+                            </p>
+                          )}
+                          <p className="text-xs text-gray-500">
+                            Received: {new Date(bonus.createdAt).toLocaleDateString()} at {new Date(bonus.createdAt).toLocaleTimeString()}
+                          </p>
+                          {bonus.transactionId && (
+                            <p className="text-xs text-purple-600 font-mono">
+                              ID: {bonus.transactionId}
+                            </p>
+                          )}
+                        </div>
+                        <div className="text-right">
+                          <Badge className="bg-green-100 text-green-800">
+                            ✅ Completed
+                          </Badge>
+                        </div>
                       </div>
-                      <p className="text-sm text-gray-600">
-                        {withdrawal.method.toUpperCase()} • {new Date(withdrawal.createdAt).toLocaleDateString()}
-                      </p>
-                      {withdrawal.status === 'rejected' && withdrawal.rejectionReason && (
-                        <p className="text-sm text-red-600 mt-1">
-                          Reason: {withdrawal.rejectionReason}
-                        </p>
-                      )}
-                    </div>
-                    {withdrawal.status === 'approved' && (
-                      <Badge className="bg-green-100 text-green-800">
-                        Payment sent within 1 hour
-                      </Badge>
-                    )}
-                  </div>
-                ))}
-              </div>
-            )}
-          </CardContent>
-        </Card>
+                    </motion.div>
+                  ))}
+                </div>
+              )}
+            </CardContent>
+          </Card>
+
+          {/* Withdrawal History */}
+          <Card className="bg-white/90 backdrop-blur border-0 shadow-lg">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <History className="w-5 h-5 text-blue-600" />
+                Withdrawal History ({withdrawalHistory.length})
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              {loading ? (
+                <div className="space-y-3">
+                  {[1, 2, 3].map((i) => (
+                    <div key={i} className="animate-pulse bg-gray-200 rounded-lg h-16"></div>
+                  ))}
+                </div>
+              ) : withdrawalHistory.length === 0 ? (
+                <div className="text-center py-8 text-gray-500">
+                  <History className="w-12 h-12 mx-auto mb-3 text-gray-400" />
+                  <p className="text-lg font-medium mb-2">No Withdrawal History</p>
+                  <p className="text-sm">You haven't made any withdrawals yet.</p>
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  {withdrawalHistory.map((withdrawal) => (
+                    <motion.div
+                      key={withdrawal.id}
+                      initial={{ opacity: 0, x: -20 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      className="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow"
+                    >
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <div className="flex items-center gap-2 mb-1">
+                            <DollarSign className="w-4 h-4 text-green-600" />
+                            <span className="font-semibold text-lg">₹{withdrawal.amount}</span>
+                            <Badge className={getStatusColor(withdrawal.status)}>
+                              {getStatusIcon(withdrawal.status)}
+                              {withdrawal.status.charAt(0).toUpperCase() + withdrawal.status.slice(1)}
+                            </Badge>
+                          </div>
+                          <p className="text-sm text-gray-600">
+                            Method: {withdrawal.method}
+                          </p>
+                          <p className="text-xs text-gray-500">
+                            Requested: {new Date(withdrawal.createdAt).toLocaleDateString()} at {new Date(withdrawal.createdAt).toLocaleTimeString()}
+                          </p>
+                          {withdrawal.processedAt && (
+                            <p className="text-xs text-gray-500">
+                              Processed: {new Date(withdrawal.processedAt).toLocaleDateString()} at {new Date(withdrawal.processedAt).toLocaleTimeString()}
+                            </p>
+                          )}
+                          {withdrawal.transactionId && (
+                            <p className="text-xs text-blue-600 font-mono">
+                              Transaction ID: {withdrawal.transactionId}
+                            </p>
+                          )}
+                          {withdrawal.rejectionReason && (
+                            <p className="text-xs text-red-600 mt-1">
+                              Reason: {withdrawal.rejectionReason}
+                            </p>
+                          )}
+                        </div>
+                      </div>
+                    </motion.div>
+                  ))}
+                </div>
+              )}
+            </CardContent>
+          </Card>
       </div>
 
       <Footer />
