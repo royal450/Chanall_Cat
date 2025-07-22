@@ -13,19 +13,18 @@ if (!process.env.DATABASE_URL) {
 
 export const pool = new Pool({ connectionString: process.env.DATABASE_URL });
 export const db = drizzle({ client: pool, schema });
-import { initializeApp } from 'firebase/app';
-import { getDatabase } from 'firebase/database';
+import { initializeApp } from "firebase/app";
+import { getDatabase } from "firebase/database";
 
-// Firebase configuration
 const firebaseConfig = {
-  apiKey: "AIzaSyC-KFjdNMmVpAJOhR3FN8BK74KRNR_9EQ8",
-  authDomain: "marketing-platform-1a4e6.firebaseapp.com",
-  databaseURL: "https://marketing-platform-1a4e6-default-rtdb.firebaseio.com",
-  projectId: "marketing-platform-1a4e6",
-  storageBucket: "marketing-platform-1a4e6.firebasestorage.app",
-  messagingSenderId: "502994030969",
-  appId: "1:502994030969:web:3d2dc5dde1326a03e6cea8",
-  measurementId: "G-HZBMHGL0PH"
+  apiKey: "AIzaSyBuioOF7DCq-qIoa1D6ZyZbrAVeGjbfv3Y",
+  authDomain: "daily-campaign-king.firebaseapp.com",
+  databaseURL: "https://daily-campaign-king-default-rtdb.firebaseio.com/",
+  projectId: "daily-campaign-king",
+  storageBucket: "daily-campaign-king.firebasestorage.app",
+  messagingSenderId: "1089692268059",
+  appId: "1:1089692268059:web:eddde94901436202576abe",
+  measurementId: "G-6PXV3B5322"
 };
 
 // Initialize Firebase for server

@@ -461,7 +461,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Enhanced User bonus system - Using same approach as referral bonus
+  // Enhanced User bonus system - Using EXACT same approach as referral bonus
   app.post("/api/admin/users/:userId/bonus", async (req, res) => {
     try {
       const userId = req.params.userId; // Firebase user ID string
@@ -469,71 +469,68 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       console.log(`🎁 Processing bonus for user ${userId}: ₹${amount} - ${reason}`);
 
-      // 🔥 USING SAME METHOD AS REFERRAL BONUS - Import from existing db.ts
-      try {
-        const { ref, get, update, push } = await import('firebase/database');
-        const { database } = require('./db');
+      // 🔥 EXACT SAME FIREBASE OPERATIONS AS REFERRAL BONUS IN use-auth.tsx
+      const { ref, get, update, push } = await import('firebase/database');
+      const { database } = await import('./db');
+      
+      const userRef = ref(database, `users/${userId}`);
+      const userSnapshot = await get(userRef);
+      
+      if (userSnapshot.exists()) {
+        const userData = userSnapshot.val();
+        const currentBalance = userData.walletBalance || 0;
+        const currentEarnings = userData.totalEarnings || 0;
         
-        const userRef = ref(database, `users/${userId}`);
-        const userSnapshot = await get(userRef);
-        
-        if (userSnapshot.exists()) {
-          const userData = userSnapshot.val();
-          const currentBalance = userData.walletBalance || 0;
-          const currentEarnings = userData.totalEarnings || 0;
-          
-          // Same approach as referral bonus - direct Firebase update
-          await update(userRef, {
-            walletBalance: currentBalance + amount,
-            totalEarnings: currentEarnings + amount,
-            lastBonusReceived: new Date().toISOString(),
-            lastUpdated: new Date().toISOString()
-          });
-          
-          console.log(`✅ Firebase updated: User ${userId} balance: ${currentBalance} → ${currentBalance + amount}`);
-          
-          // Create bonus record in Firebase - same as referral bonuses
-          const bonusRef = ref(database, 'userBonuses');
-          await push(bonusRef, {
-            userId,
-            amount,
-            reason,
-            type,
-            adminName: adminName || 'Super Admin',
-            createdAt: new Date().toISOString(),
-            status: 'completed',
-            transactionId: `BONUS_${Date.now()}`
-          });
-          
-          console.log(`✅ Bonus ₹${amount} successfully added to user ${userId}`);
-          res.json({ 
-            success: true, 
-            message: `₹${amount} bonus added to user ${userId}`,
-            newBalance: currentBalance + amount,
-            transaction: {
-              userId,
-              amount,
-              reason,
-              timestamp: new Date().toISOString()
-            }
-          });
-          
-        } else {
-          console.log(`❌ User ${userId} not found in Firebase`);
-          res.status(404).json({ error: `User ${userId} not found in Firebase database` });
-        }
-        
-      } catch (firebaseError) {
-        console.error('❌ Firebase operation failed:', firebaseError);
-        res.status(500).json({ 
-          error: 'Failed to update user balance in Firebase', 
-          details: firebaseError.message 
+        // EXACT same update method as referral bonus
+        await update(userRef, {
+          walletBalance: currentBalance + amount,
+          totalEarnings: currentEarnings + amount,
+          lastBonusReceived: new Date().toISOString(),
+          lastUpdated: new Date().toISOString()
         });
+        
+        console.log(`✅ Firebase updated: User ${userId} balance: ${currentBalance} → ${currentBalance + amount}`);
+        
+        // Create bonus record - same as referral bonuses
+        const bonusRef = ref(database, 'userBonuses');
+        await push(bonusRef, {
+          userId,
+          amount,
+          reason,
+          type,
+          adminName: adminName || 'Super Admin',
+          createdAt: new Date().toISOString(),
+          status: 'completed',
+          transactionId: `BONUS_${Date.now()}`
+        });
+        
+        console.log(`✅ Admin bonus ₹${amount} successfully added to user ${userId}`);
+        res.json({ 
+          success: true, 
+          message: `₹${amount} bonus added successfully`,
+          newBalance: currentBalance + amount,
+          userDetails: {
+            userId,
+            displayName: userData.displayName,
+            email: userData.email,
+            oldBalance: currentBalance,
+            newBalance: currentBalance + amount,
+            bonusAmount: amount,
+            reason
+          }
+        });
+        
+      } else {
+        console.log(`❌ User ${userId} not found in Firebase`);
+        res.status(404).json({ error: `User ${userId} not found in Firebase database` });
       }
       
     } catch (error) {
-      console.error('❌ Error processing bonus:', error);
-      res.status(500).json({ error: 'Failed to process bonus request' });
+      console.error('❌ Error processing admin bonus:', error);
+      res.status(500).json({ 
+        error: 'Failed to process bonus request', 
+        details: error.message 
+      });
     }
   });
 
