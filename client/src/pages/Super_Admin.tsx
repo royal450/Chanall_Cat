@@ -835,6 +835,23 @@ export default function SuperAdmin() {
                                           lastUpdated: new Date().toISOString(),
                                           updatedBy: 'Super Admin'
                                         });
+
+                                        // Update local state to reflect changes immediately
+                                        setAllChannels(prevChannels =>
+                                          prevChannels.map(c =>
+                                            c.id === channel.id
+                                              ? { ...c, ...editingChannel, lastUpdated: new Date().toISOString() }
+                                              : c
+                                          )
+                                        );
+
+                                        setEditingChannel(null);
+                                        
+                                        toast({
+                                          title: "✅ Channel Updated Successfully!",
+                                          description: `${editingChannel.title} has been updated`
+                                        });
+                                        });
                                         
                                         toast({ 
                                           title: "✅ Channel Updated Successfully",

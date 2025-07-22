@@ -72,6 +72,7 @@ export default function Profile() {
   const [withdrawalMethod, setWithdrawalMethod] = useState('bank');
   const [withdrawalHistory, setWithdrawalHistory] = useState([]);
   const [isWithdrawing, setIsWithdrawing] = useState(false);
+  const [isUpdatingChannel, setIsUpdatingChannel] = useState<string | null>(null);
 
   // Generate referral code from user ID
   const generateReferralCode = (userId: string) => {
@@ -783,7 +784,9 @@ export default function Profile() {
                         <Button 
                           size="sm" 
                           className="w-full bg-blue-600 hover:bg-blue-700 text-white"
+                          disabled={isUpdatingChannel === course.id}
                           onClick={async () => {
+                            setIsUpdatingChannel(course.id);
                             try {
                               // Get the current values from the form inputs
                               const titleInput = document.querySelector(`#title-${course.id}`) as HTMLInputElement;
@@ -800,21 +803,28 @@ export default function Profile() {
                                 price: newPrice,
                                 thumbnail: thumbnailInput?.value || course.thumbnail,
                                 fakePrice: newFakePrice,
-                                lastUpdated: new Date().toISOString()
+                                lastUpdated: new Date().toISOString(),
+                                updatedBy: user?.uid || 'user'
                               };
 
+                              // Update the existing service/channel
                               const serviceRef = ref(database, `services/${course.id}`);
                               await update(serviceRef, updates);
+
+                              // Update local state immediately for instant UI update
+                              setMyCourses(prevCourses => 
+                                prevCourses.map(c => 
+                                  c.id === course.id 
+                                    ? { ...c, ...updates }
+                                    : c
+                                )
+                              );
 
                               toast({
                                 title: "✅ Channel Updated!",
                                 description: `${updates.title} has been updated successfully`,
                               });
 
-                              // Refresh page to show updates
-                              setTimeout(() => {
-                                window.location.reload();
-                              }, 1000);
                             } catch (error) {
                               console.error('Error updating channel:', error);
                               toast({
@@ -822,10 +832,12 @@ export default function Profile() {
                                 description: "Failed to update channel. Please try again.",
                                 variant: "destructive",
                               });
+                            } finally {
+                              setIsUpdatingChannel(null);
                             }
                           }}
                         >
-                          💾 Update Channel
+                          {isUpdatingChannel === course.id ? '⏳ Updating...' : '💾 Update Channel'}
                         </Button>
                       </div>
                     </div>
