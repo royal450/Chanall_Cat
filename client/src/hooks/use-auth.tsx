@@ -115,24 +115,56 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           // Give bonus to both users - ₹10 each
           const bonusAmount = 10;
 
-          // Update referrer's wallet
+          // Update referrer's wallet and add bonus history
+          const currentReferrerBonusHistory = referrerData.bonusHistory || [];
+          const newUserInfo = await get(ref(database, `users/${newUserId}`));
+          const newUserName = newUserInfo.val()?.displayName || 'New User';
+
+          const referrerBonusRecord = {
+            amount: bonusAmount,
+            reason: `Referral bonus! ${newUserName} joined using your referral code.`,
+            type: 'referral_bonus',
+            adminName: 'System',
+            createdAt: new Date().toISOString(),
+            transactionId: `REF_REFERRER_${Date.now()}`,
+            referralCode: referralCode,
+            referredUserName: newUserName
+          };
+
           const referrerUpdates = {
             walletBalance: (referrerData.walletBalance || 0) + bonusAmount,
             totalEarnings: (referrerData.totalEarnings || 0) + bonusAmount,
             totalReferrals: (referrerData.totalReferrals || 0) + 1,
+            bonusHistory: [...currentReferrerBonusHistory, referrerBonusRecord],
             lastUpdated: new Date().toISOString()
           };
 
           await update(ref(database, `users/${referrerId}`), referrerUpdates);
           console.log(`✅ Referrer bonus added: ₹${bonusAmount} to ${referrerId}`);
 
-          // Update new user's wallet
+          // Update new user's wallet and add bonus history
+          const newUserSnapshot = await get(ref(database, `users/${newUserId}`));
+          const newUserData = newUserSnapshot.val() || {};
+          const currentBonusHistory = newUserData.bonusHistory || [];
+
+          const signupBonusRecord = {
+            amount: bonusAmount,
+            reason: 'Welcome signup bonus! Thanks for joining with referral code.',
+            type: 'referral_bonus',
+            adminName: 'System',
+            createdAt: new Date().toISOString(),
+            transactionId: `REF_SIGNUP_${Date.now()}`,
+            referralCode: referralCode,
+            referrerName: referrerData.displayName || 'Friend'
+          };
+
           const newUserUpdates = {
             walletBalance: bonusAmount,
             totalEarnings: bonusAmount,
             referredBy: referrerId,
             usedReferralCode: referralCode,
             signupBonus: bonusAmount,
+            bonusHistory: [...currentBonusHistory, signupBonusRecord],
             lastUpdated: new Date().toISOString()
           };
 

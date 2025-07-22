@@ -103,6 +103,8 @@ export default function Profile() {
         coursesCreated: data?.coursesCreated || 0,
         totalSales: data?.totalSales || 0,
         averageRating: data?.averageRating || 4.5,
+        bonusHistory: data?.bonusHistory || [],
+        referralHistory: data?.referralHistory || [],
       };
 
       setProfile(profileData);

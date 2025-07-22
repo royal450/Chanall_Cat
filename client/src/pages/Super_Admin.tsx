@@ -19,7 +19,7 @@ import {
 } from "lucide-react";
 import { motion } from "framer-motion";
 import { useFirebaseServices, useFirebaseUsers, useFirebaseAdminStats } from "@/hooks/use-firebase-realtime";
-import { ref, onValue, off, update } from 'firebase/database';
+import { ref, onValue, off, update, push, get } from 'firebase/database';
 import { database } from '@/lib/firebase';
 import { adminOperations } from "@/lib/admin-firebase";
 import type { Channel, User, AdminStats } from "@shared/schema";
@@ -132,7 +132,7 @@ export default function SuperAdmin() {
 
   const handleDeleteService = async (serviceId: string) => {
     if (!confirm("Are you sure you want to permanently delete this channel?")) return;
-    
+
     try {
       console.log('🗑️ Admin deleting service:', serviceId);
       await adminOperations.deleteService(serviceId);
@@ -153,14 +153,14 @@ export default function SuperAdmin() {
   // Data fetching - Admin-specific that shows ALL services
   const { adminStats, loading: loadingStats } = useFirebaseAdminStats();
   const { users = [] } = useFirebaseUsers();
-  
+
   // Admin-specific services hook that shows ALL services (pending, approved, rejected)
   const [allChannels, setAllChannels] = useState<any[]>([]);
   const [loadingChannels, setLoadingChannels] = useState(true);
-  
+
   useEffect(() => {
     const servicesRef = ref(database, 'services');
-    
+
     const unsubscribe = onValue(servicesRef, (snapshot) => {
       const data = snapshot.val();
       if (data) {
@@ -184,7 +184,7 @@ export default function SuperAdmin() {
 
     return () => off(servicesRef, 'value', unsubscribe);
   }, []);
-  
+
   // Filter pending channels
   const pendingChannels = allChannels.filter((channel: any) => 
     channel.approvalStatus === 'pending' || channel.status === 'pending'
@@ -193,11 +193,11 @@ export default function SuperAdmin() {
   // Real-time withdrawal requests from Firebase
   const [withdrawalRequests, setWithdrawalRequests] = useState<any[]>([]);
   const [loadingWithdrawals, setLoadingWithdrawals] = useState(true);
-  
+
   // Real-time Firebase withdrawal listener
   useEffect(() => {
     const withdrawalsRef = ref(database, 'withdrawalRequests');
-    
+
     const unsubscribe = onValue(withdrawalsRef, (snapshot) => {
       const data = snapshot.val();
       if (data) {
@@ -205,7 +205,7 @@ export default function SuperAdmin() {
           id,
           ...withdrawal
         })).sort((a, b) => new Date(b.createdAt || b.requestDate).getTime() - new Date(a.createdAt || a.requestDate).getTime());
-        
+
         setWithdrawalRequests(withdrawalsArray);
         console.log('🔥 Real-time withdrawals loaded:', withdrawalsArray.length);
       } else {
@@ -221,16 +221,16 @@ export default function SuperAdmin() {
   const handleApproveWithdrawal = async (withdrawalId: number, userName: string) => {
     const transactionId = prompt(`Enter transaction ID for ${userName}'s withdrawal:`);
     if (!transactionId) return;
-    
+
     const adminNotes = prompt("Add admin notes (optional):");
-    
+
     try {
       const response = await fetch(`/api/admin/withdrawals/${withdrawalId}/approve`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ transactionId, adminNotes })
       });
-      
+
       if (response.ok) {
         toast({
           title: "✅ Withdrawal Approved",
@@ -254,14 +254,14 @@ export default function SuperAdmin() {
   const handleRejectWithdrawal = async (withdrawalId: number, userName: string) => {
     const adminNotes = prompt(`Reason for rejecting ${userName}'s withdrawal:`);
     if (!adminNotes) return;
-    
+
     try {
       const response = await fetch(`/api/admin/withdrawals/${withdrawalId}/reject`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ adminNotes })
       });
-      
+
       if (response.ok) {
         toast({
           title: "❌ Withdrawal Rejected",
@@ -283,42 +283,76 @@ export default function SuperAdmin() {
 
   // User Bonus Management Functions - Fixed for Firebase User ID
   const handleGiveUserBonus = async (userId: string, amount: number, reason: string) => {
-    try {
-      console.log(`🎁 Giving bonus: User ID: ${userId}, Amount: ₹${amount}, Reason: ${reason}`);
-      
-      const response = await fetch(`/api/admin/users/${userId}/bonus`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ 
-          amount, 
-          reason, 
-          adminName: 'Super Admin' 
-        })
-      });
-      
-      const result = await response.json();
-      
-      if (response.ok) {
-        const user = users.find(u => u.id === userId);
-        toast({
-          title: "🎁 Bonus Given Successfully",
-          description: `₹${amount} bonus given to ${user?.displayName || 'User'}: ${reason}`,
-        });
-        
-        console.log(`✅ Bonus result:`, result);
-        
-        // Refresh user data to show updated balance
-        setTimeout(() => {
-          window.location.reload();
-        }, 1000);
-      } else {
-        throw new Error(result.error || 'Failed to give bonus');
-      }
-    } catch (error: any) {
-      console.error('❌ Bonus error:', error);
+    if (!userId || amount <= 0 || !reason.trim()) {
       toast({
-        title: "❌ Error",
-        description: error.message || "Failed to give user bonus",
+        title: "Invalid Input",
+        description: "Please provide valid user ID, amount, and reason",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    try {
+      const userRef = ref(database, `users/${userId}`);
+      const userSnapshot = await get(userRef);
+
+      if (!userSnapshot.exists()) {
+        toast({
+          title: "User Not Found",
+          description: "User ID does not exist",
+          variant: "destructive"
+        });
+        return;
+      }
+
+      const userData = userSnapshot.val();
+      const currentBalance = userData.walletBalance || 0;
+      const currentEarnings = userData.totalEarnings || 0;
+      const currentBonusHistory = userData.bonusHistory || [];
+
+      // Create bonus record
+      const bonusRecord = {
+        amount,
+        reason,
+        type: 'admin_bonus',
+        adminName: 'Super Admin',
+        createdAt: new Date().toISOString(),
+        transactionId: `BONUS_${Date.now()}`
+      };
+
+      // Update user's wallet, earnings, and bonus history
+      await update(userRef, {
+        walletBalance: currentBalance + amount,
+        totalEarnings: currentEarnings + amount,
+        bonusHistory: [...currentBonusHistory, bonusRecord],
+        lastBonusReceived: new Date().toISOString(),
+        lastUpdated: new Date().toISOString()
+      });
+
+      // Also create a separate bonus record for admin tracking
+      const bonusRef = ref(database, 'userBonuses');
+      await push(bonusRef, {
+        userId,
+        userName: userData.displayName || 'User',
+        userEmail: userData.email || 'No email',
+        ...bonusRecord
+      });
+
+      toast({
+        title: "✅ Bonus Given Successfully!",
+        description: `₹${amount} bonus given to ${userData.displayName || 'User'} - ${reason}`,
+      });
+
+      // Refresh data
+      setTimeout(() => {
+        fetchUsers();
+      }, 1000);
+
+    } catch (error) {
+      console.error('Error giving bonus:', error);
+      toast({
+        title: "Error",
+        description: "Failed to give bonus. Please try again.",
         variant: "destructive"
       });
     }
@@ -334,7 +368,7 @@ export default function SuperAdmin() {
       user.email && 
       user.email.includes('@') // Ensure it's a real email
     );
-    
+
     if (realUsers.length === 0) {
       toast({
         title: "❌ No Real Users Found",
@@ -346,9 +380,9 @@ export default function SuperAdmin() {
 
     const confirmBulk = confirm(`Give ₹${amount} bonus to ${realUsers.length} REAL authenticated users?\n\nUsers: ${realUsers.map(u => u.displayName).join(', ')}\n\nThis cannot be undone.`);
     if (!confirmBulk) return;
-    
+
     const reason = prompt("Enter reason for bulk bonus:") || "Bulk admin bonus";
-    
+
     try {
       let successful = 0;
       for (const user of realUsers) {
@@ -368,12 +402,12 @@ export default function SuperAdmin() {
           console.error(`Failed to give bonus to ${user.displayName}:`, error);
         }
       }
-      
+
       toast({
         title: "🎉 Bulk Bonus Completed",
         description: `Successfully gave ₹${amount} bonus to ${successful}/${realUsers.length} real authenticated users`,
       });
-      
+
       // Refresh for real-time update
       window.location.reload();
     } catch (error) {
@@ -435,6 +469,10 @@ export default function SuperAdmin() {
         variant: "destructive"
       });
     }
+  };
+
+  const fetchUsers = async () => {
+    queryClient.invalidateQueries(['users']);
   };
 
   if (!isAuthenticated) {
@@ -670,7 +708,7 @@ export default function SuperAdmin() {
                           <div>
                             <h3 className="font-semibold text-lg">{channel.title}</h3>
                             <p className="text-gray-600 text-sm">{channel.description}</p>
-                            
+
                             {/* Show Category and Monetization */}
                             <div className="flex items-center gap-2 mt-2 mb-2">
                               <Badge variant="outline" className="bg-blue-50 text-blue-700">
@@ -687,7 +725,7 @@ export default function SuperAdmin() {
                                 </Badge>
                               )}
                             </div>
-                            
+
                             <div className="flex items-center gap-4 mt-2 text-sm text-gray-500">
                               <span className="flex items-center gap-1">
                                 <Heart className="w-4 h-4" />
@@ -844,12 +882,12 @@ export default function SuperAdmin() {
                                         );
 
                                         setEditingChannel(null);
-                                        
+
                                         toast({
                                           title: "✅ Channel Updated Successfully!",
                                           description: `${editingChannel.title} has been updated`
                                         });
-                                        
+
                                         // Refresh data after a short delay
                                         setTimeout(() => {
                                           window.location.reload();
@@ -1064,7 +1102,7 @@ export default function SuperAdmin() {
                               📱 {user.phoneNumber}
                             </p>
                           )}
-                          
+
                           {/* Enhanced Real-time Stats Grid */}
                           <div className="grid grid-cols-2 md:grid-cols-5 gap-3 mt-3">
                             <div className="bg-green-100 dark:bg-green-900/30 p-2 rounded-lg text-center">
@@ -1073,21 +1111,21 @@ export default function SuperAdmin() {
                               </div>
                               <div className="text-xs text-green-600 dark:text-green-500">Wallet</div>
                             </div>
-                            
+
                             <div className="bg-purple-100 dark:bg-purple-900/30 p-2 rounded-lg text-center">
                               <div className="text-lg font-bold text-purple-700 dark:text-purple-400">
                                 {user.totalReferrals || 0}
                               </div>
                               <div className="text-xs text-purple-600 dark:text-purple-500">Referrals</div>
                             </div>
-                            
+
                             <div className="bg-blue-100 dark:bg-blue-900/30 p-2 rounded-lg text-center">
                               <div className="text-lg font-bold text-blue-700 dark:text-blue-400">
                                 {user.totalPurchases || 0}
                               </div>
                               <div className="text-xs text-blue-600 dark:text-blue-500">Purchases</div>
                             </div>
-                            
+
                             <div className="bg-orange-100 dark:bg-orange-900/30 p-2 rounded-lg text-center">
                               <div className="text-lg font-bold text-orange-700 dark:text-orange-400">
                                 ₹{user.totalSpent || 0}
@@ -1130,7 +1168,7 @@ export default function SuperAdmin() {
                           </div>
                         </div>
                       </div>
-                      
+
                       {/* Enhanced Action Buttons with Working Functionality */}
                       <div className="flex flex-wrap gap-2">
                         <Dialog>
@@ -1236,7 +1274,7 @@ export default function SuperAdmin() {
                                     </p>
                                   </div>
                                 </Card>
-                                
+
                                 <Card className="p-4">
                                   <h4 className="font-semibold mb-2">Financial Summary</h4>
                                   <div className="space-y-2 text-sm">
@@ -1495,7 +1533,7 @@ export default function SuperAdmin() {
                             <p className="text-sm text-blue-600">{new Date(withdrawal.createdAt || withdrawal.requestDate).toLocaleDateString()}</p>
                           </div>
                         </div>
-                        
+
                         {/* Payment Details */}
                         <div className="bg-white/80 backdrop-blur-sm rounded-xl p-6 border border-white/50 shadow-lg">
                           <h4 className="font-bold text-gray-800 mb-4 flex items-center gap-2 text-lg">
@@ -1577,9 +1615,9 @@ export default function SuperAdmin() {
                                 onClick={async () => {
                                   const transactionId = prompt(`Enter transaction ID for ${withdrawal.userName}'s ₹${withdrawal.amount} withdrawal:`);
                                   if (!transactionId) return;
-                                  
+
                                   const adminNotes = prompt("Add admin notes (optional):");
-                                  
+
                                   try {
                                     // Update Firebase withdrawal status
                                     const withdrawalRef = ref(database, `withdrawalRequests/${withdrawal.id}`);
@@ -1590,12 +1628,12 @@ export default function SuperAdmin() {
                                       processedBy: 'Super Admin',
                                       processedAt: new Date().toISOString()
                                     });
-                                    
+
                                     toast({
                                       title: "✅ Withdrawal Approved!",
                                       description: `₹${withdrawal.amount} approved for ${withdrawal.userName}`,
                                     });
-                                    
+
                                     setTimeout(() => window.location.reload(), 1000);
                                   } catch (error) {
                                     toast({
@@ -1616,7 +1654,7 @@ export default function SuperAdmin() {
                                 onClick={async () => {
                                   const rejectionReason = prompt(`Enter reason for rejecting ${withdrawal.userName}'s withdrawal:`);
                                   if (!rejectionReason) return;
-                                  
+
                                   try {
                                     // Update Firebase withdrawal status
                                     const withdrawalRef = ref(database, `withdrawalRequests/${withdrawal.id}`);
@@ -1627,7 +1665,7 @@ export default function SuperAdmin() {
                                       processedBy: 'Super Admin',
                                       processedAt: new Date().toISOString()
                                     });
-                                    
+
                                     // Return money to user's wallet
                                     const userRef = ref(database, `users/${withdrawal.userId}`);
                                     const userSnapshot = await get(userRef);
@@ -1637,12 +1675,12 @@ export default function SuperAdmin() {
                                         walletBalance: currentBalance + withdrawal.amount
                                       });
                                     }
-                                    
+
                                     toast({
                                       title: "❌ Withdrawal Rejected",
                                       description: `${withdrawal.userName}'s withdrawal rejected. ₹${withdrawal.amount} returned to wallet.`,
                                     });
-                                    
+
                                     setTimeout(() => window.location.reload(), 1000);
                                   } catch (error) {
                                     toast({
@@ -1713,14 +1751,14 @@ export default function SuperAdmin() {
                 onClick={() => {
                   const userId = prompt("Enter User ID to give bonus:");
                   if (!userId) return;
-                  
+
                   const amount = prompt("Enter bonus amount (₹):");
                   if (!amount || isNaN(Number(amount))) return;
-                  
+
                   const reason = prompt("Enter reason for bonus:");
                   if (!reason) return;
-                  
-                  handleGiveUserBonus(parseInt(userId), parseInt(amount), reason);
+
+                  handleGiveUserBonus(userId, parseInt(amount), reason);
                 }}
                 className="bg-green-500 hover:bg-green-600"
               >
@@ -1745,7 +1783,7 @@ export default function SuperAdmin() {
                         className="text-green-700 border-green-300 hover:bg-green-100"
                         onClick={() => {
                           const userId = prompt(`Give ₹${amount} bonus to User ID:`);
-                          if (userId) handleGiveUserBonus(parseInt(userId), amount, `Quick ₹${amount} bonus`);
+                          if (userId) handleGiveUserBonus(userId, amount, `Quick ₹${amount} bonus`);
                         }}
                       >
                         ₹{amount}
@@ -1787,7 +1825,7 @@ export default function SuperAdmin() {
                         className="text-purple-700 border-purple-300 hover:bg-purple-100"
                         onClick={() => {
                           const userId = prompt(`Give ₹${amount} achievement bonus to User ID:`);
-                          if (userId) handleGiveUserBonus(parseInt(userId), amount, `Achievement bonus ₹${amount}`);
+                          if (userId) handleGiveUserBonus(userId, amount, `Achievement bonus ₹${amount}`);
                         }}
                       >
                         ₹{amount}
@@ -1827,7 +1865,7 @@ export default function SuperAdmin() {
                         <Button
                           size="sm"
                           variant="outline"
-                          onClick={() => handleGiveUserBonus(user.id.toString(), 100, "Admin appreciation bonus")}
+                          onClick={() => handleGiveUserBonus(user.id, 100, "Admin appreciation bonus")}
                         >
                           <Gift className="w-3 h-3 mr-1" />
                           ₹100
@@ -1839,7 +1877,7 @@ export default function SuperAdmin() {
                             const amount = prompt(`Enter bonus amount for ${user.displayName}:`);
                             const reason = prompt("Enter bonus reason:");
                             if (amount && reason) {
-                              handleGiveUserBonus(user.id.toString(), parseInt(amount), reason);
+                              handleGiveUserBonus(user.id, parseInt(amount), reason);
                             }
                           }}
                         >
