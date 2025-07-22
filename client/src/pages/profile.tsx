@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/hooks/use-auth';
-import { ref, onValue, update, push } from 'firebase/database';
+import { ref, onValue, update, push, get } from 'firebase/database';
 import { database } from '@/lib/firebase';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -729,6 +729,103 @@ export default function Profile() {
                       <div className="flex items-center gap-1">
                         <Star className="w-4 h-4" />
                         <span>{course.likes} likes</span>
+                      </div>
+                    </div>
+
+                    {/* Channel Edit Section */}
+                    <div className="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                      <h4 className="font-semibold text-blue-800 mb-2">Edit Channel Details</h4>
+                      <div className="space-y-2">
+                        <div>
+                          <Label className="text-xs text-blue-700">Title:</Label>
+                          <Input 
+                            defaultValue={course.title} 
+                            className="h-8 text-sm"
+                            onChange={(e) => {
+                              // Auto-update logic can be added here
+                            }}
+                          />
+                        </div>
+                        <div>
+                          <Label className="text-xs text-blue-700">Description:</Label>
+                          <Textarea 
+                            defaultValue={course.description} 
+                            className="h-16 text-sm resize-none"
+                            onChange={(e) => {
+                              // Auto-update logic can be added here
+                            }}
+                          />
+                        </div>
+                        <div className="grid grid-cols-2 gap-2">
+                          <div>
+                            <Label className="text-xs text-blue-700">Price (₹):</Label>
+                            <Input 
+                              type="number" 
+                              defaultValue={course.price} 
+                              className="h-8 text-sm"
+                              onChange={(e) => {
+                                // Auto-generate fake price
+                                const newPrice = parseInt(e.target.value) || 0;
+                                const fakePrice = newPrice * (3 + Math.random() * 2);
+                                console.log(`Auto-generated fake price: ₹${Math.floor(fakePrice)}`);
+                              }}
+                            />
+                          </div>
+                          <div>
+                            <Label className="text-xs text-blue-700">Fake Price (Auto-gen):</Label>
+                            <Input 
+                              value={`₹${course.fakePrice || (course.price * 4)}`}
+                              disabled
+                              className="h-8 text-sm bg-gray-100"
+                            />
+                          </div>
+                        </div>
+                        <div>
+                          <Label className="text-xs text-blue-700">Thumbnail URL:</Label>
+                          <Input 
+                            defaultValue={course.thumbnail} 
+                            className="h-8 text-sm"
+                            placeholder="https://example.com/thumbnail.jpg"
+                          />
+                        </div>
+                        <Button 
+                          size="sm" 
+                          className="w-full bg-blue-600 hover:bg-blue-700 text-white"
+                          onClick={async () => {
+                            try {
+                              const updates = {
+                                title: document.querySelector(`input[defaultValue="${course.title}"]`)?.value || course.title,
+                                description: document.querySelector(`textarea[defaultValue="${course.description}"]`)?.value || course.description,
+                                price: parseInt(document.querySelector(`input[type="number"][defaultValue="${course.price}"]`)?.value) || course.price,
+                                thumbnail: document.querySelector(`input[placeholder="https://example.com/thumbnail.jpg"]`)?.value || course.thumbnail,
+                                fakePrice: Math.floor((parseInt(document.querySelector(`input[type="number"][defaultValue="${course.price}"]`)?.value) || course.price) * (3 + Math.random() * 2)),
+                                lastUpdated: new Date().toISOString()
+                              };
+
+                              const serviceRef = ref(database, `services/${course.id}`);
+                              await update(serviceRef, updates);
+
+                              toast({
+                                title: "✅ Channel Updated!",
+                                description: `${course.title} has been updated successfully`,
+                              });
+
+                              // Refresh page to show updates
+                              setTimeout(() => {
+                                window.location.reload();
+                              }, 1000);
+                            } catch (error) {
+                              console.error('Error updating channel:', error);
+                              toast({
+                                title: "❌ Update Failed",
+                                description: "Failed to update channel. Please try again.",
+                                variant: "destructive",
+                              });
+                            }
+                          }}
+                        >
+                          💾 Update Channel
+                        </Button>
                       </div>
                     </div>
 

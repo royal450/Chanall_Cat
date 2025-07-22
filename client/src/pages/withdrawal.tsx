@@ -64,6 +64,8 @@ export default function Withdrawal() {
 
   const fetchTransactionHistory = async () => {
     try {
+      console.log('🚀 Starting fetchTransactionHistory for user:', user?.uid);
+      
       // Fetch withdrawal history
       const mockWithdrawals = [
         {
@@ -86,33 +88,64 @@ export default function Withdrawal() {
         }
       ];
 
-      // Fetch bonus history from Firebase - Fixed path and structure
-      const bonusRef = ref(database, 'userBonuses');
-      const bonusSnapshot = await get(bonusRef);
-
+      // Fetch bonus history from Firebase - Multiple paths check
+      console.log('🔍 Fetching bonus history for user:', user?.uid);
       let userBonuses = [];
-      if (bonusSnapshot.exists()) {
-        const allBonuses = bonusSnapshot.val();
-        console.log('All bonuses from Firebase:', allBonuses);
+      
+      try {
+        // Check multiple Firebase paths for bonuses
+        const bonusPaths = ['userBonuses', 'bonuses', `users/${user?.uid}/bonuses`];
         
-        userBonuses = Object.entries(allBonuses)
-          .filter(([id, bonus]: [string, any]) => {
-            console.log('Checking bonus:', bonus, 'Current user:', user?.uid);
-            return bonus.userId === user?.uid;
-          })
-          .map(([id, bonus]: [string, any]) => ({
-            id,
-            ...bonus,
-            type: bonus.type || 'bonus',
-            reason: bonus.reason || 'Bonus reward',
-            adminName: bonus.adminName || 'System',
-            transactionId: bonus.transactionId || `BONUS_${id.slice(-8)}`
-          }))
-          .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+        for (const path of bonusPaths) {
+          const bonusRef = ref(database, path);
+          const bonusSnapshot = await get(bonusRef);
+          
+          console.log(`🔍 Checking path: ${path}`, bonusSnapshot.exists());
+          
+          if (bonusSnapshot.exists()) {
+            const allBonuses = bonusSnapshot.val();
+            console.log(`📊 Data from ${path}:`, allBonuses);
+            
+            if (path === `users/${user?.uid}/bonuses`) {
+              // Direct user bonuses path
+              userBonuses = Object.entries(allBonuses).map(([id, bonus]: [string, any]) => ({
+                id,
+                ...bonus,
+                type: bonus.type || 'admin_bonus',
+                reason: bonus.reason || 'Admin bonus reward',
+                adminName: bonus.adminName || 'System Admin',
+                transactionId: bonus.transactionId || `BONUS_${id.slice(-8)}`
+              }));
+              break; // Found direct path, use this
+            } else {
+              // Filter from global bonuses
+              const filteredBonuses = Object.entries(allBonuses)
+                .filter(([id, bonus]: [string, any]) => {
+                  return bonus.userId === user?.uid || bonus.uid === user?.uid;
+                })
+                .map(([id, bonus]: [string, any]) => ({
+                  id,
+                  ...bonus,
+                  type: bonus.type || 'admin_bonus',
+                  reason: bonus.reason || 'Admin bonus reward',
+                  adminName: bonus.adminName || 'System Admin',
+                  transactionId: bonus.transactionId || `BONUS_${id.slice(-8)}`
+                }));
+              
+              if (filteredBonuses.length > 0) {
+                userBonuses = filteredBonuses;
+                break; // Found bonuses, use these
+              }
+            }
+          }
+        }
         
-        console.log('User bonuses filtered:', userBonuses);
-      } else {
-        console.log('No bonuses found in Firebase');
+        // Sort by creation date
+        userBonuses = userBonuses.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+        
+        console.log('✅ Final user bonuses:', userBonuses);
+      } catch (error) {
+        console.error('❌ Error fetching bonus history:', error);
       }
 
       setWithdrawalHistory(mockWithdrawals);
