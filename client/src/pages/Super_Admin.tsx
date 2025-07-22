@@ -975,16 +975,19 @@ export default function SuperAdmin() {
             </div>
           </TabsContent>
 
-          {/* Users Management Tab - Enhanced */}
+          {/* Enhanced Users Management Tab with Working Functionality */}
           <TabsContent value="users" className="space-y-6">
             <div className="flex justify-between items-center">
               <h2 className="text-2xl font-bold">User Management - Real-time Data 😎</h2>
               <div className="flex gap-2">
-                <Button>
+                <Button onClick={() => window.location.reload()}>
                   <RefreshCw className="w-4 h-4 mr-2" />
                   Refresh Data
                 </Button>
-                <Button>
+                <Button onClick={() => {
+                  const amount = prompt("Enter bonus amount for all users:");
+                  if (amount) handleBulkBonus(parseInt(amount));
+                }}>
                   <Gift className="w-4 h-4 mr-2" />
                   Bulk Bonus
                 </Button>
@@ -1010,9 +1013,14 @@ export default function SuperAdmin() {
                             <h3 className="font-bold text-lg text-gray-900 dark:text-white">
                               {user.displayName || 'Unknown User'}
                             </h3>
-                            <Badge className="bg-green-500 text-white">
-                              {user.status || 'Active'}
+                            <Badge className={user.isActive !== false ? "bg-green-500 text-white" : "bg-red-500 text-white"}>
+                              {user.isActive !== false ? 'Active' : 'Blocked'}
                             </Badge>
+                            {user.userLevel && (
+                              <Badge className="bg-purple-500 text-white">
+                                {user.userLevel}
+                              </Badge>
+                            )}
                           </div>
                           <p className="text-gray-600 dark:text-gray-300 font-medium">{user.email}</p>
                           {user.phoneNumber && (
@@ -1021,8 +1029,8 @@ export default function SuperAdmin() {
                             </p>
                           )}
                           
-                          {/* Real-time Stats Grid */}
-                          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mt-3">
+                          {/* Enhanced Real-time Stats Grid */}
+                          <div className="grid grid-cols-2 md:grid-cols-5 gap-3 mt-3">
                             <div className="bg-green-100 dark:bg-green-900/30 p-2 rounded-lg text-center">
                               <div className="text-lg font-bold text-green-700 dark:text-green-400">
                                 ₹{user.walletBalance || 0}
@@ -1050,9 +1058,16 @@ export default function SuperAdmin() {
                               </div>
                               <div className="text-xs text-orange-600 dark:text-orange-500">Total Spent</div>
                             </div>
+
+                            <div className="bg-cyan-100 dark:bg-cyan-900/30 p-2 rounded-lg text-center">
+                              <div className="text-lg font-bold text-cyan-700 dark:text-cyan-400">
+                                {user.totalChannels || 0}
+                              </div>
+                              <div className="text-xs text-cyan-600 dark:text-cyan-500">Channels</div>
+                            </div>
                           </div>
 
-                          {/* User Activity Timeline */}
+                          {/* Enhanced User Activity Timeline */}
                           <div className="mt-3 text-xs text-gray-500 dark:text-gray-400">
                             <div className="flex items-center gap-4 flex-wrap">
                               <span className="flex items-center gap-1">
@@ -1069,33 +1084,219 @@ export default function SuperAdmin() {
                                   Referred by: {user.referredBy}
                                 </span>
                               )}
+                              {user.totalEarnings && (
+                                <span className="flex items-center gap-1 text-purple-600 dark:text-purple-400">
+                                  <DollarSign className="w-3 h-3" />
+                                  Total Earned: ₹{user.totalEarnings}
+                                </span>
+                              )}
                             </div>
                           </div>
                         </div>
                       </div>
                       
-                      {/* Action Buttons */}
+                      {/* Enhanced Action Buttons with Working Functionality */}
                       <div className="flex flex-wrap gap-2">
-                        <Button size="sm" variant="outline" className="bg-green-50 hover:bg-green-100 text-green-700 border-green-300">
-                          <Gift className="w-4 h-4 mr-1" />
-                          Give Bonus
+                        <Dialog>
+                          <DialogTrigger asChild>
+                            <Button size="sm" variant="outline" className="bg-green-50 hover:bg-green-100 text-green-700 border-green-300">
+                              <Gift className="w-4 h-4 mr-1" />
+                              Give Bonus
+                            </Button>
+                          </DialogTrigger>
+                          <DialogContent className="sm:max-w-md">
+                            <DialogHeader>
+                              <DialogTitle>Give Bonus to {user.displayName}</DialogTitle>
+                              <DialogDescription>
+                                Add bonus amount and reason for {user.email}
+                              </DialogDescription>
+                            </DialogHeader>
+                            <div className="space-y-4">
+                              <div>
+                                <Label htmlFor="bonusAmount">Bonus Amount (₹)</Label>
+                                <Input
+                                  id="bonusAmount"
+                                  type="number"
+                                  value={bonusAmount}
+                                  onChange={(e) => setBonusAmount(parseInt(e.target.value) || 0)}
+                                  placeholder="Enter amount"
+                                  min="1"
+                                />
+                              </div>
+                              <div>
+                                <Label htmlFor="bonusReason">Reason</Label>
+                                <Textarea
+                                  id="bonusReason"
+                                  value={rejectionReason}
+                                  onChange={(e) => setRejectionReason(e.target.value)}
+                                  placeholder="Enter reason for bonus..."
+                                />
+                              </div>
+                              <div className="bg-blue-50 p-3 rounded-lg">
+                                <p className="text-sm text-blue-700">
+                                  <strong>Current Balance:</strong> ₹{user.walletBalance || 0}
+                                </p>
+                                <p className="text-sm text-blue-700">
+                                  <strong>New Balance:</strong> ₹{(user.walletBalance || 0) + bonusAmount}
+                                </p>
+                              </div>
+                            </div>
+                            <DialogFooter>
+                              <Button
+                                onClick={() => {
+                                  if (bonusAmount > 0 && rejectionReason.trim()) {
+                                    handleGiveUserBonus(user.id, bonusAmount, rejectionReason);
+                                    setBonusAmount(0);
+                                    setRejectionReason("");
+                                  } else {
+                                    toast({
+                                      title: "Error",
+                                      description: "Please enter valid amount and reason",
+                                      variant: "destructive"
+                                    });
+                                  }
+                                }}
+                                className="bg-green-600 hover:bg-green-700"
+                              >
+                                <Gift className="w-4 h-4 mr-2" />
+                                Give ₹{bonusAmount} Bonus
+                              </Button>
+                            </DialogFooter>
+                          </DialogContent>
+                        </Dialog>
+
+                        <Dialog>
+                          <DialogTrigger asChild>
+                            <Button size="sm" variant="outline" className="bg-blue-50 hover:bg-blue-100 text-blue-700 border-blue-300">
+                              <Eye className="w-4 h-4 mr-1" />
+                              View Details
+                            </Button>
+                          </DialogTrigger>
+                          <DialogContent className="sm:max-w-4xl">
+                            <DialogHeader>
+                              <DialogTitle className="flex items-center gap-2">
+                                <div className="w-8 h-8 bg-gradient-to-r from-purple-500 to-blue-500 rounded-full flex items-center justify-center text-white font-bold">
+                                  {user.displayName?.charAt(0) || user.email.charAt(0).toUpperCase()}
+                                </div>
+                                Full Details - {user.displayName}
+                              </DialogTitle>
+                              <DialogDescription>
+                                Complete user profile and activity history
+                              </DialogDescription>
+                            </DialogHeader>
+                            <div className="space-y-6 max-h-96 overflow-y-auto">
+                              {/* User Info Section */}
+                              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <Card className="p-4">
+                                  <h4 className="font-semibold mb-2">Personal Information</h4>
+                                  <div className="space-y-2 text-sm">
+                                    <p><strong>Name:</strong> {user.displayName || 'Not provided'}</p>
+                                    <p><strong>Email:</strong> {user.email}</p>
+                                    <p><strong>Phone:</strong> {user.phoneNumber || 'Not provided'}</p>
+                                    <p><strong>Status:</strong> 
+                                      <Badge className={user.isActive !== false ? "bg-green-500 ml-2" : "bg-red-500 ml-2"}>
+                                        {user.isActive !== false ? 'Active' : 'Blocked'}
+                                      </Badge>
+                                    </p>
+                                  </div>
+                                </Card>
+                                
+                                <Card className="p-4">
+                                  <h4 className="font-semibold mb-2">Financial Summary</h4>
+                                  <div className="space-y-2 text-sm">
+                                    <p><strong>Wallet Balance:</strong> ₹{user.walletBalance || 0}</p>
+                                    <p><strong>Total Earnings:</strong> ₹{user.totalEarnings || 0}</p>
+                                    <p><strong>Total Spent:</strong> ₹{user.totalSpent || 0}</p>
+                                    <p><strong>Referral Earnings:</strong> ₹{(user.totalReferrals || 0) * 10}</p>
+                                  </div>
+                                </Card>
+                              </div>
+
+                              {/* Activity Stats */}
+                              <Card className="p-4">
+                                <h4 className="font-semibold mb-2">Activity Statistics</h4>
+                                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
+                                  <div className="bg-blue-50 p-3 rounded">
+                                    <div className="text-2xl font-bold text-blue-600">{user.totalChannels || 0}</div>
+                                    <div className="text-xs text-blue-500">Channels Added</div>
+                                  </div>
+                                  <div className="bg-green-50 p-3 rounded">
+                                    <div className="text-2xl font-bold text-green-600">{user.totalPurchases || 0}</div>
+                                    <div className="text-xs text-green-500">Purchases</div>
+                                  </div>
+                                  <div className="bg-purple-50 p-3 rounded">
+                                    <div className="text-2xl font-bold text-purple-600">{user.totalReferrals || 0}</div>
+                                    <div className="text-xs text-purple-500">Referrals</div>
+                                  </div>
+                                  <div className="bg-orange-50 p-3 rounded">
+                                    <div className="text-2xl font-bold text-orange-600">{user.loginCount || 0}</div>
+                                    <div className="text-xs text-orange-500">Total Logins</div>
+                                  </div>
+                                </div>
+                              </Card>
+
+                              {/* Recent Activity */}
+                              <Card className="p-4">
+                                <h4 className="font-semibold mb-2">Account Timeline</h4>
+                                <div className="space-y-2 text-sm">
+                                  <div className="flex justify-between">
+                                    <span>Account Created:</span>
+                                    <span className="text-gray-600">{user.createdAt ? new Date(user.createdAt).toLocaleString() : 'N/A'}</span>
+                                  </div>
+                                  <div className="flex justify-between">
+                                    <span>Last Login:</span>
+                                    <span className="text-gray-600">{user.lastLogin ? new Date(user.lastLogin).toLocaleString() : 'Never'}</span>
+                                  </div>
+                                  <div className="flex justify-between">
+                                    <span>Last Updated:</span>
+                                    <span className="text-gray-600">{user.lastUpdated ? new Date(user.lastUpdated).toLocaleString() : 'N/A'}</span>
+                                  </div>
+                                  {user.referredBy && (
+                                    <div className="flex justify-between">
+                                      <span>Referred By:</span>
+                                      <span className="text-green-600">{user.referredBy}</span>
+                                    </div>
+                                  )}
+                                </div>
+                              </Card>
+                            </div>
+                          </DialogContent>
+                        </Dialog>
+
+                        <Button 
+                          size="sm" 
+                          variant="outline" 
+                          className={user.isActive !== false ? "bg-red-50 hover:bg-red-100 text-red-700 border-red-300" : "bg-green-50 hover:bg-green-100 text-green-700 border-green-300"}
+                          onClick={() => {
+                            const action = user.isActive !== false ? 'block' : 'unblock';
+                            const reason = action === 'block' ? prompt(`Enter reason for blocking ${user.displayName}:`) : null;
+                            if (action === 'unblock' || (action === 'block' && reason)) {
+                              fetch(`/api/admin/users/${user.id}/${action}`, {
+                                method: 'PUT',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({ reason })
+                              }).then(() => {
+                                toast({
+                                  title: `User ${action}ed successfully`,
+                                  description: `${user.displayName} has been ${action}ed.`
+                                });
+                                window.location.reload();
+                              });
+                            }
+                          }}
+                        >
+                          {user.isActive !== false ? <Ban className="w-4 h-4 mr-1" /> : <CheckCircle className="w-4 h-4 mr-1" />}
+                          {user.isActive !== false ? 'Block User' : 'Unblock User'}
                         </Button>
+
                         <Button size="sm" variant="outline" className="bg-yellow-50 hover:bg-yellow-100 text-yellow-700 border-yellow-300">
                           <Award className="w-4 h-4 mr-1" />
                           Give Badge
                         </Button>
-                        <Button size="sm" variant="outline" className="bg-blue-50 hover:bg-blue-100 text-blue-700 border-blue-300">
-                          <Eye className="w-4 h-4 mr-1" />
-                          View Details
-                        </Button>
-                        <Button size="sm" variant="outline" className="bg-red-50 hover:bg-red-100 text-red-700 border-red-300">
-                          <Ban className="w-4 h-4 mr-1" />
-                          Block User
-                        </Button>
                       </div>
                     </div>
 
-                    {/* Purchase History Preview */}
+                    {/* Enhanced Purchase History Preview */}
                     {user.recentPurchases && user.recentPurchases.length > 0 && (
                       <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
                         <h4 className="font-semibold text-sm mb-2 text-gray-700 dark:text-gray-300">Recent Purchases:</h4>
@@ -1110,6 +1311,27 @@ export default function SuperAdmin() {
                               +{user.recentPurchases.length - 3} more
                             </Badge>
                           )}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* User's Channels Summary */}
+                    {user.totalChannels && user.totalChannels > 0 && (
+                      <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
+                        <h4 className="font-semibold text-sm mb-2 text-gray-700 dark:text-gray-300">Channels Summary:</h4>
+                        <div className="grid grid-cols-3 gap-2 text-xs">
+                          <div className="bg-blue-50 p-2 rounded text-center">
+                            <div className="font-semibold text-blue-600">{user.totalChannels}</div>
+                            <div className="text-blue-500">Total Channels</div>
+                          </div>
+                          <div className="bg-green-50 p-2 rounded text-center">
+                            <div className="font-semibold text-green-600">₹{user.avgChannelPrice || 0}</div>
+                            <div className="text-green-500">Avg Price</div>
+                          </div>
+                          <div className="bg-purple-50 p-2 rounded text-center">
+                            <div className="font-semibold text-purple-600">₹{user.channelEarnings || 0}</div>
+                            <div className="text-purple-500">Total Value</div>
+                          </div>
                         </div>
                       </div>
                     )}

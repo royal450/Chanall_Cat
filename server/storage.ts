@@ -645,7 +645,36 @@ export class MemStorage implements IStorage {
 
   // User management methods
   async getUserById(userId: number): Promise<User | undefined> {
-    return this.users.get(userId);
+    try {
+      const user = this.users.get(userId);
+
+      if (user) {
+        // Calculate additional user stats
+        const userChannels = await this.getUserCourses(userId.toString());
+        const userBonuses = await this.getUserBonuses(userId);
+        const userWithdrawals = await this.getUserWithdrawals(userId);
+
+        const totalChannels = userChannels.length;
+        const totalBonuses = userBonuses.length;
+        const totalWithdrawals = userWithdrawals.length;
+        const avgChannelPrice = userChannels.length > 0 ? Math.round(userChannels.reduce((sum, c) => sum + c.price, 0) / userChannels.length) : 0;
+        const channelEarnings = userChannels.reduce((sum, c) => sum + (c.price * (c.sales || 0)), 0);
+
+        return {
+          ...user,
+          totalChannels,
+          totalBonuses,
+          totalWithdrawals,
+          avgChannelPrice,
+          channelEarnings
+        };
+      }
+
+      return undefined;
+    } catch (error) {
+      console.error('Error getting user by ID:', error);
+      return undefined;
+    }
   }
 
   async getAllUsers(): Promise<User[]> {
@@ -659,6 +688,17 @@ export class MemStorage implements IStorage {
       user.totalEarnings = (user.totalEarnings || 0) + amount;
       this.users.set(userId, user);
     }
+  }
+
+  async updateUser(userId: string, updates: any): Promise<User> {
+    const user = this.users.get(parseInt(userId));
+    if (!user) {
+      throw new Error("User not found");
+    }
+
+    const updated = { ...user, ...updates };
+    this.users.set(parseInt(userId), updated);
+    return updated;
   }
 
   // Admin methods

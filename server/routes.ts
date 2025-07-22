@@ -330,13 +330,45 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get("/api/admin/users", async (req, res) => {
     try {
-      // Get real users from database, not mock data
+      // Get real users from database with enhanced details
       const users = await storage.getUsers();
-      console.log(`Real users found: ${users.length}`);
-      console.log("Users data:", users.map(u => ({ id: u.id, name: u.displayName, email: u.email })));
-      res.json(users);
+      
+      // Enhance each user with additional statistics
+      const enhancedUsers = await Promise.all(users.map(async (user) => {
+        try {
+          const userChannels = await storage.getUserCourses(user.id.toString());
+          const userBonuses = await storage.getUserBonuses(user.id);
+          const userWithdrawals = await storage.getUserWithdrawals(user.id);
+          
+          return {
+            ...user,
+            totalChannels: userChannels.length,
+            totalBonuses: userBonuses.length,
+            totalWithdrawals: userWithdrawals.length,
+            avgChannelPrice: userChannels.length > 0 ? Math.round(userChannels.reduce((sum, c) => sum + c.price, 0) / userChannels.length) : 0,
+            channelEarnings: userChannels.reduce((sum, c) => sum + (c.price * (c.soldCount || 0)), 0),
+            recentChannels: userChannels.slice(-3), // Last 3 channels
+            loginCount: user.loginCount || 0,
+            userLevel: user.totalEarnings > 1000 ? 'Premium' : user.totalEarnings > 500 ? 'Gold' : 'Silver'
+          };
+        } catch (error) {
+          console.error(`Error enhancing user ${user.id}:`, error);
+          return user;
+        }
+      }));
+
+      console.log(`Enhanced users found: ${enhancedUsers.length}`);
+      console.log("Users data:", enhancedUsers.map(u => ({ 
+        id: u.id, 
+        name: u.displayName, 
+        email: u.email, 
+        channels: u.totalChannels,
+        wallet: u.walletBalance 
+      })));
+      
+      res.json(enhancedUsers);
     } catch (error) {
-      console.error("Error fetching users:", error);
+      console.error("Error fetching enhanced users:", error);
       res.status(500).json({ error: "Failed to fetch users" });
     }
   });
@@ -429,7 +461,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // User blocking system  
+  // Enhanced User blocking/unblocking system  
   app.put("/api/admin/users/:userId/block", async (req, res) => {
     try {
       const { userId } = req.params;
@@ -438,11 +470,97 @@ export async function registerRoutes(app: Express): Promise<Server> {
       await storage.updateUser(userId, { 
         isActive: false, 
         blockReason: reason,
-        blockedAt: new Date().toISOString() 
+        blockedAt: new Date().toISOString(),
+        blockedBy: 'Super Admin'
       });
-      res.json({ success: true });
+      res.json({ success: true, message: 'User blocked successfully' });
     } catch (error) {
+      console.error('Error blocking user:', error);
       res.status(500).json({ error: "Failed to block user" });
+    }
+  });
+
+  app.put("/api/admin/users/:userId/unblock", async (req, res) => {
+    try {
+      const { userId } = req.params;
+
+      await storage.updateUser(userId, { 
+        isActive: true, 
+        blockReason: null,
+        blockedAt: null,
+        blockedBy: null,
+        unblockedAt: new Date().toISOString(),
+        unblockedBy: 'Super Admin'
+      });
+      res.json({ success: true, message: 'User unblocked successfully' });
+    } catch (error) {
+      console.error('Error unblocking user:', error);
+      res.status(500).json({ error: "Failed to unblock user" });
+    }
+  });
+
+  // Get detailed user information
+  app.get("/api/admin/users/:userId/details", async (req, res) => {
+    try {
+      const { userId } = req.params;
+      const user = await storage.getUserById(parseInt(userId));
+      
+      if (!user) {
+        return res.status(404).json({ error: "User not found" });
+      }
+
+      // Get user's channels
+      const userChannels = await storage.getUserCourses(userId);
+      const userBonuses = await storage.getUserBonuses(parseInt(userId));
+      const userWithdrawals = await storage.getUserWithdrawals(parseInt(userId));
+
+      const detailedUser = {
+        ...user,
+        channels: userChannels,
+        bonuses: userBonuses,
+        withdrawals: userWithdrawals,
+        totalChannels: userChannels.length,
+        avgChannelPrice: userChannels.length > 0 ? Math.round(userChannels.reduce((sum, c) => sum + c.price, 0) / userChannels.length) : 0,
+        channelEarnings: userChannels.reduce((sum, c) => sum + (c.price * (c.soldCount || 0)), 0)
+      };
+
+      res.json(detailedUser);
+    } catch (error) {
+      console.error('Error fetching user details:', error);
+      res.status(500).json({ error: "Failed to fetch user details" });
+    }
+  });
+
+  // Give badge to user
+  app.put("/api/admin/users/:userId/badge", async (req, res) => {
+    try {
+      const { userId } = req.params;
+      const { badgeType, badgeName, badgeColor } = req.body;
+
+      const user = await storage.getUserById(parseInt(userId));
+      if (!user) {
+        return res.status(404).json({ error: "User not found" });
+      }
+
+      const userBadges = user.badges || [];
+      const newBadge = {
+        id: Date.now(),
+        type: badgeType,
+        name: badgeName,
+        color: badgeColor,
+        givenBy: 'Super Admin',
+        givenAt: new Date().toISOString()
+      };
+
+      await storage.updateUser(userId, {
+        badges: [...userBadges, newBadge],
+        lastBadgeReceived: new Date().toISOString()
+      });
+
+      res.json({ success: true, badge: newBadge });
+    } catch (error) {
+      console.error('Error giving badge:', error);
+      res.status(500).json({ error: "Failed to give badge" });
     }
   });
 
