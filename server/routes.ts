@@ -461,27 +461,33 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Enhanced User bonus system with Firebase integration
+  // Enhanced User bonus system with Firebase integration - FIXED
   app.post("/api/admin/users/:userId/bonus", async (req, res) => {
     try {
-      const userId = req.params.userId; // Keep as string for Firebase
+      const userId = req.params.userId; // Firebase user ID string
       const { amount, reason, type = 'admin_bonus', adminName } = req.body;
 
-      console.log(`🎁 Processing bonus for user ${userId}: ₹${amount}`);
+      console.log(`🎁 Processing bonus for user ${userId}: ₹${amount} - ${reason}`);
 
-      // Create bonus record in memory storage
-      const bonus = await storage.createUserBonus({
-        userId: parseInt(userId),
-        amount,
-        reason,
-        type,
-        adminName
-      });
-      
-      // 🔥 FIREBASE UPDATE - Update user's wallet balance in Firebase
+      // 🔥 DIRECT FIREBASE UPDATE - No database module import
       try {
-        const { ref, get, update } = await import('firebase/database');
-        const { database } = await import('./db');
+        // Import Firebase functions directly without database module
+        const { initializeApp } = await import('firebase/app');
+        const { getDatabase, ref, get, update, push, set } = await import('firebase/database');
+        
+        const firebaseConfig = {
+          apiKey: "AIzaSyC-KFjdNMmVpAJOhR3FN8BK74KRNR_9EQ8",
+          authDomain: "marketing-platform-1a4e6.firebaseapp.com",
+          databaseURL: "https://marketing-platform-1a4e6-default-rtdb.firebaseio.com",
+          projectId: "marketing-platform-1a4e6",
+          storageBucket: "marketing-platform-1a4e6.firebasestorage.app",
+          messagingSenderId: "502994030969",
+          appId: "1:502994030969:web:3d2dc5dde1326a03e6cea8",
+          measurementId: "G-HZBMHGL0PH"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const database = getDatabase(app);
         
         const userRef = ref(database, `users/${userId}`);
         const userSnapshot = await get(userRef);
@@ -501,40 +507,48 @@ export async function registerRoutes(app: Express): Promise<Server> {
           await update(userRef, updates);
           console.log(`✅ Firebase updated: User ${userId} balance: ${currentBalance} → ${currentBalance + amount}`);
           
-          // Also create bonus record in Firebase
-          const { push } = await import('firebase/database');
+          // Create bonus record in Firebase
           const bonusRef = ref(database, 'userBonuses');
           await push(bonusRef, {
             userId,
             amount,
             reason,
             type,
-            adminName,
+            adminName: adminName || 'Super Admin',
             createdAt: new Date().toISOString(),
-            status: 'completed'
+            status: 'completed',
+            transactionId: `BONUS_${Date.now()}`
+          });
+          
+          console.log(`✅ Bonus ₹${amount} successfully added to user ${userId}`);
+          res.json({ 
+            success: true, 
+            message: `₹${amount} bonus added to user ${userId}`,
+            newBalance: currentBalance + amount,
+            transaction: {
+              userId,
+              amount,
+              reason,
+              timestamp: new Date().toISOString()
+            }
           });
           
         } else {
           console.log(`❌ User ${userId} not found in Firebase`);
+          res.status(404).json({ error: `User ${userId} not found in Firebase database` });
         }
+        
       } catch (firebaseError) {
-        console.error('Firebase update error:', firebaseError);
-      }
-      
-      // Also update memory storage for consistency
-      const user = await storage.getUserById(parseInt(userId));
-      if (user) {
-        await storage.updateUser(userId, {
-          walletBalance: (user.walletBalance || 0) + amount,
-          totalEarnings: (user.totalEarnings || 0) + amount
+        console.error('❌ Firebase operation failed:', firebaseError);
+        res.status(500).json({ 
+          error: 'Failed to update user balance in Firebase', 
+          details: firebaseError.message 
         });
       }
       
-      console.log(`✅ Bonus ₹${amount} given to user ${userId} successfully`);
-      res.json({ success: true, bonus, message: `₹${amount} bonus added successfully` });
     } catch (error) {
-      console.error('❌ Error giving bonus:', error);
-      res.status(500).json({ error: 'Failed to give bonus' });
+      console.error('❌ Error processing bonus:', error);
+      res.status(500).json({ error: 'Failed to process bonus request' });
     }
   });
 

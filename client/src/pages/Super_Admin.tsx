@@ -284,9 +284,11 @@ export default function SuperAdmin() {
     }
   };
 
-  // User Bonus Management Functions
-  const handleGiveUserBonus = async (userId: number, amount: number, reason: string) => {
+  // User Bonus Management Functions - Fixed for Firebase User ID
+  const handleGiveUserBonus = async (userId: string, amount: number, reason: string) => {
     try {
+      console.log(`🎁 Giving bonus: User ID: ${userId}, Amount: ₹${amount}, Reason: ${reason}`);
+      
       const response = await fetch(`/api/admin/users/${userId}/bonus`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -297,6 +299,8 @@ export default function SuperAdmin() {
         })
       });
       
+      const result = await response.json();
+      
       if (response.ok) {
         const user = users.find(u => u.id === userId);
         toast({
@@ -304,15 +308,20 @@ export default function SuperAdmin() {
           description: `₹${amount} bonus given to ${user?.displayName || 'User'}: ${reason}`,
         });
         
+        console.log(`✅ Bonus result:`, result);
+        
         // Refresh user data to show updated balance
-        window.location.reload(); // Simple refresh for real-time update
+        setTimeout(() => {
+          window.location.reload();
+        }, 1000);
       } else {
-        throw new Error('Failed to give bonus');
+        throw new Error(result.error || 'Failed to give bonus');
       }
-    } catch (error) {
+    } catch (error: any) {
+      console.error('❌ Bonus error:', error);
       toast({
-        title: "Error",
-        description: "Failed to give user bonus",
+        title: "❌ Error",
+        description: error.message || "Failed to give user bonus",
         variant: "destructive"
       });
     }
@@ -1145,7 +1154,7 @@ export default function SuperAdmin() {
                               <Button
                                 onClick={() => {
                                   if (bonusAmount > 0 && rejectionReason.trim()) {
-                                    handleGiveUserBonus(user.id, bonusAmount, rejectionReason);
+                                    handleGiveUserBonus(user.id.toString(), bonusAmount, rejectionReason);
                                     setBonusAmount(0);
                                     setRejectionReason("");
                                   } else {
@@ -1631,7 +1640,7 @@ export default function SuperAdmin() {
                         <Button
                           size="sm"
                           variant="outline"
-                          onClick={() => handleGiveUserBonus(user.id, 100, "Admin appreciation bonus")}
+                          onClick={() => handleGiveUserBonus(user.id.toString(), 100, "Admin appreciation bonus")}
                         >
                           <Gift className="w-3 h-3 mr-1" />
                           ₹100
@@ -1643,7 +1652,7 @@ export default function SuperAdmin() {
                             const amount = prompt(`Enter bonus amount for ${user.displayName}:`);
                             const reason = prompt("Enter bonus reason:");
                             if (amount && reason) {
-                              handleGiveUserBonus(user.id, parseInt(amount), reason);
+                              handleGiveUserBonus(user.id.toString(), parseInt(amount), reason);
                             }
                           }}
                         >
