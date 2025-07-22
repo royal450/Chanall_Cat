@@ -318,35 +318,54 @@ export default function SuperAdmin() {
     }
   };
 
-  // Bulk bonus for all active users
+  // Bulk bonus for REAL AUTHENTICATED users only - NO MOCK DATA
   const handleBulkBonus = async (amount: number) => {
-    const confirmBulk = confirm(`Give ₹${amount} bonus to ALL ${users.length} active users? This cannot be undone.`);
+    // Filter out admin users and only include real authenticated users
+    const realUsers = users.filter(user => 
+      user.email !== 'admin@channelmarket.com' && 
+      user.id !== 1 && 
+      user.displayName && 
+      user.email && 
+      user.email.includes('@') // Ensure it's a real email
+    );
+    
+    if (realUsers.length === 0) {
+      toast({
+        title: "❌ No Real Users Found",
+        description: "No real authenticated users available for bulk bonus",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    const confirmBulk = confirm(`Give ₹${amount} bonus to ${realUsers.length} REAL authenticated users?\n\nUsers: ${realUsers.map(u => u.displayName).join(', ')}\n\nThis cannot be undone.`);
     if (!confirmBulk) return;
     
     const reason = prompt("Enter reason for bulk bonus:") || "Bulk admin bonus";
     
     try {
       let successful = 0;
-      for (const user of users) {
+      for (const user of realUsers) {
         try {
           const response = await fetch(`/api/admin/users/${user.id}/bonus`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ 
               amount, 
-              reason: `${reason} (Bulk)`, 
-              adminName: 'Super Admin' 
+              reason: `${reason} (Bulk to real users)`, 
+              adminName: 'Super Admin',
+              type: 'admin_bonus'
             })
           });
           if (response.ok) successful++;
         } catch (error) {
-          console.error(`Failed to give bonus to user ${user.id}:`, error);
+          console.error(`Failed to give bonus to ${user.displayName}:`, error);
         }
       }
       
       toast({
         title: "🎉 Bulk Bonus Completed",
-        description: `Successfully gave ₹${amount} bonus to ${successful}/${users.length} users`,
+        description: `Successfully gave ₹${amount} bonus to ${successful}/${realUsers.length} real authenticated users`,
       });
       
       // Refresh for real-time update
@@ -491,34 +510,6 @@ export default function SuperAdmin() {
       </div>
 
       <div className="container mx-auto px-4 py-8">
-        {/* Quick Action Buttons for Admin Pages */}
-        <div className="flex flex-wrap justify-center gap-4 mb-8">
-          <Button
-            onClick={() => window.location.href = '/admin/bonuses'}
-            className="bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white shadow-lg"
-          >
-            <Gift className="w-4 h-4 mr-2" />
-            Bonus Management Panel
-          </Button>
-          
-          <Button
-            onClick={() => window.location.href = '/admin/withdrawals'}
-            className="bg-gradient-to-r from-blue-500 to-cyan-600 hover:from-blue-600 hover:to-cyan-700 text-white shadow-lg"
-          >
-            <DollarSign className="w-4 h-4 mr-2" />
-            Withdrawal Management Panel
-          </Button>
-          
-          <Button
-            onClick={() => window.location.reload()}
-            variant="outline"
-            className="border-gray-300"
-          >
-            <RefreshCw className="w-4 h-4 mr-2" />
-            Refresh All Data
-          </Button>
-        </div>
-
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
           <TabsList className="grid grid-cols-3 md:grid-cols-7 w-full h-auto">
             <TabsTrigger value="overview" className="flex flex-col md:flex-row items-center gap-1 md:gap-2 p-2 md:p-3 text-xs md:text-sm">
