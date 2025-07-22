@@ -121,19 +121,21 @@ function ReferralDetector() {
     if (referralCode && referralCode.trim()) {
       localStorage.setItem('referralCode', referralCode.trim());
       localStorage.setItem('referralDetected', 'true');
-      console.log('✅ Referral code detected:', referralCode.trim());
+      console.log('✅ Referral code detected and stored:', referralCode.trim());
 
-      // Show success toast
+      // Show success notification
       setTimeout(() => {
         window.dispatchEvent(new CustomEvent('referralDetected', { 
           detail: { code: referralCode.trim() } 
         }));
       }, 500);
 
-      // Redirect authenticated users to dashboard
+      // If user is already logged in, redirect to dashboard
       if (user) {
         setLocation("/dashboard");
       } else {
+        // Clear URL parameters but keep referral in localStorage
+        window.history.replaceState({}, document.title, window.location.pathname);
         setLocation("/signup");
       }
     }

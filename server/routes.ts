@@ -472,7 +472,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // 🔥 USING SAME METHOD AS REFERRAL BONUS - Import from existing db.ts
       try {
         const { ref, get, update, push } = await import('firebase/database');
-        const { database } = await import('./db');
+        const { database } = require('./db');
         
         const userRef = ref(database, `users/${userId}`);
         const userSnapshot = await get(userRef);

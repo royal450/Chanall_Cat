@@ -16,6 +16,7 @@ export const db = drizzle({ client: pool, schema });
 import { initializeApp } from 'firebase/app';
 import { getDatabase } from 'firebase/database';
 
+// Firebase configuration
 const firebaseConfig = {
   apiKey: "AIzaSyC-KFjdNMmVpAJOhR3FN8BK74KRNR_9EQ8",
   authDomain: "marketing-platform-1a4e6.firebaseapp.com",
@@ -27,5 +28,8 @@ const firebaseConfig = {
   measurementId: "G-HZBMHGL0PH"
 };
 
-const app = initializeApp(firebaseConfig);
-export const database = getDatabase(app);
+// Initialize Firebase for server
+const app = initializeApp(firebaseConfig, 'server-app');
+const database = getDatabase(app);
+
+export { database };
