@@ -851,14 +851,6 @@ export default function SuperAdmin() {
                                           title: "✅ Channel Updated Successfully!",
                                           description: `${editingChannel.title} has been updated`
                                         });
-                                        });
-                                        
-                                        toast({ 
-                                          title: "✅ Channel Updated Successfully",
-                                          description: `${editingChannel.title} has been updated`
-                                        });
-                                        
-                                        setEditingChannel(null);
                                         
                                         // Refresh data after a short delay
                                         setTimeout(() => {
