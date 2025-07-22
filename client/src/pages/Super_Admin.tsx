@@ -15,7 +15,7 @@ import {
   CheckCircle, XCircle, Edit3, Trash2, Image, Award, Ban, 
   Gift, Settings, Download, Upload, Star, AlertTriangle,
   RefreshCw, Clock, Calendar, BarChart3, Activity, Target,
-  Zap, Heart, MessageSquare, Share2, ThumbsUp, Lock
+  Zap, Heart, MessageSquare, Share2, ThumbsUp, Lock, Wallet
 } from "lucide-react";
 import { motion } from "framer-motion";
 import { useFirebaseServices, useFirebaseUsers, useFirebaseAdminStats } from "@/hooks/use-firebase-realtime";
