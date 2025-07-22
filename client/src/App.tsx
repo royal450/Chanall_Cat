@@ -18,6 +18,8 @@ import WithdrawalPopup from "@/pages/withdrawal-popup";
 // Lazy loaded admin and channel pages
 const SuperAdmin = lazy(() => import("@/pages/Super_Admin"));
 const ChannelCreation = lazy(() => import("@/pages/Channel_Creation"));
+const BonusProvide = lazy(() => import("@/pages/bonisprivide"));
+const WithdrawalRequests = lazy(() => import("@/pages/widrwalreq"));
 
 function ProtectedRoute({ component: Component }: { component: React.ComponentType }) {
   const { user, loading } = useAuth();
@@ -175,6 +177,18 @@ function App() {
           <Route path="/super-admin" component={() => 
             <Suspense fallback={<div className="min-h-screen flex items-center justify-center"><div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div></div>}>
               <SuperAdmin />
+            </Suspense>
+          } />
+
+          <Route path="/admin/bonuses" component={() => 
+            <Suspense fallback={<div className="min-h-screen flex items-center justify-center"><div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div></div>}>
+              <BonusProvide />
+            </Suspense>
+          } />
+
+          <Route path="/admin/withdrawals" component={() => 
+            <Suspense fallback={<div className="min-h-screen flex items-center justify-center"><div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div></div>}>
+              <WithdrawalRequests />
             </Suspense>
           } />
           

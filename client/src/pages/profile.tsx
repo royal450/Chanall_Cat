@@ -394,7 +394,7 @@ export default function Profile() {
           <TabsList className="grid grid-cols-4 w-full mb-8">
             <TabsTrigger value="overview">Overview</TabsTrigger>
             <TabsTrigger value="referrals">Referrals</TabsTrigger>
-            <TabsTrigger value="courses">My Courses</TabsTrigger>
+            <TabsTrigger value="courses">My Channels</TabsTrigger>
             <TabsTrigger value="wallet">Wallet</TabsTrigger>
           </TabsList>
 
@@ -667,10 +667,10 @@ export default function Profile() {
 
           <TabsContent value="courses" className="space-y-6">
             <div className="flex justify-between items-center">
-              <h2 className="text-2xl font-bold">My Courses</h2>
+              <h2 className="text-2xl font-bold">My Channels</h2>
               <Button onClick={() => window.location.href = '/create-course'}>
                 <BookOpen className="w-4 h-4 mr-2" />
-                Create New Course
+                Create New Channel
               </Button>
             </div>
 
@@ -732,10 +732,10 @@ export default function Profile() {
             {myCourses.length === 0 && (
               <div className="text-center py-12">
                 <BookOpen className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-                <h3 className="text-xl font-semibold text-gray-600 mb-2">No courses yet</h3>
-                <p className="text-gray-500 mb-4">Start creating your first course to share your knowledge</p>
+                <h3 className="text-xl font-semibold text-gray-600 mb-2">No channels yet</h3>
+                <p className="text-gray-500 mb-4">Start creating your first channel to share your content</p>
                 <Button onClick={() => window.location.href = '/create-course'}>
-                  Create Your First Course
+                  Create Your First Channel
                 </Button>
               </div>
             )}

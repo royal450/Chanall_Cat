@@ -42,6 +42,11 @@ export interface IStorage {
   getUserBonuses(userId: number): Promise<UserBonus[]>;
   getAllBonuses(): Promise<UserBonus[]>;
 
+  // User methods
+  getUserById(userId: number): Promise<User | undefined>;
+  getAllUsers(): Promise<User[]>;
+  updateUserWallet(userId: number, amount: number): Promise<void>;
+
   // Admin methods
   getAdminStats(): Promise<any>;
 }
@@ -636,6 +641,24 @@ export class MemStorage implements IStorage {
   // Get course by ID method
   async getCourseById(courseId: string): Promise<Channel | undefined> {
     return this.courses.get(courseId);
+  }
+
+  // User management methods
+  async getUserById(userId: number): Promise<User | undefined> {
+    return this.users.get(userId);
+  }
+
+  async getAllUsers(): Promise<User[]> {
+    return Array.from(this.users.values());
+  }
+
+  async updateUserWallet(userId: number, amount: number): Promise<void> {
+    const user = this.users.get(userId);
+    if (user) {
+      user.walletBalance = (user.walletBalance || 0) + amount;
+      user.totalEarnings = (user.totalEarnings || 0) + amount;
+      this.users.set(userId, user);
+    }
   }
 
   // Admin methods

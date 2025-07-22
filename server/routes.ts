@@ -398,16 +398,34 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // User bonus system
+  // Enhanced User bonus system
   app.post("/api/admin/users/:userId/bonus", async (req, res) => {
     try {
-      const { userId } = req.params;
-      const { amount, reason } = req.body;
+      const userId = parseInt(req.params.userId);
+      const { amount, reason, type = 'admin_bonus', adminName } = req.body;
 
-      await storage.updateUserWallet(parseInt(userId), amount);
-      res.json({ success: true });
+      // Create bonus record
+      const bonus = await storage.createUserBonus({
+        userId,
+        amount,
+        reason,
+        type,
+        adminName
+      });
+      
+      // Update user's wallet balance
+      const user = await storage.getUserById(userId);
+      if (user) {
+        await storage.updateUser(userId, {
+          walletBalance: (user.walletBalance || 0) + amount,
+          totalEarnings: (user.totalEarnings || 0) + amount
+        });
+      }
+      
+      res.json(bonus);
     } catch (error) {
-      res.status(500).json({ error: "Failed to give bonus" });
+      console.error('Error giving bonus:', error);
+      res.status(500).json({ error: 'Failed to give bonus' });
     }
   });
 
@@ -428,23 +446,74 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Withdrawal management
+  // Enhanced Withdrawal management
   app.get("/api/admin/withdrawals", async (req, res) => {
     try {
-      const withdrawals = await storage.getWithdrawals();
+      const withdrawals = await storage.getAllWithdrawals();
       res.json(withdrawals);
     } catch (error) {
+      console.error('Error fetching withdrawals:', error);
       res.status(500).json({ error: "Failed to fetch withdrawals" });
     }
   });
 
   app.put("/api/admin/withdrawals/:withdrawalId/approve", async (req, res) => {
     try {
-      const { withdrawalId } = req.params;
-      await storage.updateWithdrawal(withdrawalId, { status: 'approved' });
-      res.json({ success: true });
+      const withdrawalId = parseInt(req.params.withdrawalId);
+      const { transactionId, adminNotes } = req.body;
+      
+      const updatedWithdrawal = await storage.approveWithdrawal(withdrawalId, {
+        transactionId,
+        adminNotes,
+        processedBy: 'Super Admin',
+        processedAt: new Date()
+      });
+      
+      res.json(updatedWithdrawal);
     } catch (error) {
+      console.error('Error approving withdrawal:', error);
       res.status(500).json({ error: "Failed to approve withdrawal" });
+    }
+  });
+
+  app.put("/api/admin/withdrawals/:withdrawalId/reject", async (req, res) => {
+    try {
+      const withdrawalId = parseInt(req.params.withdrawalId);
+      const { adminNotes } = req.body;
+      
+      const updatedWithdrawal = await storage.rejectWithdrawal(withdrawalId, {
+        adminNotes,
+        processedBy: 'Super Admin',
+        processedAt: new Date()
+      });
+      
+      res.json(updatedWithdrawal);
+    } catch (error) {
+      console.error('Error rejecting withdrawal:', error);
+      res.status(500).json({ error: "Failed to reject withdrawal" });
+    }
+  });
+
+  // Get all bonuses
+  app.get("/api/admin/bonuses", async (req, res) => {
+    try {
+      const bonuses = await storage.getAllBonuses();
+      res.json(bonuses);
+    } catch (error) {
+      console.error('Error fetching bonuses:', error);
+      res.status(500).json({ error: "Failed to fetch bonuses" });
+    }
+  });
+
+  // Get user bonuses
+  app.get("/api/admin/users/:userId/bonuses", async (req, res) => {
+    try {
+      const userId = parseInt(req.params.userId);
+      const bonuses = await storage.getUserBonuses(userId);
+      res.json(bonuses);
+    } catch (error) {
+      console.error('Error fetching user bonuses:', error);
+      res.status(500).json({ error: "Failed to fetch user bonuses" });
     }
   });
 

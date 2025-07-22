@@ -491,6 +491,34 @@ export default function SuperAdmin() {
       </div>
 
       <div className="container mx-auto px-4 py-8">
+        {/* Quick Action Buttons for Admin Pages */}
+        <div className="flex flex-wrap justify-center gap-4 mb-8">
+          <Button
+            onClick={() => window.location.href = '/admin/bonuses'}
+            className="bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white shadow-lg"
+          >
+            <Gift className="w-4 h-4 mr-2" />
+            Bonus Management Panel
+          </Button>
+          
+          <Button
+            onClick={() => window.location.href = '/admin/withdrawals'}
+            className="bg-gradient-to-r from-blue-500 to-cyan-600 hover:from-blue-600 hover:to-cyan-700 text-white shadow-lg"
+          >
+            <DollarSign className="w-4 h-4 mr-2" />
+            Withdrawal Management Panel
+          </Button>
+          
+          <Button
+            onClick={() => window.location.reload()}
+            variant="outline"
+            className="border-gray-300"
+          >
+            <RefreshCw className="w-4 h-4 mr-2" />
+            Refresh All Data
+          </Button>
+        </div>
+
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
           <TabsList className="grid grid-cols-3 md:grid-cols-7 w-full h-auto">
             <TabsTrigger value="overview" className="flex flex-col md:flex-row items-center gap-1 md:gap-2 p-2 md:p-3 text-xs md:text-sm">
