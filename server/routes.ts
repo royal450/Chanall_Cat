@@ -461,7 +461,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Enhanced User bonus system with Firebase integration - FIXED
+  // Enhanced User bonus system - Using same approach as referral bonus
   app.post("/api/admin/users/:userId/bonus", async (req, res) => {
     try {
       const userId = req.params.userId; // Firebase user ID string
@@ -469,25 +469,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       console.log(`🎁 Processing bonus for user ${userId}: ₹${amount} - ${reason}`);
 
-      // 🔥 DIRECT FIREBASE UPDATE - No database module import
+      // 🔥 USING SAME METHOD AS REFERRAL BONUS - Import from existing db.ts
       try {
-        // Import Firebase functions directly without database module
-        const { initializeApp } = await import('firebase/app');
-        const { getDatabase, ref, get, update, push, set } = await import('firebase/database');
-        
-        const firebaseConfig = {
-          apiKey: "AIzaSyC-KFjdNMmVpAJOhR3FN8BK74KRNR_9EQ8",
-          authDomain: "marketing-platform-1a4e6.firebaseapp.com",
-          databaseURL: "https://marketing-platform-1a4e6-default-rtdb.firebaseio.com",
-          projectId: "marketing-platform-1a4e6",
-          storageBucket: "marketing-platform-1a4e6.firebasestorage.app",
-          messagingSenderId: "502994030969",
-          appId: "1:502994030969:web:3d2dc5dde1326a03e6cea8",
-          measurementId: "G-HZBMHGL0PH"
-        };
-
-        const app = initializeApp(firebaseConfig);
-        const database = getDatabase(app);
+        const { ref, get, update, push } = await import('firebase/database');
+        const { database } = await import('./db');
         
         const userRef = ref(database, `users/${userId}`);
         const userSnapshot = await get(userRef);
@@ -497,17 +482,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
           const currentBalance = userData.walletBalance || 0;
           const currentEarnings = userData.totalEarnings || 0;
           
-          const updates = {
+          // Same approach as referral bonus - direct Firebase update
+          await update(userRef, {
             walletBalance: currentBalance + amount,
             totalEarnings: currentEarnings + amount,
             lastBonusReceived: new Date().toISOString(),
             lastUpdated: new Date().toISOString()
-          };
+          });
           
-          await update(userRef, updates);
           console.log(`✅ Firebase updated: User ${userId} balance: ${currentBalance} → ${currentBalance + amount}`);
           
-          // Create bonus record in Firebase
+          // Create bonus record in Firebase - same as referral bonuses
           const bonusRef = ref(database, 'userBonuses');
           await push(bonusRef, {
             userId,
