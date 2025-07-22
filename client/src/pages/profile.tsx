@@ -1412,102 +1412,140 @@ export default function Profile() {
 
                   {/* Withdrawals Tab */}
                   <TabsContent value="withdrawals" className="space-y-4 mt-4">
-                    <div className="space-y-3 max-h-96 overflow-y-auto">
+                    <div className="space-y-4 max-h-96 overflow-y-auto">
                       {withdrawalHistory.length > 0 ? (
                         withdrawalHistory.map((withdrawal) => (
-                          <Card key={withdrawal.id} className={`border-l-4 ${
-                            withdrawal.status === 'pending' ? 'border-yellow-500 bg-yellow-50/50' :
-                            withdrawal.status === 'approved' ? 'border-green-500 bg-green-50/50' :
-                            'border-red-500 bg-red-50/50'
-                          } hover:shadow-md transition-shadow`}>
-                            <CardContent className="p-3 md:p-4">
-                              <div className="flex flex-col md:flex-row md:items-start justify-between gap-3">
-                                <div className="flex-1">
-                                  <div className="flex items-center gap-2 mb-2">
-                                    {withdrawal.status === 'pending' && <Clock className="w-4 h-4 md:w-5 md:h-5 text-yellow-600" />}
-                                    {withdrawal.status === 'approved' && <CheckCircle className="w-4 h-4 md:w-5 md:h-5 text-green-600" />}
-                                    {withdrawal.status === 'rejected' && <XCircle className="w-4 h-4 md:w-5 md:h-5 text-red-600" />}
-                                    <span className="font-bold text-lg md:text-xl text-gray-800">₹{withdrawal.amount}</span>
-                                    <Badge className={`text-xs ${
-                                      withdrawal.status === 'pending' ? 'bg-yellow-500 text-white animate-pulse' :
-                                      withdrawal.status === 'approved' ? 'bg-green-500 text-white' :
-                                      'bg-red-500 text-white'
-                                    }`}>
-                                      {withdrawal.status === 'pending' ? '⏳ Processing' :
-                                       withdrawal.status === 'approved' ? '✅ Completed' :
-                                       '❌ Rejected'}
-                                    </Badge>
-                                  </div>
+                          <Card key={withdrawal.id} className={`relative overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300 border-0 ${
+                            withdrawal.status === 'pending' ? 'bg-gradient-to-r from-amber-50 via-yellow-50 to-orange-50' :
+                            withdrawal.status === 'approved' ? 'bg-gradient-to-r from-emerald-50 via-green-50 to-teal-50' :
+                            'bg-gradient-to-r from-red-50 via-pink-50 to-rose-50'
+                          }`}>
+                            {/* Status Bar */}
+                            <div className={`h-1.5 w-full ${
+                              withdrawal.status === 'pending' ? 'bg-gradient-to-r from-amber-400 to-orange-500' :
+                              withdrawal.status === 'approved' ? 'bg-gradient-to-r from-emerald-400 to-green-500' :
+                              'bg-gradient-to-r from-red-400 to-pink-500'
+                            }`}></div>
 
-                                  <div className="grid grid-cols-1 md:grid-cols-2 gap-2 md:gap-3 text-xs md:text-sm mb-3">
-                                    <div>
-                                      <span className="text-gray-600">💳 Method:</span>
-                                      <p className="font-medium">{withdrawal.method}</p>
-                                    </div>
-                                    <div>
-                                      <span className="text-gray-600">🏦 Account:</span>
-                                      <p className="font-mono text-xs break-all">{withdrawal.accountDetails || withdrawal.upiId || withdrawal.cryptoAddress || 'N/A'}</p>
-                                    </div>
-                                    <div>
-                                      <span className="text-gray-600">👤 Client Name:</span>
-                                      <p className="font-medium">{withdrawal.bankVerifiedName || withdrawal.userName}</p>
-                                    </div>
-                                    <div>
-                                      <span className="text-gray-600">📅 Date:</span>
-                                      <p className="text-xs">{new Date(withdrawal.requestDate || withdrawal.createdAt).toLocaleDateString()}</p>
-                                    </div>
-                                  </div>
-
-                                  <div className="text-xs text-gray-500">
-                                    🆔 Client ID: {withdrawal.userId.slice(0, 8)} | Request ID: #{withdrawal.requestId || withdrawal.id}
-                                  </div>
-
-                                  {withdrawal.transactionId && (
-                                    <div className="mt-2 p-2 bg-green-100 rounded text-xs">
-                                      <span className="text-green-700 font-medium">💸 Transaction ID:</span>
-                                      <p className="font-mono text-green-800">{withdrawal.transactionId}</p>
-                                    </div>
-                                  )}
-
-                                  {withdrawal.adminNotes && (
-                                    <div className="mt-2 p-2 bg-blue-100 rounded text-xs">
-                                      <span className="text-blue-700 font-medium">💬 Admin Notes:</span>
-                                      <p className="text-blue-800">{withdrawal.adminNotes}</p>
-                                    </div>
-                                  )}
-
-                                  {withdrawal.rejectionReason && (
-                                    <div className="mt-2 p-2 bg-red-100 rounded text-xs">
-                                      <span className="text-red-700 font-medium">❌ Rejection Reason:</span>
-                                      <p className="text-red-800">{withdrawal.rejectionReason}</p>
-                                    </div>
-                                  )}
-                                </div>
-
-                                <div className="text-center md:text-right">
-                                  <div className={`text-xl md:text-2xl font-bold mb-1 ${
-                                    withdrawal.status === 'approved' ? 'text-green-600' :
-                                    withdrawal.status === 'rejected' ? 'text-red-600' :
-                                    'text-yellow-600'
+                            <CardContent className="p-6">
+                              <div className="flex items-start justify-between mb-4">
+                                <div className="flex items-center gap-3">
+                                  <div className={`w-12 h-12 rounded-full flex items-center justify-center shadow-md ${
+                                    withdrawal.status === 'pending' ? 'bg-amber-500' :
+                                    withdrawal.status === 'approved' ? 'bg-emerald-500' :
+                                    'bg-red-500'
                                   }`}>
-                                    {withdrawal.status === 'pending' ? '⏳' :
-                                     withdrawal.status === 'approved' ? '✅' : '❌'}
+                                    {withdrawal.status === 'pending' && <Clock className="w-6 h-6 text-white" />}
+                                    {withdrawal.status === 'approved' && <CheckCircle className="w-6 h-6 text-white" />}
+                                    {withdrawal.status === 'rejected' && <XCircle className="w-6 h-6 text-white" />}
                                   </div>
-                                  <p className="text-xs text-gray-500">
-                                    {withdrawal.status === 'pending' ? 'Under Review' :
-                                     withdrawal.status === 'approved' ? 'Payment Sent' :
-                                     'Request Declined'}
+                                  <div>
+                                    <div className="flex items-center gap-2 mb-1">
+                                      <span className="text-2xl font-bold text-gray-800">₹{withdrawal.amount.toLocaleString()}</span>
+                                      <Badge className={`text-xs font-semibold ${
+                                        withdrawal.status === 'pending' ? 'bg-amber-500 text-white' :
+                                        withdrawal.status === 'approved' ? 'bg-emerald-500 text-white' :
+                                        'bg-red-500 text-white'
+                                      }`}>
+                                        {withdrawal.status === 'pending' ? 'Processing' :
+                                         withdrawal.status === 'approved' ? 'Completed' :
+                                         'Rejected'}
+                                      </Badge>
+                                    </div>
+                                    <p className="text-sm text-gray-600 font-medium">{withdrawal.method} Withdrawal</p>
+                                  </div>
+                                </div>
+                                <div className="text-right">
+                                  <p className="text-xs text-gray-500">Request #{withdrawal.requestId || withdrawal.id}</p>
+                                  <p className="text-xs text-gray-500">{new Date(withdrawal.requestDate || withdrawal.createdAt).toLocaleDateString()}</p>
+                                </div>
+                              </div>
+
+                              {/* Payment Details Card */}
+                              <div className="bg-white/70 backdrop-blur-sm rounded-lg p-4 border border-white/50 shadow-sm mb-4">
+                                <h4 className="font-semibold text-gray-800 mb-3 flex items-center gap-2">
+                                  <Wallet className="w-4 h-4 text-blue-600" />
+                                  Payment Details
+                                </h4>
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm">
+                                  <div className="flex items-center gap-2">
+                                    <span className="text-gray-600">Method:</span>
+                                    <span className="font-medium text-gray-800">{withdrawal.method}</span>
+                                  </div>
+                                  <div className="flex items-center gap-2">
+                                    <span className="text-gray-600">Account:</span>
+                                    <span className="font-mono text-xs bg-gray-100 px-2 py-1 rounded">
+                                      {withdrawal.accountDetails || withdrawal.upiId || withdrawal.cryptoAddress || 'N/A'}
+                                    </span>
+                                  </div>
+                                  <div className="flex items-center gap-2">
+                                    <span className="text-gray-600">Name:</span>
+                                    <span className="font-medium text-gray-800">{withdrawal.bankVerifiedName || withdrawal.userName}</span>
+                                  </div>
+                                  <div className="flex items-center gap-2">
+                                    <span className="text-gray-600">Client ID:</span>
+                                    <span className="font-mono text-xs bg-blue-100 px-2 py-1 rounded text-blue-800">
+                                      {withdrawal.userId.slice(0, 8)}
+                                    </span>
+                                  </div>
+                                </div>
+                              </div>
+
+                              {/* Transaction Status */}
+                              {withdrawal.transactionId && (
+                                <div className="bg-emerald-100 border border-emerald-200 rounded-lg p-3 mb-3">
+                                  <div className="flex items-center gap-2 mb-1">
+                                    <CheckCircle className="w-4 h-4 text-emerald-600" />
+                                    <span className="text-emerald-800 font-medium text-sm">Transaction Completed</span>
+                                  </div>
+                                  <p className="text-xs text-emerald-700 font-mono bg-emerald-50 px-2 py-1 rounded">
+                                    ID: {withdrawal.transactionId}
                                   </p>
                                 </div>
+                              )}
+
+                              {withdrawal.adminNotes && (
+                                <div className="bg-blue-100 border border-blue-200 rounded-lg p-3 mb-3">
+                                  <div className="flex items-center gap-2 mb-1">
+                                    <Users className="w-4 h-4 text-blue-600" />
+                                    <span className="text-blue-800 font-medium text-sm">Admin Notes</span>
+                                  </div>
+                                  <p className="text-sm text-blue-800">{withdrawal.adminNotes}</p>
+                                </div>
+                              )}
+
+                              {withdrawal.rejectionReason && (
+                                <div className="bg-red-100 border border-red-200 rounded-lg p-3">
+                                  <div className="flex items-center gap-2 mb-1">
+                                    <XCircle className="w-4 h-4 text-red-600" />
+                                    <span className="text-red-800 font-medium text-sm">Rejection Reason</span>
+                                  </div>
+                                  <p className="text-sm text-red-800">{withdrawal.rejectionReason}</p>
+                                </div>
+                              )}
+
+                              {/* Status Footer */}
+                              <div className={`mt-4 p-3 rounded-lg text-center ${
+                                withdrawal.status === 'pending' ? 'bg-amber-100 text-amber-800' :
+                                withdrawal.status === 'approved' ? 'bg-emerald-100 text-emerald-800' :
+                                'bg-red-100 text-red-800'
+                              }`}>
+                                <p className="text-sm font-medium">
+                                  {withdrawal.status === 'pending' ? 'Your withdrawal is being processed by our team' :
+                                   withdrawal.status === 'approved' ? 'Payment has been sent to your account successfully' :
+                                   'Withdrawal request was declined. Funds returned to wallet.'}
+                                </p>
                               </div>
                             </CardContent>
                           </Card>
                         ))
                       ) : (
-                        <div className="text-center py-8">
-                          <Wallet className="w-12 h-12 md:w-16 md:h-16 text-gray-400 mx-auto mb-4" />
-                          <p className="text-gray-500 font-medium text-sm md:text-base">No withdrawal requests yet</p>
-                          <p className="text-xs md:text-sm text-gray-400">Your withdrawal requests will appear here with full tracking</p>
+                        <div className="text-center py-12">
+                          <div className="w-20 h-20 bg-gradient-to-r from-purple-500 to-blue-500 rounded-full flex items-center justify-center mx-auto mb-4">
+                            <Wallet className="w-10 h-10 text-white" />
+                          </div>
+                          <h3 className="text-lg font-semibold text-gray-700 mb-2">No withdrawal requests yet</h3>
+                          <p className="text-sm text-gray-500">Your withdrawal requests will appear here with full tracking</p>
                         </div>
                       )}
                     </div>

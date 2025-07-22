@@ -515,7 +515,7 @@ export default function SuperAdmin() {
         </div>
       </div>
 
-      <div className="container mx-auto px-2 md:px-4 py-4 md:py-8 max-w-[85%]">
+      <div className="container mx-auto px-2 md:px-4 py-4 md:py-8 max-w-[80%]">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
           <TabsList className="grid grid-cols-4 md:grid-cols-7 w-full h-auto">
             <TabsTrigger value="overview" className="flex flex-col md:flex-row items-center gap-1 md:gap-2 p-2 md:p-3 text-xs md:text-sm">
@@ -1450,45 +1450,57 @@ export default function SuperAdmin() {
                 {withdrawalRequests.map((withdrawal) => {
                   const user = users.find(u => u.id === withdrawal.userId);
                   return (
-                    <Card key={withdrawal.id} className={`p-4 md:p-6 border-l-4 shadow-lg hover:shadow-xl transition-shadow ${
-                      withdrawal.status === 'pending' ? 'border-yellow-500 bg-gradient-to-r from-yellow-50 to-orange-50' :
-                      withdrawal.status === 'approved' ? 'border-green-500 bg-gradient-to-r from-green-50 to-emerald-50' :
-                      'border-red-500 bg-gradient-to-r from-red-50 to-pink-50'
+                    <Card key={withdrawal.id} className={`relative overflow-hidden shadow-xl hover:shadow-2xl transition-all duration-300 border-0 ${
+                      withdrawal.status === 'pending' ? 'bg-gradient-to-br from-amber-50 via-yellow-50 to-orange-50' :
+                      withdrawal.status === 'approved' ? 'bg-gradient-to-br from-emerald-50 via-green-50 to-teal-50' :
+                      'bg-gradient-to-br from-red-50 via-pink-50 to-rose-50'
                     }`}>
-                      <div className="space-y-4">
+                      {/* Status Bar */}
+                      <div className={`h-2 w-full ${
+                        withdrawal.status === 'pending' ? 'bg-gradient-to-r from-amber-400 via-yellow-500 to-orange-500' :
+                        withdrawal.status === 'approved' ? 'bg-gradient-to-r from-emerald-400 via-green-500 to-teal-500' :
+                        'bg-gradient-to-r from-red-400 via-pink-500 to-rose-500'
+                      }`}></div>
+
+                      <div className="space-y-4 p-6">
                         {/* Header */}
-                        <div className="flex flex-col md:flex-row md:items-center justify-between gap-3">
-                          <div className="flex items-center gap-3">
-                            <div className="w-12 h-12 bg-gradient-to-r from-purple-500 to-blue-500 rounded-full flex items-center justify-center text-white font-bold text-lg">
+                        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                          <div className="flex items-center gap-4">
+                            <div className={`w-16 h-16 rounded-full flex items-center justify-center text-white font-bold text-xl shadow-lg ${
+                              withdrawal.status === 'pending' ? 'bg-gradient-to-r from-amber-500 to-orange-500' :
+                              withdrawal.status === 'approved' ? 'bg-gradient-to-r from-emerald-500 to-green-500' :
+                              'bg-gradient-to-r from-red-500 to-pink-500'
+                            }`}>
                               {withdrawal.userName?.charAt(0) || withdrawal.userEmail?.charAt(0)?.toUpperCase() || 'U'}
                             </div>
                             <div>
-                              <h3 className="font-bold text-lg text-gray-900">
+                              <h3 className="font-bold text-xl text-gray-900 mb-1">
                                 {withdrawal.userName || user?.displayName || 'Unknown User'}
                               </h3>
-                              <p className="text-sm text-gray-600">{withdrawal.userEmail || user?.email}</p>
-                              <Badge className={`text-xs mt-1 ${
-                                withdrawal.status === 'pending' ? 'bg-yellow-500 text-white animate-pulse' :
-                                withdrawal.status === 'approved' ? 'bg-green-500 text-white' :
+                              <p className="text-sm text-gray-600 mb-2">{withdrawal.userEmail || user?.email}</p>
+                              <Badge className={`text-sm font-semibold ${
+                                withdrawal.status === 'pending' ? 'bg-amber-500 text-white' :
+                                withdrawal.status === 'approved' ? 'bg-emerald-500 text-white' :
                                 'bg-red-500 text-white'
                               }`}>
-                                {withdrawal.status === 'pending' ? '⏳ PROCESSING' :
-                                 withdrawal.status === 'approved' ? '✅ COMPLETED' :
-                                 '❌ REJECTED'}
+                                {withdrawal.status === 'pending' ? 'PROCESSING' :
+                                 withdrawal.status === 'approved' ? 'COMPLETED' :
+                                 'REJECTED'}
                               </Badge>
                             </div>
                           </div>
                           <div className="text-right">
-                            <p className="text-3xl font-bold text-green-600">₹{withdrawal.amount}</p>
-                            <p className="text-xs text-gray-500">Request #{withdrawal.requestId || withdrawal.id}</p>
-                            <p className="text-xs text-blue-600">{new Date(withdrawal.createdAt || withdrawal.requestDate).toLocaleDateString()}</p>
+                            <p className="text-4xl font-bold text-gray-800 mb-1">₹{withdrawal.amount.toLocaleString()}</p>
+                            <p className="text-sm text-gray-600 mb-1">Request #{withdrawal.requestId || withdrawal.id}</p>
+                            <p className="text-sm text-blue-600">{new Date(withdrawal.createdAt || withdrawal.requestDate).toLocaleDateString()}</p>
                           </div>
                         </div>
                         
                         {/* Payment Details */}
-                        <div className="bg-white/60 backdrop-blur rounded-lg p-4 border border-gray-200">
-                          <h4 className="font-semibold text-gray-800 mb-3 flex items-center gap-2">
-                            💳 Payment Details
+                        <div className="bg-white/80 backdrop-blur-sm rounded-xl p-6 border border-white/50 shadow-lg">
+                          <h4 className="font-bold text-gray-800 mb-4 flex items-center gap-2 text-lg">
+                            <Wallet className="w-5 h-5 text-blue-600" />
+                            Payment Details
                           </h4>
                           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
                             <div>
