@@ -19,7 +19,7 @@ import {
 } from "lucide-react";
 import { motion } from "framer-motion";
 import { useFirebaseServices, useFirebaseUsers, useFirebaseAdminStats } from "@/hooks/use-firebase-realtime";
-import { ref, onValue, off } from 'firebase/database';
+import { ref, onValue, off, update } from 'firebase/database';
 import { database } from '@/lib/firebase';
 import { adminOperations } from "@/lib/admin-firebase";
 import type { Channel, User, AdminStats } from "@shared/schema";
@@ -824,17 +824,37 @@ export default function SuperAdmin() {
                               </div>
                               <DialogFooter>
                                 <Button
-                                  onClick={() => {
+                                  onClick={async () => {
                                     if (editingChannel) {
-                                      fetch(`/api/courses/${channel.id}`, {
-                                        method: 'PUT',
-                                        headers: { 'Content-Type': 'application/json' },
-                                        body: JSON.stringify(editingChannel)
-                                      }).then(() => {
-                                        toast({ title: "✅ Channel Updated Successfully" });
-                                        queryClient.invalidateQueries({ queryKey: ['/api/admin/channels'] });
+                                      try {
+                                        const serviceRef = ref(database, `services/${channel.id}`);
+                                        await update(serviceRef, {
+                                          title: editingChannel.title,
+                                          description: editingChannel.description,
+                                          price: editingChannel.price,
+                                          lastUpdated: new Date().toISOString(),
+                                          updatedBy: 'Super Admin'
+                                        });
+                                        
+                                        toast({ 
+                                          title: "✅ Channel Updated Successfully",
+                                          description: `${editingChannel.title} has been updated`
+                                        });
+                                        
                                         setEditingChannel(null);
-                                      });
+                                        
+                                        // Refresh data after a short delay
+                                        setTimeout(() => {
+                                          window.location.reload();
+                                        }, 1000);
+                                      } catch (error) {
+                                        console.error('Error updating channel:', error);
+                                        toast({ 
+                                          title: "❌ Update Failed",
+                                          description: "Failed to update channel. Please try again.",
+                                          variant: "destructive"
+                                        });
+                                      }
                                     }
                                   }}
                                 >

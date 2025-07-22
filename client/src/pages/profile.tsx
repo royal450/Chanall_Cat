@@ -739,36 +739,27 @@ export default function Profile() {
                         <div>
                           <Label className="text-xs text-blue-700">Title:</Label>
                           <Input 
+                            id={`title-${course.id}`}
                             defaultValue={course.title} 
                             className="h-8 text-sm"
-                            onChange={(e) => {
-                              // Auto-update logic can be added here
-                            }}
                           />
                         </div>
                         <div>
                           <Label className="text-xs text-blue-700">Description:</Label>
                           <Textarea 
+                            id={`desc-${course.id}`}
                             defaultValue={course.description} 
                             className="h-16 text-sm resize-none"
-                            onChange={(e) => {
-                              // Auto-update logic can be added here
-                            }}
                           />
                         </div>
                         <div className="grid grid-cols-2 gap-2">
                           <div>
                             <Label className="text-xs text-blue-700">Price (₹):</Label>
                             <Input 
+                              id={`price-${course.id}`}
                               type="number" 
                               defaultValue={course.price} 
                               className="h-8 text-sm"
-                              onChange={(e) => {
-                                // Auto-generate fake price
-                                const newPrice = parseInt(e.target.value) || 0;
-                                const fakePrice = newPrice * (3 + Math.random() * 2);
-                                console.log(`Auto-generated fake price: ₹${Math.floor(fakePrice)}`);
-                              }}
                             />
                           </div>
                           <div>
@@ -783,6 +774,7 @@ export default function Profile() {
                         <div>
                           <Label className="text-xs text-blue-700">Thumbnail URL:</Label>
                           <Input 
+                            id={`thumbnail-${course.id}`}
                             defaultValue={course.thumbnail} 
                             className="h-8 text-sm"
                             placeholder="https://example.com/thumbnail.jpg"
@@ -793,12 +785,21 @@ export default function Profile() {
                           className="w-full bg-blue-600 hover:bg-blue-700 text-white"
                           onClick={async () => {
                             try {
+                              // Get the current values from the form inputs
+                              const titleInput = document.querySelector(`#title-${course.id}`) as HTMLInputElement;
+                              const descInput = document.querySelector(`#desc-${course.id}`) as HTMLTextAreaElement;
+                              const priceInput = document.querySelector(`#price-${course.id}`) as HTMLInputElement;
+                              const thumbnailInput = document.querySelector(`#thumbnail-${course.id}`) as HTMLInputElement;
+
+                              const newPrice = parseInt(priceInput?.value) || course.price;
+                              const newFakePrice = Math.floor(newPrice * (3 + Math.random() * 2));
+
                               const updates = {
-                                title: document.querySelector(`input[defaultValue="${course.title}"]`)?.value || course.title,
-                                description: document.querySelector(`textarea[defaultValue="${course.description}"]`)?.value || course.description,
-                                price: parseInt(document.querySelector(`input[type="number"][defaultValue="${course.price}"]`)?.value) || course.price,
-                                thumbnail: document.querySelector(`input[placeholder="https://example.com/thumbnail.jpg"]`)?.value || course.thumbnail,
-                                fakePrice: Math.floor((parseInt(document.querySelector(`input[type="number"][defaultValue="${course.price}"]`)?.value) || course.price) * (3 + Math.random() * 2)),
+                                title: titleInput?.value || course.title,
+                                description: descInput?.value || course.description,
+                                price: newPrice,
+                                thumbnail: thumbnailInput?.value || course.thumbnail,
+                                fakePrice: newFakePrice,
                                 lastUpdated: new Date().toISOString()
                               };
 
@@ -807,7 +808,7 @@ export default function Profile() {
 
                               toast({
                                 title: "✅ Channel Updated!",
-                                description: `${course.title} has been updated successfully`,
+                                description: `${updates.title} has been updated successfully`,
                               });
 
                               // Refresh page to show updates
