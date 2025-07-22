@@ -11,7 +11,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { QRCodeComponent } from '@/components/qr-code';
 import { useToast } from '@/hooks/use-toast';
-import { Copy, Share2, Users, Wallet, BookOpen, Star, TrendingUp, IndianRupee, CheckCircle, XCircle, Clock, Eye, UserPlus } from 'lucide-react';
+import { Copy, Share2, Users, Wallet, BookOpen, Star, TrendingUp, IndianRupee, CheckCircle, XCircle, Clock, Eye, UserPlus, Gift } from 'lucide-react';
 
 interface UserProfile {
   id: string;
