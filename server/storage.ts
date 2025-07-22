@@ -1,4 +1,4 @@
-import { users, channels, payments, referralBonuses, type User, type InsertUser, type Channel, type InsertChannel, type Payment, type InsertPayment, type ReferralBonus } from "@shared/schema";
+import { users, channels, payments, referralBonuses, withdrawalRequests, userBonuses, type User, type InsertUser, type Channel, type InsertChannel, type Payment, type InsertPayment, type ReferralBonus, type WithdrawalRequest, type InsertWithdrawalRequest, type UserBonus, type InsertUserBonus } from "@shared/schema";
 
 // modify the interface with any CRUD methods
 // you might need
@@ -19,6 +19,7 @@ export interface IStorage {
   createCourse(course: any): Promise<Channel>;
   updateCourse(courseId: string, updates: any): Promise<Channel>;
   deleteCourse(courseId: string): Promise<void>;
+  getCourseById(courseId: string): Promise<Channel | undefined>;
 
   // Payment methods
   createPayment(payment: any): Promise<Payment>;
@@ -28,8 +29,18 @@ export interface IStorage {
   getReferralByBuyer(buyerId: number): Promise<ReferralBonus | undefined>;
 
   // Withdrawal methods
-  getWithdrawals(): Promise<any[]>;
-  updateWithdrawal(withdrawalId: string, updates: any): Promise<any>;
+  getWithdrawals(): Promise<WithdrawalRequest[]>;
+  updateWithdrawal(withdrawalId: string, updates: any): Promise<WithdrawalRequest>;
+  createWithdrawalRequest(withdrawal: InsertWithdrawalRequest): Promise<WithdrawalRequest>;
+  getUserWithdrawals(userId: number): Promise<WithdrawalRequest[]>;
+  getAllWithdrawals(): Promise<WithdrawalRequest[]>;
+  approveWithdrawal(withdrawalId: number, data: any): Promise<WithdrawalRequest>;
+  rejectWithdrawal(withdrawalId: number, data: any): Promise<WithdrawalRequest>;
+
+  // Bonus methods
+  createUserBonus(bonus: InsertUserBonus): Promise<UserBonus>;
+  getUserBonuses(userId: number): Promise<UserBonus[]>;
+  getAllBonuses(): Promise<UserBonus[]>;
 
   // Admin methods
   getAdminStats(): Promise<any>;
@@ -40,20 +51,28 @@ export class MemStorage implements IStorage {
   private courses: Map<string, Channel>;
   private payments: Map<number, Payment>;
   private referrals: Map<number, ReferralBonus>;
+  private withdrawals: Map<number, WithdrawalRequest>;
+  private bonuses: Map<number, UserBonus>;
   currentUserId: number;
   currentCourseId: number;
   currentPaymentId: number;
   currentReferralId: number;
+  currentWithdrawalId: number;
+  currentBonusId: number;
 
   constructor() {
     this.users = new Map();
     this.courses = new Map();
     this.payments = new Map();
     this.referrals = new Map();
+    this.withdrawals = new Map();
+    this.bonuses = new Map();
     this.currentUserId = 1;
     this.currentCourseId = 1;
     this.currentPaymentId = 1;
     this.currentReferralId = 1;
+    this.currentWithdrawalId = 1;
+    this.currentBonusId = 1;
 
     // Add some sample data for testing
     this.initializeSampleData();
@@ -490,6 +509,133 @@ export class MemStorage implements IStorage {
     return Array.from(this.referrals.values()).find(
       (referral) => referral.referredId === buyerId,
     );
+  }
+
+  // Withdrawal methods
+  async getWithdrawals(): Promise<WithdrawalRequest[]> {
+    return Array.from(this.withdrawals.values());
+  }
+
+  async getAllWithdrawals(): Promise<WithdrawalRequest[]> {
+    return Array.from(this.withdrawals.values());
+  }
+
+  async getUserWithdrawals(userId: number): Promise<WithdrawalRequest[]> {
+    return Array.from(this.withdrawals.values()).filter(
+      (withdrawal) => withdrawal.userId === userId,
+    );
+  }
+
+  async createWithdrawalRequest(withdrawalData: InsertWithdrawalRequest): Promise<WithdrawalRequest> {
+    const id = this.currentWithdrawalId++;
+    const withdrawal: WithdrawalRequest = {
+      id,
+      userId: withdrawalData.userId,
+      amount: withdrawalData.amount,
+      method: withdrawalData.method,
+      accountDetails: withdrawalData.accountDetails,
+      bankName: withdrawalData.bankName || null,
+      ifscCode: withdrawalData.ifscCode || null,
+      accountNumber: withdrawalData.accountNumber || null,
+      accountHolderName: withdrawalData.accountHolderName || null,
+      status: "pending",
+      adminNotes: null,
+      transactionId: null,
+      processedAt: null,
+      processedBy: null,
+      createdAt: new Date()
+    };
+    this.withdrawals.set(id, withdrawal);
+    return withdrawal;
+  }
+
+  async updateWithdrawal(withdrawalId: string, updates: any): Promise<WithdrawalRequest> {
+    const id = parseInt(withdrawalId);
+    const withdrawal = this.withdrawals.get(id);
+    if (!withdrawal) {
+      throw new Error("Withdrawal not found");
+    }
+
+    const updatedWithdrawal = { ...withdrawal, ...updates };
+    this.withdrawals.set(id, updatedWithdrawal);
+    return updatedWithdrawal;
+  }
+
+  async approveWithdrawal(withdrawalId: number, data: any): Promise<WithdrawalRequest> {
+    const withdrawal = this.withdrawals.get(withdrawalId);
+    if (!withdrawal) {
+      throw new Error("Withdrawal not found");
+    }
+
+    const updatedWithdrawal = {
+      ...withdrawal,
+      status: "approved" as const,
+      transactionId: data.transactionId,
+      adminNotes: data.adminNotes,
+      processedBy: data.processedBy,
+      processedAt: data.processedAt
+    };
+    this.withdrawals.set(withdrawalId, updatedWithdrawal);
+    return updatedWithdrawal;
+  }
+
+  async rejectWithdrawal(withdrawalId: number, data: any): Promise<WithdrawalRequest> {
+    const withdrawal = this.withdrawals.get(withdrawalId);
+    if (!withdrawal) {
+      throw new Error("Withdrawal not found");
+    }
+
+    // Return money to user wallet when withdrawal is rejected
+    if (withdrawal.userId) {
+      const user = this.users.get(withdrawal.userId);
+      if (user) {
+        user.walletBalance = (user.walletBalance || 0) + withdrawal.amount;
+        this.users.set(withdrawal.userId, user);
+      }
+    }
+
+    const updatedWithdrawal = {
+      ...withdrawal,
+      status: "rejected" as const,
+      adminNotes: data.adminNotes,
+      processedBy: data.processedBy,
+      processedAt: data.processedAt
+    };
+    this.withdrawals.set(withdrawalId, updatedWithdrawal);
+    return updatedWithdrawal;
+  }
+
+  // Bonus methods
+  async createUserBonus(bonusData: InsertUserBonus): Promise<UserBonus> {
+    const id = this.currentBonusId++;
+    const bonus: UserBonus = {
+      id,
+      userId: bonusData.userId,
+      amount: bonusData.amount,
+      reason: bonusData.reason,
+      type: bonusData.type || "admin_bonus",
+      adminId: bonusData.adminId || null,
+      adminName: bonusData.adminName || null,
+      status: "completed",
+      createdAt: new Date()
+    };
+    this.bonuses.set(id, bonus);
+    return bonus;
+  }
+
+  async getUserBonuses(userId: number): Promise<UserBonus[]> {
+    return Array.from(this.bonuses.values()).filter(
+      (bonus) => bonus.userId === userId,
+    );
+  }
+
+  async getAllBonuses(): Promise<UserBonus[]> {
+    return Array.from(this.bonuses.values());
+  }
+
+  // Get course by ID method
+  async getCourseById(courseId: string): Promise<Channel | undefined> {
+    return this.courses.get(courseId);
   }
 
   // Admin methods

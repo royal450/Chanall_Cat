@@ -564,6 +564,191 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // ================================
+  // WITHDRAWAL MANAGEMENT ENDPOINTS
+  // ================================
+  
+  // Create withdrawal request
+  app.post("/api/withdrawals", async (req, res) => {
+    try {
+      const withdrawalData = {
+        ...req.body,
+        status: 'pending',
+        createdAt: new Date()
+      };
+      
+      const withdrawal = await storage.createWithdrawalRequest(withdrawalData);
+      res.json(withdrawal);
+    } catch (error) {
+      console.error("Error creating withdrawal request:", error);
+      res.status(500).json({ error: "Failed to create withdrawal request" });
+    }
+  });
+
+  // Get user's withdrawal history
+  app.get("/api/users/:userId/withdrawals", async (req, res) => {
+    try {
+      const { userId } = req.params;
+      const withdrawals = await storage.getUserWithdrawals(parseInt(userId));
+      res.json(withdrawals);
+    } catch (error) {
+      console.error("Error fetching user withdrawals:", error);
+      res.status(500).json({ error: "Failed to fetch withdrawals" });
+    }
+  });
+
+  // Get all withdrawal requests (Admin)
+  app.get("/api/admin/withdrawals", async (req, res) => {
+    try {
+      const withdrawals = await storage.getAllWithdrawals();
+      res.json(withdrawals);
+    } catch (error) {
+      console.error("Error fetching all withdrawals:", error);
+      res.status(500).json({ error: "Failed to fetch withdrawals" });
+    }
+  });
+
+  // Approve withdrawal request (Admin)
+  app.put("/api/admin/withdrawals/:id/approve", async (req, res) => {
+    try {
+      const { id } = req.params;
+      const { transactionId, adminNotes } = req.body;
+      
+      const withdrawal = await storage.approveWithdrawal(parseInt(id), {
+        transactionId,
+        adminNotes,
+        processedBy: 'admin',
+        processedAt: new Date()
+      });
+      
+      res.json(withdrawal);
+    } catch (error) {
+      console.error("Error approving withdrawal:", error);
+      res.status(500).json({ error: "Failed to approve withdrawal" });
+    }
+  });
+
+  // Reject withdrawal request (Admin)
+  app.put("/api/admin/withdrawals/:id/reject", async (req, res) => {
+    try {
+      const { id } = req.params;
+      const { adminNotes } = req.body;
+      
+      const withdrawal = await storage.rejectWithdrawal(parseInt(id), {
+        adminNotes,
+        processedBy: 'admin',
+        processedAt: new Date()
+      });
+      
+      res.json(withdrawal);
+    } catch (error) {
+      console.error("Error rejecting withdrawal:", error);
+      res.status(500).json({ error: "Failed to reject withdrawal" });
+    }
+  });
+
+  // ================================
+  // USER BONUS MANAGEMENT ENDPOINTS
+  // ================================
+  
+  // Give user bonus (Admin)
+  app.post("/api/admin/users/:userId/bonus", async (req, res) => {
+    try {
+      const { userId } = req.params;
+      const { amount, reason, adminName } = req.body;
+      
+      // Create bonus record
+      const bonus = await storage.createUserBonus({
+        userId: parseInt(userId),
+        amount,
+        reason,
+        adminId: 'super_admin',
+        adminName: adminName || 'Super Admin',
+        type: 'admin_bonus'
+      });
+      
+      // Update user wallet balance
+      await storage.updateUserWallet(parseInt(userId), amount);
+      
+      res.json({ success: true, bonus });
+    } catch (error) {
+      console.error("Error giving user bonus:", error);
+      res.status(500).json({ error: "Failed to give bonus" });
+    }
+  });
+
+  // Get user bonus history
+  app.get("/api/users/:userId/bonuses", async (req, res) => {
+    try {
+      const { userId } = req.params;
+      const bonuses = await storage.getUserBonuses(parseInt(userId));
+      res.json(bonuses);
+    } catch (error) {
+      console.error("Error fetching user bonuses:", error);
+      res.status(500).json({ error: "Failed to fetch bonuses" });
+    }
+  });
+
+  // Get all bonuses (Admin)
+  app.get("/api/admin/bonuses", async (req, res) => {
+    try {
+      const bonuses = await storage.getAllBonuses();
+      res.json(bonuses);
+    } catch (error) {
+      console.error("Error fetching all bonuses:", error);
+      res.status(500).json({ error: "Failed to fetch bonuses" });
+    }
+  });
+
+  // ================================
+  // USER CHANNEL MANAGEMENT ENDPOINTS
+  // ================================
+  
+  // Get user's channels (My Channels section)
+  app.get("/api/users/:userId/channels", async (req, res) => {
+    try {
+      const { userId } = req.params;
+      const channels = await storage.getUserCourses(userId);
+      res.json(channels);
+    } catch (error) {
+      console.error("Error fetching user channels:", error);
+      res.status(500).json({ error: "Failed to fetch user channels" });
+    }
+  });
+
+  // Update user's channel (Limited editing)
+  app.put("/api/users/:userId/channels/:channelId", async (req, res) => {
+    try {
+      const { userId, channelId } = req.params;
+      const { title, description, price, thumbnail } = req.body;
+      
+      // Verify channel belongs to user
+      const channel = await storage.getCourseById(channelId);
+      if (!channel || channel.sellerId !== parseInt(userId)) {
+        return res.status(403).json({ error: "Unauthorized to edit this channel" });
+      }
+      
+      // Only allow limited fields to be edited
+      const allowedUpdates = {
+        title,
+        description, 
+        price,
+        thumbnail
+      };
+      
+      // Filter out undefined values
+      const updates = Object.fromEntries(
+        Object.entries(allowedUpdates).filter(([_, value]) => value !== undefined)
+      );
+      
+      const updatedChannel = await storage.updateCourse(channelId, updates);
+      res.json(updatedChannel);
+    } catch (error) {
+      console.error("Error updating user channel:", error);
+      res.status(500).json({ error: "Failed to update channel" });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }

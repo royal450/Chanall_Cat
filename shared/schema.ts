@@ -104,6 +104,36 @@ export const referralBonuses = pgTable("referral_bonuses", {
   createdAt: timestamp("created_at").defaultNow(),
 });
 
+export const withdrawalRequests = pgTable("withdrawal_requests", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").references(() => users.id),
+  amount: integer("amount").notNull(),
+  method: text("method").notNull(), // 'bank' | 'upi' | 'paytm'
+  accountDetails: text("account_details").notNull(),
+  bankName: text("bank_name"),
+  ifscCode: text("ifsc_code"),
+  accountNumber: text("account_number"),
+  accountHolderName: text("account_holder_name"),
+  status: text("status").default("pending"), // 'pending' | 'approved' | 'rejected' | 'completed'
+  adminNotes: text("admin_notes"),
+  transactionId: text("transaction_id"),
+  processedAt: timestamp("processed_at"),
+  processedBy: text("processed_by"),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const userBonuses = pgTable("user_bonuses", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").references(() => users.id),
+  amount: integer("amount").notNull(),
+  reason: text("reason").notNull(),
+  type: text("type").default("admin_bonus"), // 'admin_bonus' | 'referral_bonus' | 'achievement_bonus'
+  adminId: text("admin_id"),
+  adminName: text("admin_name"),
+  status: text("status").default("completed"), // 'completed' | 'pending' | 'cancelled'
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
 export const insertUserSchema = createInsertSchema(users).omit({
   id: true,
   createdAt: true,
@@ -134,17 +164,35 @@ export const insertReferralBonusSchema = createInsertSchema(referralBonuses).omi
   createdAt: true,
 });
 
+export const insertWithdrawalRequestSchema = createInsertSchema(withdrawalRequests).omit({
+  id: true,
+  status: true,
+  processedAt: true,
+  processedBy: true,
+  createdAt: true,
+});
+
+export const insertUserBonusSchema = createInsertSchema(userBonuses).omit({
+  id: true,
+  status: true,
+  createdAt: true,
+});
+
 export type User = typeof users.$inferSelect;
 export type Channel = typeof channels.$inferSelect;
 export type Payment = typeof payments.$inferSelect;
 export type Listing = typeof listings.$inferSelect;
 export type Analytics = typeof analytics.$inferSelect;
 export type ReferralBonus = typeof referralBonuses.$inferSelect;
+export type WithdrawalRequest = typeof withdrawalRequests.$inferSelect;
+export type UserBonus = typeof userBonuses.$inferSelect;
 export type InsertUser = z.infer<typeof insertUserSchema>;
 export type InsertChannel = z.infer<typeof insertChannelSchema>;
 export type InsertPayment = z.infer<typeof insertPaymentSchema>;
 export type InsertListing = z.infer<typeof insertListingSchema>;
 export type InsertReferralBonus = z.infer<typeof insertReferralBonusSchema>;
+export type InsertWithdrawalRequest = z.infer<typeof insertWithdrawalRequestSchema>;
+export type InsertUserBonus = z.infer<typeof insertUserBonusSchema>;
 
 // For backward compatibility (to be removed after full migration)
 export const courses = channels;

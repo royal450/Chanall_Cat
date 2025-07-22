@@ -190,19 +190,175 @@ export default function SuperAdmin() {
     channel.approvalStatus === 'pending' || channel.status === 'pending'
   );
 
-  // Mock withdrawal requests (should come from API)
-  const [withdrawalRequests] = useState<WithdrawalRequest[]>([
-    {
-      id: "1",
-      userId: "user1",
-      userName: "John Doe",
-      amount: 500,
-      method: "UPI",
-      accountDetails: "john@paytm",
-      status: "pending",
-      createdAt: new Date().toISOString()
+  // Real-time withdrawal requests from API
+  const [withdrawalRequests, setWithdrawalRequests] = useState<any[]>([]);
+  const [loadingWithdrawals, setLoadingWithdrawals] = useState(false);
+  
+  // Fetch withdrawal requests
+  useEffect(() => {
+    const fetchWithdrawals = async () => {
+      try {
+        setLoadingWithdrawals(true);
+        const response = await fetch('/api/admin/withdrawals');
+        const data = await response.json();
+        setWithdrawalRequests(data);
+      } catch (error) {
+        console.error('Error fetching withdrawals:', error);
+        toast({
+          title: "Error",
+          description: "Failed to fetch withdrawal requests",
+          variant: "destructive"
+        });
+      } finally {
+        setLoadingWithdrawals(false);
+      }
+    };
+    
+    fetchWithdrawals();
+    // Refresh every 10 seconds for real-time updates
+    const interval = setInterval(fetchWithdrawals, 10000);
+    return () => clearInterval(interval);
+  }, []);
+
+  // Approve withdrawal
+  const handleApproveWithdrawal = async (withdrawalId: number, userName: string) => {
+    const transactionId = prompt(`Enter transaction ID for ${userName}'s withdrawal:`);
+    if (!transactionId) return;
+    
+    const adminNotes = prompt("Add admin notes (optional):");
+    
+    try {
+      const response = await fetch(`/api/admin/withdrawals/${withdrawalId}/approve`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ transactionId, adminNotes })
+      });
+      
+      if (response.ok) {
+        toast({
+          title: "✅ Withdrawal Approved",
+          description: `₹${withdrawalRequests.find(w => w.id === withdrawalId)?.amount} approved for ${userName}`,
+        });
+        // Refresh data
+        const updatedResponse = await fetch('/api/admin/withdrawals');
+        const updatedData = await updatedResponse.json();
+        setWithdrawalRequests(updatedData);
+      }
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to approve withdrawal",
+        variant: "destructive"
+      });
     }
-  ]);
+  };
+
+  // Reject withdrawal  
+  const handleRejectWithdrawal = async (withdrawalId: number, userName: string) => {
+    const adminNotes = prompt(`Reason for rejecting ${userName}'s withdrawal:`);
+    if (!adminNotes) return;
+    
+    try {
+      const response = await fetch(`/api/admin/withdrawals/${withdrawalId}/reject`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ adminNotes })
+      });
+      
+      if (response.ok) {
+        toast({
+          title: "❌ Withdrawal Rejected",
+          description: `${userName}'s withdrawal rejected. Funds returned to wallet.`,
+        });
+        // Refresh data
+        const updatedResponse = await fetch('/api/admin/withdrawals');
+        const updatedData = await updatedResponse.json();
+        setWithdrawalRequests(updatedData);
+      }
+    } catch (error) {
+      toast({
+        title: "Error", 
+        description: "Failed to reject withdrawal",
+        variant: "destructive"
+      });
+    }
+  };
+
+  // User Bonus Management Functions
+  const handleGiveUserBonus = async (userId: number, amount: number, reason: string) => {
+    try {
+      const response = await fetch(`/api/admin/users/${userId}/bonus`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ 
+          amount, 
+          reason, 
+          adminName: 'Super Admin' 
+        })
+      });
+      
+      if (response.ok) {
+        const user = users.find(u => u.id === userId);
+        toast({
+          title: "🎁 Bonus Given Successfully",
+          description: `₹${amount} bonus given to ${user?.displayName || 'User'}: ${reason}`,
+        });
+        
+        // Refresh user data to show updated balance
+        window.location.reload(); // Simple refresh for real-time update
+      } else {
+        throw new Error('Failed to give bonus');
+      }
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to give user bonus",
+        variant: "destructive"
+      });
+    }
+  };
+
+  // Bulk bonus for all active users
+  const handleBulkBonus = async (amount: number) => {
+    const confirmBulk = confirm(`Give ₹${amount} bonus to ALL ${users.length} active users? This cannot be undone.`);
+    if (!confirmBulk) return;
+    
+    const reason = prompt("Enter reason for bulk bonus:") || "Bulk admin bonus";
+    
+    try {
+      let successful = 0;
+      for (const user of users) {
+        try {
+          const response = await fetch(`/api/admin/users/${user.id}/bonus`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ 
+              amount, 
+              reason: `${reason} (Bulk)`, 
+              adminName: 'Super Admin' 
+            })
+          });
+          if (response.ok) successful++;
+        } catch (error) {
+          console.error(`Failed to give bonus to user ${user.id}:`, error);
+        }
+      }
+      
+      toast({
+        title: "🎉 Bulk Bonus Completed",
+        description: `Successfully gave ₹${amount} bonus to ${successful}/${users.length} users`,
+      });
+      
+      // Refresh for real-time update
+      window.location.reload();
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to process bulk bonus",
+        variant: "destructive"
+      });
+    }
+  };
 
   // REMOVED DUPLICATE - Using existing functions below
 
@@ -336,7 +492,7 @@ export default function SuperAdmin() {
 
       <div className="container mx-auto px-4 py-8">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className="grid grid-cols-3 md:grid-cols-6 w-full h-auto">
+          <TabsList className="grid grid-cols-3 md:grid-cols-7 w-full h-auto">
             <TabsTrigger value="overview" className="flex flex-col md:flex-row items-center gap-1 md:gap-2 p-2 md:p-3 text-xs md:text-sm">
               <BarChart3 className="w-3 h-3 md:w-4 md:h-4" />
               <span className="hidden md:inline">Overview</span>
@@ -359,6 +515,10 @@ export default function SuperAdmin() {
             <TabsTrigger value="withdrawals" className="flex flex-col md:flex-row items-center gap-1 md:gap-2 p-2 md:p-3 text-xs md:text-sm hidden md:flex">
               <DollarSign className="w-3 h-3 md:w-4 md:h-4" />
               Withdrawals
+            </TabsTrigger>
+            <TabsTrigger value="bonuses" className="flex flex-col md:flex-row items-center gap-1 md:gap-2 p-2 md:p-3 text-xs md:text-sm hidden md:flex">
+              <Gift className="w-3 h-3 md:w-4 md:h-4" />
+              Bonuses
             </TabsTrigger>
             <TabsTrigger value="controls" className="flex flex-col md:flex-row items-center gap-1 md:gap-2 p-2 md:p-3 text-xs md:text-sm hidden md:flex">
               <Settings className="w-3 h-3 md:w-4 md:h-4" />
@@ -971,38 +1131,297 @@ export default function SuperAdmin() {
             </Card>
           </TabsContent>
 
-          {/* Withdrawals Tab */}
+          {/* Enhanced Real-time Withdrawals Tab */}
           <TabsContent value="withdrawals" className="space-y-6">
             <div className="flex justify-between items-center">
-              <h2 className="text-2xl font-bold">Withdrawal Management</h2>
-              <Badge className="bg-green-500">
-                {withdrawalRequests.filter(w => w.status === 'pending').length} Pending
-              </Badge>
+              <h2 className="text-2xl font-bold">Real-time Withdrawal Management 💸</h2>
+              <div className="flex gap-2">
+                <Badge className="bg-yellow-500 text-white animate-pulse">
+                  {withdrawalRequests.filter(w => w.status === 'pending').length} Pending
+                </Badge>
+                <Badge className="bg-green-500 text-white">
+                  {withdrawalRequests.filter(w => w.status === 'approved').length} Approved
+                </Badge>
+                <Badge className="bg-red-500 text-white">
+                  {withdrawalRequests.filter(w => w.status === 'rejected').length} Rejected
+                </Badge>
+              </div>
             </div>
 
-            <div className="grid gap-4">
-              {withdrawalRequests.map((withdrawal) => (
-                <Card key={withdrawal.id} className="p-6">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <h3 className="font-semibold">{withdrawal.userName}</h3>
-                      <p className="text-gray-600">₹{withdrawal.amount} via {withdrawal.method}</p>
-                      <p className="text-sm text-gray-500">{withdrawal.accountDetails}</p>
-                    </div>
-                    <div className="flex gap-2">
-                      <Button size="sm" className="bg-green-500 hover:bg-green-600">
-                        <CheckCircle className="w-4 h-4 mr-1" />
-                        Approve
-                      </Button>
-                      <Button size="sm" variant="destructive">
-                        <XCircle className="w-4 h-4 mr-1" />
-                        Reject
-                      </Button>
-                    </div>
-                  </div>
-                </Card>
-              ))}
+            {loadingWithdrawals ? (
+              <div className="flex items-center justify-center py-8">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-600"></div>
+                <span className="ml-2">Loading withdrawals...</span>
+              </div>
+            ) : withdrawalRequests.length === 0 ? (
+              <Card className="p-8 text-center">
+                <DollarSign className="w-16 h-16 mx-auto text-gray-400 mb-4" />
+                <p className="text-gray-500">No withdrawal requests found</p>
+              </Card>
+            ) : (
+              <div className="grid gap-4">
+                {withdrawalRequests.map((withdrawal) => {
+                  const user = users.find(u => u.id === withdrawal.userId);
+                  return (
+                    <Card key={withdrawal.id} className={`p-6 border-l-4 ${
+                      withdrawal.status === 'pending' ? 'border-yellow-500 bg-yellow-50' :
+                      withdrawal.status === 'approved' ? 'border-green-500 bg-green-50' :
+                      'border-red-500 bg-red-50'
+                    }`}>
+                      <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+                        <div className="flex-1">
+                          <div className="flex items-center gap-2 mb-2">
+                            <h3 className="font-semibold text-lg">
+                              {user?.displayName || 'Unknown User'}
+                            </h3>
+                            <Badge className={
+                              withdrawal.status === 'pending' ? 'bg-yellow-500' :
+                              withdrawal.status === 'approved' ? 'bg-green-500' :
+                              'bg-red-500'
+                            }>
+                              {withdrawal.status.toUpperCase()}
+                            </Badge>
+                          </div>
+                          
+                          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+                            <div>
+                              <span className="text-gray-600">Amount:</span>
+                              <p className="font-semibold text-lg text-green-600">₹{withdrawal.amount}</p>
+                            </div>
+                            <div>
+                              <span className="text-gray-600">Method:</span>
+                              <p className="font-semibold">{withdrawal.method.toUpperCase()}</p>
+                            </div>
+                            <div>
+                              <span className="text-gray-600">Account:</span>
+                              <p className="font-mono text-sm">{withdrawal.accountDetails}</p>
+                            </div>
+                            <div>
+                              <span className="text-gray-600">Requested:</span>
+                              <p className="text-sm">{new Date(withdrawal.createdAt).toLocaleString()}</p>
+                            </div>
+                          </div>
+
+                          {withdrawal.bankName && (
+                            <div className="mt-2 grid grid-cols-2 md:grid-cols-3 gap-2 text-xs text-gray-600">
+                              <span>Bank: {withdrawal.bankName}</span>
+                              <span>IFSC: {withdrawal.ifscCode}</span>
+                              <span>A/C: {withdrawal.accountNumber}</span>
+                            </div>
+                          )}
+
+                          {withdrawal.adminNotes && (
+                            <div className="mt-2 p-2 bg-gray-100 rounded text-sm">
+                              <span className="font-medium">Admin Notes: </span>
+                              {withdrawal.adminNotes}
+                            </div>
+                          )}
+                        </div>
+
+                        {withdrawal.status === 'pending' && (
+                          <div className="flex gap-2">
+                            <Button 
+                              size="sm" 
+                              className="bg-green-500 hover:bg-green-600"
+                              onClick={() => handleApproveWithdrawal(withdrawal.id, user?.displayName || 'User')}
+                            >
+                              <CheckCircle className="w-4 h-4 mr-1" />
+                              Approve
+                            </Button>
+                            <Button 
+                              size="sm" 
+                              variant="destructive"
+                              onClick={() => handleRejectWithdrawal(withdrawal.id, user?.displayName || 'User')}
+                            >
+                              <XCircle className="w-4 h-4 mr-1" />
+                              Reject
+                            </Button>
+                          </div>
+                        )}
+
+                        {withdrawal.status === 'approved' && (
+                          <div className="text-green-600 flex items-center gap-2">
+                            <CheckCircle className="w-5 h-5" />
+                            <div className="text-sm">
+                              <p>Approved by {withdrawal.processedBy}</p>
+                              {withdrawal.transactionId && (
+                                <p className="font-mono">TXN: {withdrawal.transactionId}</p>
+                              )}
+                            </div>
+                          </div>
+                        )}
+
+                        {withdrawal.status === 'rejected' && (
+                          <div className="text-red-600 flex items-center gap-2">
+                            <XCircle className="w-5 h-5" />
+                            <div className="text-sm">
+                              <p>Rejected by {withdrawal.processedBy}</p>
+                              <p>Funds returned to wallet</p>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    </Card>
+                  );
+                })}
+              </div>
+            )}
+          </TabsContent>
+
+          {/* User Bonuses Management Tab */}
+          <TabsContent value="bonuses" className="space-y-6">
+            <div className="flex justify-between items-center">
+              <h2 className="text-2xl font-bold">User Bonus System 🎁</h2>
+              <Button
+                onClick={() => {
+                  const userId = prompt("Enter User ID to give bonus:");
+                  if (!userId) return;
+                  
+                  const amount = prompt("Enter bonus amount (₹):");
+                  if (!amount || isNaN(Number(amount))) return;
+                  
+                  const reason = prompt("Enter reason for bonus:");
+                  if (!reason) return;
+                  
+                  handleGiveUserBonus(parseInt(userId), parseInt(amount), reason);
+                }}
+                className="bg-green-500 hover:bg-green-600"
+              >
+                <Gift className="w-4 h-4 mr-2" />
+                Give User Bonus
+              </Button>
             </div>
+
+            {/* Quick Bonus Section */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+              <Card className="p-4 bg-gradient-to-r from-green-50 to-emerald-50 border-green-200">
+                <div className="text-center">
+                  <Gift className="w-8 h-8 mx-auto text-green-600 mb-2" />
+                  <h3 className="font-semibold text-green-800">Quick Bonus</h3>
+                  <p className="text-sm text-green-600">Instant reward system</p>
+                  <div className="flex gap-1 mt-2">
+                    {[50, 100, 200].map(amount => (
+                      <Button
+                        key={amount}
+                        size="sm"
+                        variant="outline"
+                        className="text-green-700 border-green-300 hover:bg-green-100"
+                        onClick={() => {
+                          const userId = prompt(`Give ₹${amount} bonus to User ID:`);
+                          if (userId) handleGiveUserBonus(parseInt(userId), amount, `Quick ₹${amount} bonus`);
+                        }}
+                      >
+                        ₹{amount}
+                      </Button>
+                    ))}
+                  </div>
+                </div>
+              </Card>
+
+              <Card className="p-4 bg-gradient-to-r from-blue-50 to-cyan-50 border-blue-200">
+                <div className="text-center">
+                  <Users className="w-8 h-8 mx-auto text-blue-600 mb-2" />
+                  <h3 className="font-semibold text-blue-800">Bulk Bonus</h3>
+                  <p className="text-sm text-blue-600">Reward multiple users</p>
+                  <Button
+                    size="sm"
+                    className="mt-2 bg-blue-500 hover:bg-blue-600"
+                    onClick={() => {
+                      const amount = prompt("Enter bonus amount for all active users:");
+                      if (amount) handleBulkBonus(parseInt(amount));
+                    }}
+                  >
+                    Bulk Reward
+                  </Button>
+                </div>
+              </Card>
+
+              <Card className="p-4 bg-gradient-to-r from-purple-50 to-pink-50 border-purple-200">
+                <div className="text-center">
+                  <Award className="w-8 h-8 mx-auto text-purple-600 mb-2" />
+                  <h3 className="font-semibold text-purple-800">Achievement</h3>
+                  <p className="text-sm text-purple-600">Special rewards</p>
+                  <div className="flex gap-1 mt-2">
+                    {[500, 1000].map(amount => (
+                      <Button
+                        key={amount}
+                        size="sm"
+                        variant="outline"
+                        className="text-purple-700 border-purple-300 hover:bg-purple-100"
+                        onClick={() => {
+                          const userId = prompt(`Give ₹${amount} achievement bonus to User ID:`);
+                          if (userId) handleGiveUserBonus(parseInt(userId), amount, `Achievement bonus ₹${amount}`);
+                        }}
+                      >
+                        ₹{amount}
+                      </Button>
+                    ))}
+                  </div>
+                </div>
+              </Card>
+            </div>
+
+            {/* Recent Bonuses */}
+            <Card className="p-6">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <TrendingUp className="w-5 h-5 text-green-500" />
+                  Recent User Bonuses
+                </CardTitle>
+                <CardDescription>
+                  Real-time bonus transactions and rewards
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-3">
+                  {users.slice(0, 5).map((user) => (
+                    <div key={user.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 bg-gradient-to-r from-green-400 to-blue-500 rounded-full flex items-center justify-center text-white font-bold">
+                          {user.displayName?.charAt(0) || 'U'}
+                        </div>
+                        <div>
+                          <p className="font-semibold">{user.displayName}</p>
+                          <p className="text-sm text-gray-600">{user.email}</p>
+                          <p className="text-xs text-green-600">Balance: ₹{user.walletBalance || 0}</p>
+                        </div>
+                      </div>
+                      <div className="flex gap-2">
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => handleGiveUserBonus(user.id, 100, "Admin appreciation bonus")}
+                        >
+                          <Gift className="w-3 h-3 mr-1" />
+                          ₹100
+                        </Button>
+                        <Button
+                          size="sm"
+                          className="bg-green-500 hover:bg-green-600"
+                          onClick={() => {
+                            const amount = prompt(`Enter bonus amount for ${user.displayName}:`);
+                            const reason = prompt("Enter bonus reason:");
+                            if (amount && reason) {
+                              handleGiveUserBonus(user.id, parseInt(amount), reason);
+                            }
+                          }}
+                        >
+                          <Gift className="w-3 h-3 mr-1" />
+                          Custom
+                        </Button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+                {users.length === 0 && (
+                  <div className="text-center py-8">
+                    <Gift className="w-16 h-16 mx-auto text-gray-400 mb-4" />
+                    <p className="text-gray-500">No users available for bonuses</p>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
           </TabsContent>
 
           {/* Admin Controls Tab */}
