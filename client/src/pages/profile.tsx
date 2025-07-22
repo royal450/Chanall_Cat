@@ -885,38 +885,464 @@ export default function Profile() {
 <TabsContent value="wallet" className="space-y-6">
             {/* Wallet Balance Card */}
             <Card className="bg-gradient-to-r from-green-500 to-emerald-600 text-white border-0">
-              <CardContent className="p-6">
+              <CardContent className="p-4 md:p-6">
                 <div className="flex items-center justify-between">
                   <div>
-                    <h3 className="text-lg font-medium text-green-100">Available Balance</h3>
-                    <p className="text-3xl font-bold">₹{profile.walletBalance.toLocaleString()}</p>
-                    <p className="text-sm text-green-100 mt-1">Total Earnings: ₹{profile.totalEarnings.toLocaleString()}</p>
+                    <h3 className="text-base md:text-lg font-medium text-green-100">Available Balance</h3>
+                    <p className="text-2xl md:text-3xl font-bold">₹{profile.walletBalance.toLocaleString()}</p>
+                    <p className="text-xs md:text-sm text-green-100 mt-1">Total Earnings: ₹{profile.totalEarnings.toLocaleString()}</p>
                   </div>
-                  <Wallet className="w-12 h-12 text-green-100" />
+                  <Wallet className="w-8 h-8 md:w-12 md:h-12 text-green-100" />
                 </div>
               </CardContent>
             </Card>
 
-            {/* Quick Withdrawal Button */}
+            {/* Withdrawal Forms Section */}
             <Card>
-              <CardContent className="p-6 text-center">
-                <Button 
-                  onClick={() => window.location.href = '/withdrawal'}
-                  className="bg-gradient-to-r from-purple-600 to-pink-600 text-white py-3 px-8 text-lg"
-                >
-                  <Wallet className="w-5 h-5 mr-2" />
-                  Request Withdrawal
-                </Button>
-                <p className="text-sm text-gray-600 mt-2">
-                  Minimum withdrawal: ₹100 • Processing time: 1-3 business days
-                </p>
+              <CardHeader>
+                <CardTitle className="text-lg md:text-xl flex items-center gap-2">
+                  <Wallet className="w-5 h-5 text-purple-600" />
+                  Request Withdrawal (Min: ₹100, Max: ₹50,000)
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <Tabs defaultValue="upi" className="w-full">
+                  <TabsList className="grid w-full grid-cols-3 h-10 md:h-12">
+                    <TabsTrigger value="upi" className="text-xs md:text-sm">💳 UPI</TabsTrigger>
+                    <TabsTrigger value="bank" className="text-xs md:text-sm">🏦 Bank</TabsTrigger>
+                    <TabsTrigger value="crypto" className="text-xs md:text-sm">₿ Crypto</TabsTrigger>
+                  </TabsList>
+
+                  {/* UPI Form */}
+                  <TabsContent value="upi" className="space-y-4 mt-4">
+                    <div className="space-y-3">
+                      <div>
+                        <Label className="text-sm font-medium">Amount (₹)</Label>
+                        <Input
+                          type="number"
+                          placeholder="Min ₹100 - Max ₹50,000"
+                          className="mt-1"
+                          min="100"
+                          max="50000"
+                          id="upi-amount"
+                        />
+                      </div>
+                      <div>
+                        <Label className="text-sm font-medium">UPI ID</Label>
+                        <Input
+                          type="text"
+                          placeholder="your-upi@paytm"
+                          className="mt-1"
+                          id="upi-id"
+                        />
+                      </div>
+                      <div>
+                        <Label className="text-sm font-medium">Mobile Number</Label>
+                        <Input
+                          type="tel"
+                          placeholder="+91 9876543210"
+                          className="mt-1"
+                          id="upi-number"
+                        />
+                      </div>
+                      <div>
+                        <Label className="text-sm font-medium">Bank Verified Name</Label>
+                        <Input
+                          type="text"
+                          placeholder="Full name as per bank"
+                          className="mt-1"
+                          id="upi-name"
+                        />
+                      </div>
+                      <div>
+                        <Label className="text-sm font-medium">Password Verification</Label>
+                        <Input
+                          type="password"
+                          placeholder="Enter your account password"
+                          className="mt-1"
+                          id="upi-password"
+                        />
+                      </div>
+                      <Button 
+                        className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 mt-4"
+                        onClick={() => {
+                          const amount = document.getElementById('upi-amount')?.value;
+                          const upiId = document.getElementById('upi-id')?.value;
+                          const number = document.getElementById('upi-number')?.value;
+                          const name = document.getElementById('upi-name')?.value;
+                          const password = document.getElementById('upi-password')?.value;
+
+                          if (!amount || !upiId || !number || !name || !password) {
+                            toast({
+                              title: "Missing Information",
+                              description: "Please fill all fields",
+                              variant: "destructive"
+                            });
+                            return;
+                          }
+
+                          const amountNum = parseInt(amount);
+                          if (amountNum < 100 || amountNum > 50000) {
+                            toast({
+                              title: "Invalid Amount",
+                              description: "Amount must be between ₹100 and ₹50,000",
+                              variant: "destructive"
+                            });
+                            return;
+                          }
+
+                          if (amountNum > profile.walletBalance) {
+                            toast({
+                              title: "Insufficient Balance",
+                              description: "Not enough balance for this withdrawal",
+                              variant: "destructive"
+                            });
+                            return;
+                          }
+
+                          // Create withdrawal request
+                          const withdrawalData = {
+                            userId: user.uid,
+                            userName: profile.displayName,
+                            userEmail: user.email,
+                            amount: amountNum,
+                            method: 'UPI',
+                            upiId: upiId,
+                            phoneNumber: number,
+                            bankVerifiedName: name,
+                            status: 'pending',
+                            createdAt: new Date().toISOString(),
+                            requestId: `REQ_${Date.now()}`,
+                            accountDetails: upiId
+                          };
+
+                          // Update Firebase
+                          const withdrawalRef = ref(database, 'withdrawalRequests');
+                          push(withdrawalRef, withdrawalData).then(() => {
+                            // Deduct from wallet
+                            const userRef = ref(database, `users/${user.uid}`);
+                            update(userRef, {
+                              walletBalance: profile.walletBalance - amountNum
+                            });
+
+                            toast({
+                              title: "✅ Withdrawal Requested!",
+                              description: `₹${amountNum} UPI withdrawal submitted. Money deducted from wallet.`,
+                            });
+
+                            // Clear form
+                            document.getElementById('upi-amount').value = '';
+                            document.getElementById('upi-id').value = '';
+                            document.getElementById('upi-number').value = '';
+                            document.getElementById('upi-name').value = '';
+                            document.getElementById('upi-password').value = '';
+                          }).catch(error => {
+                            toast({
+                              title: "Error",
+                              description: "Failed to submit request. Try again.",
+                              variant: "destructive"
+                            });
+                          });
+                        }}
+                      >
+                        💳 Submit UPI Withdrawal Request
+                      </Button>
+                    </div>
+                  </TabsContent>
+
+                  {/* Bank Form */}
+                  <TabsContent value="bank" className="space-y-4 mt-4">
+                    <div className="space-y-3">
+                      <div>
+                        <Label className="text-sm font-medium">Bank Verified Name</Label>
+                        <Input
+                          type="text"
+                          placeholder="Full name as per bank account"
+                          className="mt-1"
+                          id="bank-name"
+                        />
+                      </div>
+                      <div>
+                        <Label className="text-sm font-medium">Account Number</Label>
+                        <Input
+                          type="text"
+                          placeholder="Bank account number"
+                          className="mt-1"
+                          id="bank-account"
+                        />
+                      </div>
+                      <div>
+                        <Label className="text-sm font-medium">IFSC Code</Label>
+                        <Input
+                          type="text"
+                          placeholder="IFSC Code (e.g., SBIN0001234)"
+                          className="mt-1"
+                          id="bank-ifsc"
+                        />
+                      </div>
+                      <div>
+                        <Label className="text-sm font-medium">Bank Name</Label>
+                        <Input
+                          type="text"
+                          placeholder="Bank name"
+                          className="mt-1"
+                          id="bank-bank-name"
+                        />
+                      </div>
+                      <div>
+                        <Label className="text-sm font-medium">Amount (₹)</Label>
+                        <Input
+                          type="number"
+                          placeholder="Min ₹100 - Max ₹50,000"
+                          className="mt-1"
+                          min="100"
+                          max="50000"
+                          id="bank-amount"
+                        />
+                      </div>
+                      <div>
+                        <Label className="text-sm font-medium">Password</Label>
+                        <Input
+                          type="password"
+                          placeholder="Enter your account password"
+                          className="mt-1"
+                          id="bank-password"
+                        />
+                      </div>
+                      <Button 
+                        className="w-full bg-gradient-to-r from-green-600 to-blue-600 hover:from-green-700 hover:to-blue-700 mt-4"
+                        onClick={() => {
+                          const name = document.getElementById('bank-name')?.value;
+                          const account = document.getElementById('bank-account')?.value;
+                          const ifsc = document.getElementById('bank-ifsc')?.value;
+                          const bankName = document.getElementById('bank-bank-name')?.value;
+                          const amount = document.getElementById('bank-amount')?.value;
+                          const password = document.getElementById('bank-password')?.value;
+
+                          if (!name || !account || !ifsc || !bankName || !amount || !password) {
+                            toast({
+                              title: "Missing Information",
+                              description: "Please fill all fields",
+                              variant: "destructive"
+                            });
+                            return;
+                          }
+
+                          const amountNum = parseInt(amount);
+                          if (amountNum < 100 || amountNum > 50000) {
+                            toast({
+                              title: "Invalid Amount",
+                              description: "Amount must be between ₹100 and ₹50,000",
+                              variant: "destructive"
+                            });
+                            return;
+                          }
+
+                          if (amountNum > profile.walletBalance) {
+                            toast({
+                              title: "Insufficient Balance",
+                              description: "Not enough balance for this withdrawal",
+                              variant: "destructive"
+                            });
+                            return;
+                          }
+
+                          // Create withdrawal request
+                          const withdrawalData = {
+                            userId: user.uid,
+                            userName: profile.displayName,
+                            userEmail: user.email,
+                            amount: amountNum,
+                            method: 'BANK',
+                            bankVerifiedName: name,
+                            accountNumber: account,
+                            ifscCode: ifsc,
+                            bankName: bankName,
+                            status: 'pending',
+                            createdAt: new Date().toISOString(),
+                            requestId: `REQ_${Date.now()}`,
+                            accountDetails: `${account} - ${bankName}`
+                          };
+
+                          // Update Firebase
+                          const withdrawalRef = ref(database, 'withdrawalRequests');
+                          push(withdrawalRef, withdrawalData).then(() => {
+                            // Deduct from wallet
+                            const userRef = ref(database, `users/${user.uid}`);
+                            update(userRef, {
+                              walletBalance: profile.walletBalance - amountNum
+                            });
+
+                            toast({
+                              title: "🏦 Bank Withdrawal Requested!",
+                              description: `₹${amountNum} bank transfer submitted. Money deducted from wallet.`,
+                            });
+
+                            // Clear form
+                            document.getElementById('bank-name').value = '';
+                            document.getElementById('bank-account').value = '';
+                            document.getElementById('bank-ifsc').value = '';
+                            document.getElementById('bank-bank-name').value = '';
+                            document.getElementById('bank-amount').value = '';
+                            document.getElementById('bank-password').value = '';
+                          }).catch(error => {
+                            toast({
+                              title: "Error",
+                              description: "Failed to submit request. Try again.",
+                              variant: "destructive"
+                            });
+                          });
+                        }}
+                      >
+                        🏦 Submit Bank Transfer Request
+                      </Button>
+                    </div>
+                  </TabsContent>
+
+                  {/* Crypto Form */}
+                  <TabsContent value="crypto" className="space-y-4 mt-4">
+                    <div className="space-y-3">
+                      <div>
+                        <Label className="text-sm font-medium">USD Wallet Address</Label>
+                        <Input
+                          type="text"
+                          placeholder="Your USD crypto wallet address"
+                          className="mt-1"
+                          id="crypto-address"
+                        />
+                      </div>
+                      <div>
+                        <Label className="text-sm font-medium">Email</Label>
+                        <Input
+                          type="email"
+                          placeholder="your@email.com"
+                          className="mt-1"
+                          id="crypto-email"
+                        />
+                      </div>
+                      <div>
+                        <Label className="text-sm font-medium">WhatsApp Number</Label>
+                        <Input
+                          type="tel"
+                          placeholder="+91 9876543210"
+                          className="mt-1"
+                          id="crypto-whatsapp"
+                        />
+                      </div>
+                      <div>
+                        <Label className="text-sm font-medium">Amount (₹)</Label>
+                        <Input
+                          type="number"
+                          placeholder="Min ₹100 - Max ₹50,000"
+                          className="mt-1"
+                          min="100"
+                          max="50000"
+                          id="crypto-amount"
+                        />
+                      </div>
+                      <div>
+                        <Label className="text-sm font-medium">Password</Label>
+                        <Input
+                          type="password"
+                          placeholder="Enter your account password"
+                          className="mt-1"
+                          id="crypto-password"
+                        />
+                      </div>
+                      <Button 
+                        className="w-full bg-gradient-to-r from-orange-600 to-red-600 hover:from-orange-700 hover:to-red-700 mt-4"
+                        onClick={() => {
+                          const address = document.getElementById('crypto-address')?.value;
+                          const email = document.getElementById('crypto-email')?.value;
+                          const whatsapp = document.getElementById('crypto-whatsapp')?.value;
+                          const amount = document.getElementById('crypto-amount')?.value;
+                          const password = document.getElementById('crypto-password')?.value;
+
+                          if (!address || !email || !whatsapp || !amount || !password) {
+                            toast({
+                              title: "Missing Information",
+                              description: "Please fill all fields",
+                              variant: "destructive"
+                            });
+                            return;
+                          }
+
+                          const amountNum = parseInt(amount);
+                          if (amountNum < 100 || amountNum > 50000) {
+                            toast({
+                              title: "Invalid Amount",
+                              description: "Amount must be between ₹100 and ₹50,000",
+                              variant: "destructive"
+                            });
+                            return;
+                          }
+
+                          if (amountNum > profile.walletBalance) {
+                            toast({
+                              title: "Insufficient Balance",
+                              description: "Not enough balance for this withdrawal",
+                              variant: "destructive"
+                            });
+                            return;
+                          }
+
+                          // Create withdrawal request
+                          const withdrawalData = {
+                            userId: user.uid,
+                            userName: profile.displayName,
+                            userEmail: user.email,
+                            amount: amountNum,
+                            method: 'CRYPTO',
+                            cryptoAddress: address,
+                            email: email,
+                            phoneNumber: whatsapp,
+                            status: 'pending',
+                            createdAt: new Date().toISOString(),
+                            requestId: `REQ_${Date.now()}`,
+                            accountDetails: address
+                          };
+
+                          // Update Firebase
+                          const withdrawalRef = ref(database, 'withdrawalRequests');
+                          push(withdrawalRef, withdrawalData).then(() => {
+                            // Deduct from wallet
+                            const userRef = ref(database, `users/${user.uid}`);
+                            update(userRef, {
+                              walletBalance: profile.walletBalance - amountNum
+                            });
+
+                            toast({
+                              title: "₿ Crypto Withdrawal Requested!",
+                              description: `₹${amountNum} crypto withdrawal submitted. Money deducted from wallet.`,
+                            });
+
+                            // Clear form
+                            document.getElementById('crypto-address').value = '';
+                            document.getElementById('crypto-email').value = '';
+                            document.getElementById('crypto-whatsapp').value = '';
+                            document.getElementById('crypto-amount').value = '';
+                            document.getElementById('crypto-password').value = '';
+                          }).catch(error => {
+                            toast({
+                              title: "Error",
+                              description: "Failed to submit request. Try again.",
+                              variant: "destructive"
+                            });
+                          });
+                        }}
+                      >
+                        ₿ Submit Crypto Withdrawal Request
+                      </Button>
+                    </div>
+                  </TabsContent>
+                </Tabs>
               </CardContent>
             </Card>
 
-            {/* Real-time Bonus & Transaction History */}
+            {/* Bonus & Transaction History */}
             <Card>
               <CardHeader>
-                <CardTitle className="flex items-center gap-2">
+                <CardTitle className="text-lg md:text-xl flex items-center gap-2">
                   <Gift className="w-5 h-5 text-purple-600" />
                   Bonus & Transaction History (Real-time)
                 </CardTitle>
@@ -926,9 +1352,9 @@ export default function Profile() {
               </CardHeader>
               <CardContent>
                 <Tabs defaultValue="bonuses" className="w-full">
-                  <TabsList className="grid w-full grid-cols-2">
-                    <TabsTrigger value="bonuses">🎁 Bonuses Received</TabsTrigger>
-                    <TabsTrigger value="withdrawals">💸 Withdrawal Requests</TabsTrigger>
+                  <TabsList className="grid w-full grid-cols-2 h-10 md:h-12">
+                    <TabsTrigger value="bonuses" className="text-xs md:text-sm">🎁 Bonuses Received</TabsTrigger>
+                    <TabsTrigger value="withdrawals" className="text-xs md:text-sm">💸 Withdrawal Requests</TabsTrigger>
                   </TabsList>
 
                   {/* Bonuses Tab */}
@@ -936,19 +1362,19 @@ export default function Profile() {
                     <div className="space-y-3 max-h-96 overflow-y-auto">
                       {profile.bonusHistory && profile.bonusHistory.length > 0 ? (
                         profile.bonusHistory.map((bonus, index) => (
-                          <Card key={index} className="border-l-4 border-purple-500 bg-purple-50/50 hover:shadow-md transition-shadow">
-                            <CardContent className="p-4">
+                          <Card key={index} className="border-l-4 border-green-500 bg-green-50/50 hover:shadow-md transition-shadow">
+                            <CardContent className="p-3 md:p-4">
                               <div className="flex items-center justify-between">
                                 <div className="flex-1">
                                   <div className="flex items-center gap-2 mb-2">
-                                    <Gift className="w-5 h-5 text-purple-600" />
-                                    <span className="font-bold text-xl text-green-600">+₹{bonus.amount}</span>
-                                    <Badge className="bg-purple-100 text-purple-800">
+                                    <Gift className="w-4 h-4 md:w-5 md:h-5 text-green-600" />
+                                    <span className="font-bold text-lg md:text-xl text-green-600">+₹{bonus.amount}</span>
+                                    <Badge className="bg-green-100 text-green-800 text-xs">
                                       🎁 {bonus.type === 'admin_bonus' ? 'Admin Bonus' : 'Referral Bonus'}
                                     </Badge>
                                   </div>
-                                  <p className="text-sm text-gray-700 font-medium mb-1">
-                                    {bonus.reason || 'Bonus reward'}
+                                  <p className="text-xs md:text-sm text-gray-700 font-medium mb-1">
+                                    {bonus.reason || 'Keep it up!'}
                                   </p>
                                   {bonus.adminName && (
                                     <p className="text-xs text-gray-600 mb-1">
@@ -956,16 +1382,16 @@ export default function Profile() {
                                     </p>
                                   )}
                                   <p className="text-xs text-gray-500">
-                                    📅 Received: {new Date(bonus.createdAt).toLocaleDateString()} at {new Date(bonus.createdAt).toLocaleTimeString()}
+                                    📅 {new Date(bonus.createdAt).toLocaleDateString()} at {new Date(bonus.createdAt).toLocaleTimeString()}
                                   </p>
                                   {bonus.transactionId && (
-                                    <p className="text-xs text-purple-600 font-mono mt-1">
+                                    <p className="text-xs text-green-600 font-mono mt-1">
                                       🆔 ID: {bonus.transactionId}
                                     </p>
                                   )}
                                 </div>
                                 <div className="text-right">
-                                  <Badge className="bg-green-100 text-green-800">
+                                  <Badge className="bg-green-100 text-green-800 text-xs">
                                     ✅ Completed
                                   </Badge>
                                   <p className="text-xs text-gray-500 mt-1">Instant</p>
@@ -976,9 +1402,9 @@ export default function Profile() {
                         ))
                       ) : (
                         <div className="text-center py-8">
-                          <Gift className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-                          <p className="text-gray-500 font-medium">No bonuses received yet</p>
-                          <p className="text-sm text-gray-400">Bonuses from admin and referrals will appear here</p>
+                          <Gift className="w-12 h-12 md:w-16 md:h-16 text-gray-400 mx-auto mb-4" />
+                          <p className="text-gray-500 font-medium text-sm md:text-base">No bonuses received yet</p>
+                          <p className="text-xs md:text-sm text-gray-400">Bonuses from admin and referrals will appear here</p>
                         </div>
                       )}
                     </div>
@@ -990,19 +1416,19 @@ export default function Profile() {
                       {withdrawalHistory.length > 0 ? (
                         withdrawalHistory.map((withdrawal) => (
                           <Card key={withdrawal.id} className={`border-l-4 ${
-                            withdrawal.status === 'pending' ? 'border-yellow-500 bg-yellow-50' :
-                            withdrawal.status === 'approved' ? 'border-green-500 bg-green-50' :
-                            'border-red-500 bg-red-50'
+                            withdrawal.status === 'pending' ? 'border-yellow-500 bg-yellow-50/50' :
+                            withdrawal.status === 'approved' ? 'border-green-500 bg-green-50/50' :
+                            'border-red-500 bg-red-50/50'
                           } hover:shadow-md transition-shadow`}>
-                            <CardContent className="p-4">
-                              <div className="flex items-start justify-between">
+                            <CardContent className="p-3 md:p-4">
+                              <div className="flex flex-col md:flex-row md:items-start justify-between gap-3">
                                 <div className="flex-1">
                                   <div className="flex items-center gap-2 mb-2">
-                                    {withdrawal.status === 'pending' && <Clock className="w-5 h-5 text-yellow-600" />}
-                                    {withdrawal.status === 'approved' && <CheckCircle className="w-5 h-5 text-green-600" />}
-                                    {withdrawal.status === 'rejected' && <XCircle className="w-5 h-5 text-red-600" />}
-                                    <span className="font-bold text-xl">₹{withdrawal.amount}</span>
-                                    <Badge className={`${
+                                    {withdrawal.status === 'pending' && <Clock className="w-4 h-4 md:w-5 md:h-5 text-yellow-600" />}
+                                    {withdrawal.status === 'approved' && <CheckCircle className="w-4 h-4 md:w-5 md:h-5 text-green-600" />}
+                                    {withdrawal.status === 'rejected' && <XCircle className="w-4 h-4 md:w-5 md:h-5 text-red-600" />}
+                                    <span className="font-bold text-lg md:text-xl text-gray-800">₹{withdrawal.amount}</span>
+                                    <Badge className={`text-xs ${
                                       withdrawal.status === 'pending' ? 'bg-yellow-500 text-white animate-pulse' :
                                       withdrawal.status === 'approved' ? 'bg-green-500 text-white' :
                                       'bg-red-500 text-white'
@@ -1013,67 +1439,53 @@ export default function Profile() {
                                     </Badge>
                                   </div>
 
-                                  <div className="grid grid-cols-2 gap-3 text-sm mb-3">
+                                  <div className="grid grid-cols-1 md:grid-cols-2 gap-2 md:gap-3 text-xs md:text-sm mb-3">
                                     <div>
                                       <span className="text-gray-600">💳 Method:</span>
-                                      <p className="font-medium">{withdrawal.method.toUpperCase()}</p>
-                                    </div>
-                                    <div>
-                                      <span className="text-gray-600">📱 Mobile:</span>
-                                      <p className="font-mono text-sm">{withdrawal.phoneNumber || 'N/A'}</p>
+                                      <p className="font-medium">{withdrawal.method}</p>
                                     </div>
                                     <div>
                                       <span className="text-gray-600">🏦 Account:</span>
                                       <p className="font-mono text-xs break-all">{withdrawal.accountDetails || withdrawal.upiId || withdrawal.cryptoAddress || 'N/A'}</p>
                                     </div>
                                     <div>
+                                      <span className="text-gray-600">👤 Client Name:</span>
+                                      <p className="font-medium">{withdrawal.bankVerifiedName || withdrawal.userName}</p>
+                                    </div>
+                                    <div>
                                       <span className="text-gray-600">📅 Date:</span>
-                                      <p className="text-xs">{new Date(withdrawal.requestDate || withdrawal.createdAt).toLocaleString()}</p>
+                                      <p className="text-xs">{new Date(withdrawal.requestDate || withdrawal.createdAt).toLocaleDateString()}</p>
                                     </div>
                                   </div>
 
-                                  {withdrawal.bankName && withdrawal.ifscCode && (
-                                    <div className="mb-2 p-2 bg-gray-100 rounded text-xs">
-                                      <span className="font-medium">🏦 Bank Details:</span>
-                                      <p>Bank: {withdrawal.bankName} | IFSC: {withdrawal.ifscCode}</p>
-                                      {withdrawal.accountNumber && <p>A/C: {withdrawal.accountNumber}</p>}
-                                    </div>
-                                  )}
+                                  <div className="text-xs text-gray-500">
+                                    🆔 Client ID: {withdrawal.userId.slice(0, 8)} | Request ID: #{withdrawal.requestId || withdrawal.id}
+                                  </div>
 
                                   {withdrawal.transactionId && (
-                                    <div className="mb-2 p-2 bg-green-100 rounded text-xs">
+                                    <div className="mt-2 p-2 bg-green-100 rounded text-xs">
                                       <span className="text-green-700 font-medium">💸 Transaction ID:</span>
                                       <p className="font-mono text-green-800">{withdrawal.transactionId}</p>
                                     </div>
                                   )}
 
                                   {withdrawal.adminNotes && (
-                                    <div className="mb-2 p-2 bg-blue-100 rounded text-xs">
+                                    <div className="mt-2 p-2 bg-blue-100 rounded text-xs">
                                       <span className="text-blue-700 font-medium">💬 Admin Notes:</span>
                                       <p className="text-blue-800">{withdrawal.adminNotes}</p>
                                     </div>
                                   )}
 
                                   {withdrawal.rejectionReason && (
-                                    <div className="mb-2 p-2 bg-red-100 rounded text-xs">
+                                    <div className="mt-2 p-2 bg-red-100 rounded text-xs">
                                       <span className="text-red-700 font-medium">❌ Rejection Reason:</span>
                                       <p className="text-red-800">{withdrawal.rejectionReason}</p>
                                     </div>
                                   )}
-
-                                  {withdrawal.processedBy && withdrawal.processedAt && (
-                                    <div className="text-xs text-gray-500">
-                                      👤 Processed by {withdrawal.processedBy} on {new Date(withdrawal.processedAt).toLocaleString()}
-                                    </div>
-                                  )}
-
-                                  <p className="text-xs text-gray-500 mt-1">
-                                    🆔 Request ID: #{withdrawal.id}
-                                  </p>
                                 </div>
 
-                                <div className="text-right ml-4">
-                                  <div className={`text-2xl font-bold ${
+                                <div className="text-center md:text-right">
+                                  <div className={`text-xl md:text-2xl font-bold mb-1 ${
                                     withdrawal.status === 'approved' ? 'text-green-600' :
                                     withdrawal.status === 'rejected' ? 'text-red-600' :
                                     'text-yellow-600'
@@ -1081,7 +1493,7 @@ export default function Profile() {
                                     {withdrawal.status === 'pending' ? '⏳' :
                                      withdrawal.status === 'approved' ? '✅' : '❌'}
                                   </div>
-                                  <p className="text-xs text-gray-500 mt-1">
+                                  <p className="text-xs text-gray-500">
                                     {withdrawal.status === 'pending' ? 'Under Review' :
                                      withdrawal.status === 'approved' ? 'Payment Sent' :
                                      'Request Declined'}
@@ -1093,9 +1505,9 @@ export default function Profile() {
                         ))
                       ) : (
                         <div className="text-center py-8">
-                          <Wallet className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-                          <p className="text-gray-500 font-medium">No withdrawal requests yet</p>
-                          <p className="text-sm text-gray-400">Your withdrawal requests will appear here with full tracking</p>
+                          <Wallet className="w-12 h-12 md:w-16 md:h-16 text-gray-400 mx-auto mb-4" />
+                          <p className="text-gray-500 font-medium text-sm md:text-base">No withdrawal requests yet</p>
+                          <p className="text-xs md:text-sm text-gray-400">Your withdrawal requests will appear here with full tracking</p>
                         </div>
                       )}
                     </div>

@@ -515,9 +515,9 @@ export default function SuperAdmin() {
         </div>
       </div>
 
-      <div className="container mx-auto px-2 md:px-4 py-4 md:py-8 max-w-[95%] md:max-w-[85%]">
+      <div className="container mx-auto px-2 md:px-4 py-4 md:py-8 max-w-[85%]">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className="grid grid-cols-3 md:grid-cols-7 w-full h-auto">
+          <TabsList className="grid grid-cols-4 md:grid-cols-7 w-full h-auto">
             <TabsTrigger value="overview" className="flex flex-col md:flex-row items-center gap-1 md:gap-2 p-2 md:p-3 text-xs md:text-sm">
               <BarChart3 className="w-3 h-3 md:w-4 md:h-4" />
               <span className="hidden md:inline">Overview</span>
@@ -533,13 +533,14 @@ export default function SuperAdmin() {
               <span className="hidden md:inline">Users</span>
               <span className="md:hidden">Users</span>
             </TabsTrigger>
+            <TabsTrigger value="withdrawals" className="flex flex-col md:flex-row items-center gap-1 md:gap-2 p-2 md:p-3 text-xs md:text-sm">
+              <DollarSign className="w-3 h-3 md:w-4 md:h-4" />
+              <span className="hidden md:inline">Withdrawals</span>
+              <span className="md:hidden">W.</span>
+            </TabsTrigger>
             <TabsTrigger value="referrals" className="flex flex-col md:flex-row items-center gap-1 md:gap-2 p-2 md:p-3 text-xs md:text-sm hidden md:flex">
               <Share2 className="w-3 h-3 md:w-4 md:h-4" />
               Referrals
-            </TabsTrigger>
-            <TabsTrigger value="withdrawals" className="flex flex-col md:flex-row items-center gap-1 md:gap-2 p-2 md:p-3 text-xs md:text-sm hidden md:flex">
-              <DollarSign className="w-3 h-3 md:w-4 md:h-4" />
-              Withdrawals
             </TabsTrigger>
             <TabsTrigger value="bonuses" className="flex flex-col md:flex-row items-center gap-1 md:gap-2 p-2 md:p-3 text-xs md:text-sm hidden md:flex">
               <Gift className="w-3 h-3 md:w-4 md:h-4" />
