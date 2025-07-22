@@ -471,7 +471,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       // 🔥 EXACT SAME FIREBASE OPERATIONS AS REFERRAL BONUS IN use-auth.tsx
       const { ref, get, update, push } = await import('firebase/database');
-      const { database } = await import('./db');
+      
+      // Import Firebase database only
+      let database;
+      try {
+        const dbModule = await import('./db');
+        database = dbModule.database;
+        
+        if (!database) {
+          throw new Error('Firebase database not initialized');
+        }
+      } catch (error) {
+        console.error('Error importing database:', error);
+        return res.status(500).json({ 
+          error: 'Database connection failed', 
+          details: error.message 
+        });
+      }
       
       const userRef = ref(database, `users/${userId}`);
       const userSnapshot = await get(userRef);
@@ -480,6 +496,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
         const userData = userSnapshot.val();
         const currentBalance = userData.walletBalance || 0;
         const currentEarnings = userData.totalEarnings || 0;
+        
+        console.log(`🔍 Current user data:`, {
+          userId,
+          displayName: userData.displayName,
+          currentBalance,
+          bonusAmount: amount
+        });
         
         // EXACT same update method as referral bonus
         await update(userRef, {
@@ -491,9 +514,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         
         console.log(`✅ Firebase updated: User ${userId} balance: ${currentBalance} → ${currentBalance + amount}`);
         
-        // Create bonus record - same as referral bonuses
+        // Create bonus record - same as referral bonuses  
         const bonusRef = ref(database, 'userBonuses');
-        await push(bonusRef, {
+        const bonusRecord = {
           userId,
           amount,
           reason,
@@ -502,12 +525,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
           createdAt: new Date().toISOString(),
           status: 'completed',
           transactionId: `BONUS_${Date.now()}`
-        });
+        };
+        
+        await push(bonusRef, bonusRecord);
+        console.log(`✅ Bonus record created:`, bonusRecord);
         
         console.log(`✅ Admin bonus ₹${amount} successfully added to user ${userId}`);
         res.json({ 
           success: true, 
-          message: `₹${amount} bonus added successfully`,
+          message: `₹${amount} bonus added successfully to ${userData.displayName}`,
           newBalance: currentBalance + amount,
           userDetails: {
             userId,

@@ -1,18 +1,25 @@
-import { Pool, neonConfig } from '@neondatabase/serverless';
-import { drizzle } from 'drizzle-orm/neon-serverless';
-import ws from "ws";
-import * as schema from "@shared/schema";
+// PostgreSQL configuration (optional, only for legacy features)
+let pool = null;
+let db = null;
 
-neonConfig.webSocketConstructor = ws;
+try {
+  if (process.env.DATABASE_URL) {
+    const { Pool, neonConfig } = await import('@neondatabase/serverless');
+    const { drizzle } = await import('drizzle-orm/neon-serverless');
+    const ws = await import("ws");
+    const schema = await import("@shared/schema");
 
-if (!process.env.DATABASE_URL) {
-  throw new Error(
-    "DATABASE_URL must be set. Did you forget to provision a database?",
-  );
+    neonConfig.webSocketConstructor = ws.default;
+    pool = new Pool({ connectionString: process.env.DATABASE_URL });
+    db = drizzle({ client: pool, schema });
+  }
+} catch (error) {
+  console.log('PostgreSQL not configured, using Firebase only');
 }
 
-export const pool = new Pool({ connectionString: process.env.DATABASE_URL });
-export const db = drizzle({ client: pool, schema });
+export { pool, db };
+
+// Firebase configuration (primary database)
 import { initializeApp } from "firebase/app";
 import { getDatabase } from "firebase/database";
 
