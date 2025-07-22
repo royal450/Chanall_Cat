@@ -608,35 +608,7 @@ export default function Profile() {
                         level="M"
                         includeMargin={true}
                       />
-                      <Button
-                        onClick={async () => {
-                          try {
-                            if (navigator.share) {
-                              await navigator.share({
-                                title: 'Join with my referral code',
-                                text: `Join using my referral code: ${profile.referralCode}`,
-                                url: `https://coursemarket.web.app/signup?ref=${profile.referralCode}`
-                              });
-                            } else {
-                              throw new Error('Share not supported');
-                            }
-                          } catch (error) {
-                            if (error.name === 'AbortError') {
-                              toast({
-                                title: "Share Cancelled ❌",
-                                description: "QR code sharing was cancelled by user",
-                                variant: "destructive",
-                              });
-                            } else {
-                              await copyReferralLink();
-                            }
-                          }
-                        }}
-                        className="bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 text-white"
-                      >
-                        <Share2 className="w-4 h-4 mr-2" />
-                        Share QR Code
-                      </Button>
+                      
                     </div>
                   )}
                   <p className="text-sm text-gray-600 text-center mt-2">
@@ -646,43 +618,83 @@ export default function Profile() {
               </Card>
             </div>
 
-            {/* Referral History Section */}
-            <Card>
-              <CardHeader>
-                <CardTitle>Referral History</CardTitle>
-                <CardDescription>People who joined using your referral code</CardDescription>
-              </CardHeader>
-              <CardContent>
-                {profile.referralHistory && profile.referralHistory.length > 0 ? (
-                  <div className="space-y-3">
-                    {profile.referralHistory.map((referral, index) => (
-                      <div key={index} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                        <div className="flex items-center space-x-3">
-                          <div className="w-10 h-10 bg-gradient-to-r from-purple-500 to-blue-500 rounded-full flex items-center justify-center text-white font-bold">
-                            {referral.name.charAt(0).toUpperCase()}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              {/* Referral History Section */}
+              <Card>
+                <CardHeader>
+                  <CardTitle>Referral History</CardTitle>
+                  <CardDescription>People who joined using your referral code</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  {profile.referralHistory && profile.referralHistory.length > 0 ? (
+                    <div className="space-y-3">
+                      {profile.referralHistory.map((referral, index) => (
+                        <div key={index} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                          <div className="flex items-center space-x-3">
+                            <div className="w-10 h-10 bg-gradient-to-r from-purple-500 to-blue-500 rounded-full flex items-center justify-center text-white font-bold">
+                              {referral.name.charAt(0).toUpperCase()}
+                            </div>
+                            <div>
+                              <p className="font-medium text-gray-900">{referral.name}</p>
+                              <p className="text-sm text-gray-500">{referral.email}</p>
+                              <p className="text-xs text-gray-400">{new Date(referral.joinDate).toLocaleDateString()}</p>
+                            </div>
                           </div>
-                          <div>
-                            <p className="font-medium text-gray-900">{referral.name}</p>
-                            <p className="text-sm text-gray-500">{referral.email}</p>
-                            <p className="text-xs text-gray-400">{new Date(referral.joinDate).toLocaleDateString()}</p>
+                          <div className="text-right">
+                            <p className="font-semibold text-green-600">+₹{referral.commission}</p>
+                            <p className="text-xs text-gray-500">{referral.type}</p>
                           </div>
                         </div>
-                        <div className="text-right">
-                          <p className="font-semibold text-green-600">+₹{referral.commission}</p>
-                          <p className="text-xs text-gray-500">{referral.type}</p>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="text-center py-8">
+                      <UserPlus className="w-16 h-16 text-gray-400 mx-auto mb-4" />
+                      <p className="text-gray-500">No referrals yet</p>
+                      <p className="text-sm text-gray-400">Share your referral link to get started!</p>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+
+              {/* Bonus History Section */}
+              <Card>
+                <CardHeader>
+                  <CardTitle>Bonus History 🎁</CardTitle>
+                  <CardDescription>All bonuses received from admin and referrals</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-3 max-h-64 overflow-y-auto">
+                    {profile.bonusHistory && profile.bonusHistory.length > 0 ? (
+                      profile.bonusHistory.map((bonus, index) => (
+                        <div key={index} className="flex items-center justify-between p-3 bg-green-50 rounded-lg border border-green-200">
+                          <div className="flex items-center space-x-3">
+                            <div className="w-8 h-8 bg-green-500 rounded-full flex items-center justify-center text-white">
+                              <Gift className="w-4 h-4" />
+                            </div>
+                            <div>
+                              <p className="font-medium text-gray-900">{bonus.reason || 'Admin Bonus'}</p>
+                              <p className="text-xs text-gray-500">{new Date(bonus.createdAt).toLocaleString()}</p>
+                              <p className="text-xs text-green-600">From: {bonus.adminName || 'System Admin'}</p>
+                            </div>
+                          </div>
+                          <div className="text-right">
+                            <p className="font-semibold text-green-600">+₹{bonus.amount}</p>
+                            <p className="text-xs text-gray-500">{bonus.type || 'bonus'}</p>
+                          </div>
                         </div>
+                      ))
+                    ) : (
+                      <div className="text-center py-6">
+                        <Gift className="w-12 h-12 text-gray-400 mx-auto mb-2" />
+                        <p className="text-gray-500 text-sm">No bonuses yet</p>
+                        <p className="text-xs text-gray-400">Bonuses will appear here</p>
                       </div>
-                    ))}
+                    )}
                   </div>
-                ) : (
-                  <div className="text-center py-8">
-                    <UserPlus className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-                    <p className="text-gray-500">No referrals yet</p>
-                    <p className="text-sm text-gray-400">Share your referral link to get started!</p>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
+                </CardContent>
+              </Card>
+            </div>
           </TabsContent>
 
           <TabsContent value="courses" className="space-y-6">
@@ -1071,39 +1083,111 @@ Withdrawing(false);
             <Card>
               <CardHeader>
                 <CardTitle>Withdrawal History</CardTitle>
-                <CardDescription>Your recent withdrawal requests</CardDescription>
+                <CardDescription>Your recent withdrawal requests with complete tracking</CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="space-y-3">
+                <div className="space-y-4">
                   {withdrawalHistory.length > 0 ? (
                     withdrawalHistory.map((withdrawal) => (
-                      <div key={withdrawal.id} className="flex items-center justify-between p-3 bg-gray-50 rounded">
-                        <div className="flex items-center gap-3">
-                          {withdrawal.status === 'pending' && <Clock className="w-5 h-5 text-yellow-600" />}
-                          {withdrawal.status === 'approved' && <CheckCircle className="w-5 h-5 text-green-600" />}
-                          {withdrawal.status === 'rejected' && <XCircle className="w-5 h-5 text-red-600" />}
-                          <div>
-                            <p className="font-medium">Withdrawal Request</p>
-                            <p className="text-sm text-gray-600">
-                              {new Date(withdrawal.requestDate).toLocaleDateString()} • {withdrawal.method}
-                            </p>
+                      <Card key={withdrawal.id} className={`border-l-4 ${
+                        withdrawal.status === 'pending' ? 'border-yellow-500 bg-yellow-50' :
+                        withdrawal.status === 'approved' ? 'border-green-500 bg-green-50' :
+                        'border-red-500 bg-red-50'
+                      }`}>
+                        <CardContent className="p-4">
+                          <div className="flex flex-col md:flex-row md:items-center justify-between gap-3">
+                            <div className="flex-1">
+                              <div className="flex items-center gap-3 mb-2">
+                                {withdrawal.status === 'pending' && <Clock className="w-5 h-5 text-yellow-600" />}
+                                {withdrawal.status === 'approved' && <CheckCircle className="w-5 h-5 text-green-600" />}
+                                {withdrawal.status === 'rejected' && <XCircle className="w-5 h-5 text-red-600" />}
+                                <div>
+                                  <p className="font-semibold text-lg">₹{withdrawal.amount.toLocaleString()}</p>
+                                  <p className="text-sm text-gray-600">Withdrawal Request #{withdrawal.id}</p>
+                                </div>
+                              </div>
+                              
+                              <div className="grid grid-cols-2 gap-3 text-sm">
+                                <div>
+                                  <span className="text-gray-600">Method:</span>
+                                  <p className="font-medium">{withdrawal.method.toUpperCase()}</p>
+                                </div>
+                                <div>
+                                  <span className="text-gray-600">Date:</span>
+                                  <p className="font-medium">{new Date(withdrawal.requestDate).toLocaleDateString()}</p>
+                                </div>
+                                <div>
+                                  <span className="text-gray-600">Time:</span>
+                                  <p className="font-medium">{new Date(withdrawal.requestDate).toLocaleTimeString()}</p>
+                                </div>
+                                <div>
+                                  <span className="text-gray-600">Status:</span>
+                                  <Badge 
+                                    className={
+                                      withdrawal.status === 'approved' ? 'bg-green-500 text-white' : 
+                                      withdrawal.status === 'rejected' ? 'bg-red-500 text-white' : 
+                                      'bg-yellow-500 text-white'
+                                    }
+                                  >
+                                    {withdrawal.status === 'pending' ? '⏳ Processing' :
+                                     withdrawal.status === 'approved' ? '✅ Completed' :
+                                     '❌ Rejected'}
+                                  </Badge>
+                                </div>
+                              </div>
+
+                              {withdrawal.accountDetails && (
+                                <div className="mt-3 p-2 bg-gray-100 rounded text-sm">
+                                  <span className="text-gray-600">Account Details:</span>
+                                  <p className="font-mono">{withdrawal.accountDetails}</p>
+                                </div>
+                              )}
+
+                              {withdrawal.transactionId && (
+                                <div className="mt-2 p-2 bg-green-100 rounded text-sm">
+                                  <span className="text-green-700">Transaction ID:</span>
+                                  <p className="font-mono text-green-800">{withdrawal.transactionId}</p>
+                                </div>
+                              )}
+
+                              {withdrawal.adminNotes && (
+                                <div className="mt-2 p-2 bg-blue-100 rounded text-sm">
+                                  <span className="text-blue-700">Admin Notes:</span>
+                                  <p className="text-blue-800">{withdrawal.adminNotes}</p>
+                                </div>
+                              )}
+
+                              {withdrawal.processedBy && withdrawal.processedAt && (
+                                <div className="mt-2 text-xs text-gray-500">
+                                  Processed by {withdrawal.processedBy} on {new Date(withdrawal.processedAt).toLocaleString()}
+                                </div>
+                              )}
+                            </div>
+
+                            <div className="text-right">
+                              <div className={`text-2xl font-bold ${
+                                withdrawal.status === 'approved' ? 'text-green-600' :
+                                withdrawal.status === 'rejected' ? 'text-red-600' :
+                                'text-yellow-600'
+                              }`}>
+                                {withdrawal.status === 'pending' ? '⏳' :
+                                 withdrawal.status === 'approved' ? '✅' : '❌'}
+                              </div>
+                              <p className="text-xs text-gray-500 mt-1">
+                                {withdrawal.status === 'pending' ? 'Under Review' :
+                                 withdrawal.status === 'approved' ? 'Payment Sent' :
+                                 'Request Declined'}
+                              </p>
+                            </div>
                           </div>
-                        </div>
-                        <div className="text-right">
-                          <span className="font-semibold">₹{withdrawal.amount}</span>
-                          <Badge 
-                            variant={withdrawal.status === 'approved' ? 'default' : withdrawal.status === 'rejected' ? 'destructive' : 'secondary'}
-                            className="ml-2"
-                          >
-                            {withdrawal.status}
-                          </Badge>
-                        </div>
-                      </div>
+                        </CardContent>
+                      </Card>
                     ))
                   ) : (
-                    <div className="text-center py-6">
-                      <Wallet className="w-12 h-12 text-gray-400 mx-auto mb-2" />
-                      <p className="text-gray-500">No withdrawal history</p>
+                    <div className="text-center py-8">
+                      <Wallet className="w-16 h-16 text-gray-400 mx-auto mb-4" />
+                      <p className="text-gray-500 font-medium">No withdrawal history</p>
+                      <p className="text-sm text-gray-400">Your withdrawal requests will appear here</p>
                     </div>
                   )}
                 </div>

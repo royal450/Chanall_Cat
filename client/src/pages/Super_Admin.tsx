@@ -518,7 +518,7 @@ export default function SuperAdmin() {
         </div>
       </div>
 
-      <div className="container mx-auto px-4 py-8">
+      <div className="container mx-auto px-2 md:px-4 py-4 md:py-8 max-w-[95%] md:max-w-[85%]">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
           <TabsList className="grid grid-cols-3 md:grid-cols-7 w-full h-auto">
             <TabsTrigger value="overview" className="flex flex-col md:flex-row items-center gap-1 md:gap-2 p-2 md:p-3 text-xs md:text-sm">
@@ -1430,115 +1430,118 @@ export default function SuperAdmin() {
             {loadingWithdrawals ? (
               <div className="flex items-center justify-center py-8">
                 <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-600"></div>
-                <span className="ml-2">Loading withdrawals...</span>
+                <span className="ml-2 text-sm md:text-base">Loading withdrawals...</span>
               </div>
             ) : withdrawalRequests.length === 0 ? (
-              <Card className="p-8 text-center">
-                <DollarSign className="w-16 h-16 mx-auto text-gray-400 mb-4" />
-                <p className="text-gray-500">No withdrawal requests found</p>
+              <Card className="p-4 md:p-8 text-center">
+                <DollarSign className="w-12 h-12 md:w-16 md:h-16 mx-auto text-gray-400 mb-4" />
+                <p className="text-gray-500 text-sm md:text-base">No withdrawal requests found</p>
               </Card>
             ) : (
-              <div className="grid gap-4">
+              <div className="grid gap-3 md:gap-4">
                 {withdrawalRequests.map((withdrawal) => {
                   const user = users.find(u => u.id === withdrawal.userId);
                   return (
-                    <Card key={withdrawal.id} className={`p-6 border-l-4 ${
+                    <Card key={withdrawal.id} className={`p-3 md:p-6 border-l-4 ${
                       withdrawal.status === 'pending' ? 'border-yellow-500 bg-yellow-50' :
                       withdrawal.status === 'approved' ? 'border-green-500 bg-green-50' :
                       'border-red-500 bg-red-50'
                     }`}>
-                      <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
-                        <div className="flex-1">
-                          <div className="flex items-center gap-2 mb-2">
-                            <h3 className="font-semibold text-lg">
+                      <div className="flex flex-col gap-3 md:gap-4">
+                        <div className="flex flex-col md:flex-row md:items-center justify-between gap-2">
+                          <div className="flex items-center gap-2">
+                            <h3 className="font-semibold text-base md:text-lg">
                               {user?.displayName || 'Unknown User'}
                             </h3>
-                            <Badge className={
+                            <Badge className={`text-xs md:text-sm ${
                               withdrawal.status === 'pending' ? 'bg-yellow-500' :
                               withdrawal.status === 'approved' ? 'bg-green-500' :
                               'bg-red-500'
-                            }>
+                            }`}>
                               {withdrawal.status.toUpperCase()}
                             </Badge>
                           </div>
-                          
-                          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
-                            <div>
-                              <span className="text-gray-600">Amount:</span>
-                              <p className="font-semibold text-lg text-green-600">₹{withdrawal.amount}</p>
-                            </div>
-                            <div>
-                              <span className="text-gray-600">Method:</span>
-                              <p className="font-semibold">{withdrawal.method.toUpperCase()}</p>
-                            </div>
-                            <div>
-                              <span className="text-gray-600">Account:</span>
-                              <p className="font-mono text-sm">{withdrawal.accountDetails}</p>
-                            </div>
-                            <div>
-                              <span className="text-gray-600">Requested:</span>
-                              <p className="text-sm">{new Date(withdrawal.createdAt).toLocaleString()}</p>
-                            </div>
+                          <div className="text-right">
+                            <p className="font-semibold text-lg md:text-xl text-green-600">₹{withdrawal.amount}</p>
+                            <p className="text-xs text-gray-500">#{withdrawal.id}</p>
                           </div>
+                        </div>
+                        
+                        <div className="grid grid-cols-2 gap-2 md:gap-4 text-xs md:text-sm">
+                          <div>
+                            <span className="text-gray-600">Method:</span>
+                            <p className="font-semibold">{withdrawal.method.toUpperCase()}</p>
+                          </div>
+                          <div>
+                            <span className="text-gray-600">Account:</span>
+                            <p className="font-mono text-xs break-all">{withdrawal.accountDetails}</p>
+                          </div>
+                          <div className="col-span-2">
+                            <span className="text-gray-600">Requested:</span>
+                            <p className="text-xs">{new Date(withdrawal.createdAt).toLocaleString()}</p>
+                          </div>
+                        </div>
 
-                          {withdrawal.bankName && (
-                            <div className="mt-2 grid grid-cols-2 md:grid-cols-3 gap-2 text-xs text-gray-600">
-                              <span>Bank: {withdrawal.bankName}</span>
-                              <span>IFSC: {withdrawal.ifscCode}</span>
-                              <span>A/C: {withdrawal.accountNumber}</span>
+                        {withdrawal.bankName && (
+                          <div className="grid grid-cols-1 md:grid-cols-3 gap-2 text-xs text-gray-600 bg-gray-100 p-2 rounded">
+                            <span>Bank: {withdrawal.bankName}</span>
+                            <span>IFSC: {withdrawal.ifscCode}</span>
+                            <span>A/C: {withdrawal.accountNumber}</span>
+                          </div>
+                        )}
+
+                        {withdrawal.adminNotes && (
+                          <div className="p-2 bg-gray-100 rounded text-xs md:text-sm">
+                            <span className="font-medium">Admin Notes: </span>
+                            {withdrawal.adminNotes}
+                          </div>
+                        )}
+
+                        <div className="flex flex-col md:flex-row gap-2 md:gap-3">
+                          {withdrawal.status === 'pending' && (
+                            <>
+                              <Button 
+                                size="sm" 
+                                className="bg-green-500 hover:bg-green-600 text-xs md:text-sm flex-1"
+                                onClick={() => handleApproveWithdrawal(withdrawal.id, user?.displayName || 'User')}
+                              >
+                                <CheckCircle className="w-3 h-3 md:w-4 md:h-4 mr-1" />
+                                Approve
+                              </Button>
+                              <Button 
+                                size="sm" 
+                                variant="destructive"
+                                className="text-xs md:text-sm flex-1"
+                                onClick={() => handleRejectWithdrawal(withdrawal.id, user?.displayName || 'User')}
+                              >
+                                <XCircle className="w-3 h-3 md:w-4 md:h-4 mr-1" />
+                                Reject
+                              </Button>
+                            </>
+                          )}
+
+                          {withdrawal.status === 'approved' && (
+                            <div className="text-green-600 flex items-center gap-2 bg-green-100 p-2 rounded">
+                              <CheckCircle className="w-4 h-4 md:w-5 md:h-5" />
+                              <div className="text-xs md:text-sm">
+                                <p>✅ Approved by {withdrawal.processedBy}</p>
+                                {withdrawal.transactionId && (
+                                  <p className="font-mono">TXN: {withdrawal.transactionId}</p>
+                                )}
+                              </div>
                             </div>
                           )}
 
-                          {withdrawal.adminNotes && (
-                            <div className="mt-2 p-2 bg-gray-100 rounded text-sm">
-                              <span className="font-medium">Admin Notes: </span>
-                              {withdrawal.adminNotes}
+                          {withdrawal.status === 'rejected' && (
+                            <div className="text-red-600 flex items-center gap-2 bg-red-100 p-2 rounded">
+                              <XCircle className="w-4 h-4 md:w-5 md:h-5" />
+                              <div className="text-xs md:text-sm">
+                                <p>❌ Rejected by {withdrawal.processedBy}</p>
+                                <p>Funds returned to wallet</p>
+                              </div>
                             </div>
                           )}
                         </div>
-
-                        {withdrawal.status === 'pending' && (
-                          <div className="flex gap-2">
-                            <Button 
-                              size="sm" 
-                              className="bg-green-500 hover:bg-green-600"
-                              onClick={() => handleApproveWithdrawal(withdrawal.id, user?.displayName || 'User')}
-                            >
-                              <CheckCircle className="w-4 h-4 mr-1" />
-                              Approve
-                            </Button>
-                            <Button 
-                              size="sm" 
-                              variant="destructive"
-                              onClick={() => handleRejectWithdrawal(withdrawal.id, user?.displayName || 'User')}
-                            >
-                              <XCircle className="w-4 h-4 mr-1" />
-                              Reject
-                            </Button>
-                          </div>
-                        )}
-
-                        {withdrawal.status === 'approved' && (
-                          <div className="text-green-600 flex items-center gap-2">
-                            <CheckCircle className="w-5 h-5" />
-                            <div className="text-sm">
-                              <p>Approved by {withdrawal.processedBy}</p>
-                              {withdrawal.transactionId && (
-                                <p className="font-mono">TXN: {withdrawal.transactionId}</p>
-                              )}
-                            </div>
-                          </div>
-                        )}
-
-                        {withdrawal.status === 'rejected' && (
-                          <div className="text-red-600 flex items-center gap-2">
-                            <XCircle className="w-5 h-5" />
-                            <div className="text-sm">
-                              <p>Rejected by {withdrawal.processedBy}</p>
-                              <p>Funds returned to wallet</p>
-                            </div>
-                          </div>
-                        )}
                       </div>
                     </Card>
                   );
