@@ -13,7 +13,7 @@ import Profile from "@/pages/profile";
 import Referral from "@/pages/referral";
 import NotFound from "@/pages/not-found";
 import Withdrawal from "@/pages/withdrawal";
-import WithdrawalPopup from "@/pages/withdrawal-popup";
+
 
 // Lazy loaded admin and channel pages
 const SuperAdmin = lazy(() => import("@/pages/Super_Admin"));
@@ -163,7 +163,7 @@ function App() {
           <Route path="/profile" component={() => <ProtectedRoute component={Profile} />} />
           <Route path="/referral" component={() => <ProtectedRoute component={Referral} />} />
           <Route path="/withdrawal" component={() => <ProtectedRoute component={Withdrawal} />} />
-          <Route path="/withdrawal-popup" component={() => <ProtectedRoute component={WithdrawalPopup} />} />
+
           
           {/* Lazy loaded protected routes */}
           <Route path="/create-channel" component={() => 
