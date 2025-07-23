@@ -86,16 +86,82 @@ export default function Dashboard() {
       filtered = filtered.filter(service => service.category === activeFilter);
     }
 
-    // Apply search filter - Enhanced with service type search
+    // Advanced Smart Search Filter
     if (searchTerm) {
-      filtered = filtered.filter(service =>
-        service.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        service.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        service.seller?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        service.category.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        service.serviceType?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        service.platform?.toLowerCase().includes(searchTerm.toLowerCase())
-      );
+      const searchWords = searchTerm.toLowerCase().trim().split(/\s+/);
+      
+      filtered = filtered.filter(service => {
+        // Create searchable content array
+        const searchableContent = [
+          service.title,
+          service.description,
+          service.seller || '',
+          service.category,
+          service.serviceType || '',
+          service.platform || '',
+          // Add price range search
+          `₹${service.price}`,
+          service.price.toString(),
+          // Add follower count search if available
+          service.followerCount ? service.followerCount.toString() : '',
+          // Add verification status
+          service.verificationStatus || '',
+          // Add monetization status
+          service.monetizationStatus || '',
+          // Common keywords mapping
+          service.serviceType === 'youtube' ? 'youtube channel video subscriber' : '',
+          service.serviceType === 'instagram' ? 'instagram insta profile follower' : '',
+          service.serviceType === 'telegram' ? 'telegram channel member' : '',
+          service.serviceType === 'discord' ? 'discord server gaming' : '',
+          service.serviceType === 'reels' ? 'reels short video viral' : '',
+          service.serviceType === 'video' ? 'video content creator' : '',
+          service.serviceType === 'tools' ? 'tools software digital' : '',
+        ].join(' ').toLowerCase();
+
+        // Check if all search words match
+        return searchWords.every(word => {
+          // Direct match
+          if (searchableContent.includes(word)) return true;
+          
+          // Smart keyword mapping
+          const keywordMap: { [key: string]: string[] } = {
+            'youtube': ['yt', 'video', 'channel', 'subscriber'],
+            'instagram': ['insta', 'ig', 'photo', 'follower', 'profile'],
+            'telegram': ['tg', 'channel', 'group', 'member'],
+            'discord': ['disc', 'server', 'gaming', 'community'],
+            'reels': ['reel', 'short', 'viral', 'video'],
+            'video': ['vid', 'content', 'creator'],
+            'tools': ['tool', 'software', 'app', 'digital'],
+            'cheap': ['low', 'affordable', 'budget'],
+            'expensive': ['premium', 'high', 'costly'],
+            'verified': ['blue', 'tick', 'authentic'],
+            'monetized': ['earning', 'revenue', 'money']
+          };
+
+          // Check keyword mappings
+          for (const [key, synonyms] of Object.entries(keywordMap)) {
+            if (word === key || synonyms.includes(word)) {
+              if (searchableContent.includes(key)) return true;
+            }
+          }
+
+          // Price range search
+          if (word.match(/^\d+$/)) {
+            const searchPrice = parseInt(word);
+            const servicePrice = service.price;
+            // Allow ±20% price range matching
+            return servicePrice >= searchPrice * 0.8 && servicePrice <= searchPrice * 1.2;
+          }
+
+          // Partial matching for titles (minimum 3 characters)
+          if (word.length >= 3) {
+            return service.title.toLowerCase().includes(word) ||
+                   service.description.toLowerCase().includes(word);
+          }
+
+          return false;
+        });
+      });
     }
 
     setFilteredServices(filtered);
@@ -236,7 +302,7 @@ export default function Dashboard() {
           </div>
         </div>
 
-        {/* Enhanced Search Bar */}
+        {/* Enhanced Search Bar with Real-time Indicators */}
         <div className="mb-4 animate-fadeIn">
           <div className="relative w-full max-w-full mx-auto px-2">
             <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none z-10">
@@ -248,11 +314,58 @@ export default function Dashboard() {
               type="text"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-12 pr-4 py-3 border-2 border-purple-200 dark:border-purple-700 rounded-xl focus:ring-2 focus:ring-purple-200 focus:border-purple-500 text-sm bg-white/95 dark:bg-gray-800/95 backdrop-blur-sm shadow-lg hover:shadow-xl transition-all duration-300 placeholder:text-gray-400 text-gray-900 dark:text-white"
-              placeholder="Search by title, service type (youtube, instagram, telegram), category..."
+              className="w-full pl-12 pr-20 py-3 border-2 border-purple-200 dark:border-purple-700 rounded-xl focus:ring-2 focus:ring-purple-200 focus:border-purple-500 text-sm bg-white/95 dark:bg-gray-800/95 backdrop-blur-sm shadow-lg hover:shadow-xl transition-all duration-300 placeholder:text-gray-400 text-gray-900 dark:text-white"
+              placeholder="🔍 Smart Search: Try 'youtube gaming', 'cheap instagram', 'verified telegram', prices like '500'..."
             />
+            {/* Search Results Counter */}
+            {searchTerm && (
+              <div className="absolute inset-y-0 right-0 pr-4 flex items-center pointer-events-none z-10">
+                <div className="bg-gradient-to-r from-purple-500 to-pink-500 text-white px-3 py-1 rounded-full text-xs font-bold animate-pulse">
+                  {filteredServices.length} found
+                </div>
+              </div>
+            )}
           </div>
         </div>
+
+        {/* Search Tips & Quick Filters */}
+        {searchTerm && (
+          <div className="mb-4 px-2 animate-fadeIn">
+            <div className="bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-900/30 dark:to-purple-900/30 backdrop-blur-sm rounded-xl p-4 border border-blue-200 dark:border-blue-700">
+              <div className="flex items-center justify-between mb-2">
+                <div className="flex items-center space-x-2">
+                  <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+                  <span className="text-sm text-gray-700 dark:text-gray-300 font-medium">
+                    Smart search active - Found {filteredServices.length} results for "{searchTerm}"
+                  </span>
+                </div>
+                <Button
+                  onClick={() => setSearchTerm("")}
+                  variant="ghost"
+                  size="sm"
+                  className="text-xs text-purple-600 hover:text-purple-800 dark:text-purple-400 dark:hover:text-purple-200"
+                >
+                  Clear
+                </Button>
+              </div>
+              
+              {/* Quick Search Suggestions */}
+              <div className="flex flex-wrap gap-2">
+                {['youtube', 'instagram', 'telegram', 'cheap', 'verified'].map((suggestion) => (
+                  <Button
+                    key={suggestion}
+                    onClick={() => setSearchTerm(suggestion)}
+                    variant="outline"
+                    size="sm"
+                    className="text-xs h-6 px-2 bg-white/50 dark:bg-gray-800/50 hover:bg-purple-100 dark:hover:bg-purple-900/50"
+                  >
+                    {suggestion}
+                  </Button>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Enhanced Filter Buttons - Horizontal Scrollable */}
         <div className="mb-6 animate-fadeIn">
@@ -321,38 +434,66 @@ export default function Dashboard() {
 
                 return Object.entries(groupedByServiceType).map(([serviceType, services], groupIndex) => (
                   <div key={serviceType} className="space-y-4">
-                    {/* Service Type Label */}
-                    <div className="flex items-center justify-between border-b border-gray-200 dark:border-gray-700 pb-3">
-                      <div className="flex items-center space-x-3">
-                        <div className="w-8 h-8 bg-gradient-to-r from-purple-500 to-pink-500 rounded-lg flex items-center justify-center">
-                          {serviceType === 'youtube' && <Youtube className="w-4 h-4 text-white" />}
-                          {serviceType === 'instagram' && <Instagram className="w-4 h-4 text-white" />}
-                          {serviceType === 'telegram' && <Megaphone className="w-4 h-4 text-white" />}
-                          {serviceType === 'discord' && <Users className="w-4 h-4 text-white" />}
-                          {serviceType === 'reels' && <Play className="w-4 h-4 text-white" />}
-                          {serviceType === 'video' && <Play className="w-4 h-4 text-white" />}
-                          {serviceType === 'tools' && <Bot className="w-4 h-4 text-white" />}
-                          {serviceType === 'other' && <Target className="w-4 h-4 text-white" />}
+                    {/* Modern Service Type Label with Glassmorphism */}
+                    <div className="relative bg-gradient-to-r from-purple-50/80 via-pink-50/80 to-cyan-50/80 dark:from-purple-900/30 dark:via-pink-900/30 dark:to-cyan-900/30 backdrop-blur-xl rounded-2xl p-6 border border-white/20 dark:border-gray-700/50 shadow-xl mb-6 overflow-hidden">
+                      {/* Animated Background Particles */}
+                      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+                        <div className="absolute -top-2 -right-2 w-20 h-20 bg-gradient-to-br from-purple-400/20 to-pink-400/20 rounded-full blur-xl animate-pulse"></div>
+                        <div className="absolute -bottom-2 -left-2 w-16 h-16 bg-gradient-to-br from-cyan-400/20 to-blue-400/20 rounded-full blur-xl animate-pulse delay-1000"></div>
+                      </div>
+                      
+                      <div className="relative flex items-center justify-between">
+                        <div className="flex items-center space-x-4">
+                          {/* Enhanced Icon with Animation */}
+                          <div className="relative group">
+                            <div className="w-12 h-12 bg-gradient-to-br from-purple-500 via-pink-500 to-cyan-500 rounded-xl flex items-center justify-center shadow-lg group-hover:shadow-xl transform group-hover:scale-110 transition-all duration-300 animate-pulse">
+                              <div className="absolute inset-0 bg-gradient-to-br from-white/20 to-transparent rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                              {serviceType === 'youtube' && <Youtube className="w-6 h-6 text-white relative z-10" />}
+                              {serviceType === 'instagram' && <Instagram className="w-6 h-6 text-white relative z-10" />}
+                              {serviceType === 'telegram' && <Megaphone className="w-6 h-6 text-white relative z-10" />}
+                              {serviceType === 'discord' && <Users className="w-6 h-6 text-white relative z-10" />}
+                              {serviceType === 'reels' && <Play className="w-6 h-6 text-white relative z-10" />}
+                              {serviceType === 'video' && <Play className="w-6 h-6 text-white relative z-10" />}
+                              {serviceType === 'tools' && <Bot className="w-6 h-6 text-white relative z-10" />}
+                              {serviceType === 'other' && <Target className="w-6 h-6 text-white relative z-10" />}
+                            </div>
+                            {/* Glow Effect */}
+                            <div className="absolute inset-0 bg-gradient-to-br from-purple-500 via-pink-500 to-cyan-500 rounded-xl blur-md opacity-30 group-hover:opacity-50 transition-opacity duration-300 -z-10"></div>
+                          </div>
+                          
+                          <div>
+                            {/* Modern Typography with Gradient */}
+                            <h3 className="text-2xl md:text-3xl font-black bg-gradient-to-r from-purple-600 via-pink-600 to-cyan-600 bg-clip-text text-transparent mb-1">
+                              {serviceType === 'youtube' ? '🔴 YouTube Channels' :
+                               serviceType === 'instagram' ? '📸 Instagram Profiles' :
+                               serviceType === 'telegram' ? '💬 Telegram Channels' :
+                               serviceType === 'discord' ? '🎮 Discord Servers' :
+                               serviceType === 'reels' ? '🎬 Reels & Videos' :
+                               serviceType === 'video' ? '🎥 Video Services' :
+                               serviceType === 'tools' ? '🛠️ Digital Tools' :
+                               '🌐 Other Services'}
+                            </h3>
+                            <div className="flex items-center space-x-2">
+                              <p className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                                ✨ Premium channels curated by experts
+                              </p>
+                              <div className="w-2 h-2 bg-gradient-to-r from-green-400 to-emerald-500 rounded-full animate-pulse"></div>
+                              <span className="text-xs text-green-600 dark:text-green-400 font-semibold">Live</span>
+                            </div>
+                          </div>
                         </div>
-                        <div>
-                          <h3 className="text-xl md:text-2xl font-bold text-gray-900 dark:text-white capitalize">
-                            {serviceType === 'youtube' ? 'YouTube Channels' :
-                             serviceType === 'instagram' ? 'Instagram Profiles' :
-                             serviceType === 'telegram' ? 'Telegram Channels' :
-                             serviceType === 'discord' ? 'Discord Servers' :
-                             serviceType === 'reels' ? 'Reels & Videos' :
-                             serviceType === 'video' ? 'Video Services' :
-                             serviceType === 'tools' ? 'Digital Tools' :
-                             'Other Services'} ({services.length})
-                          </h3>
-                          <p className="text-sm text-gray-600 dark:text-gray-400">
-                            Channel creation provided by user
-                          </p>
+                        
+                        {/* Enhanced Badge with Animation */}
+                        <div className="flex items-center space-x-3">
+                          <Badge className="bg-gradient-to-r from-purple-500 to-pink-500 text-white border-0 shadow-lg px-4 py-2 text-sm font-bold transform hover:scale-105 transition-all duration-300 animate-bounce">
+                            <Crown className="w-3 h-3 mr-1" />
+                            {services.length} Premium {services.length === 1 ? 'Service' : 'Services'}
+                          </Badge>
+                          <div className="w-8 h-8 bg-gradient-to-r from-green-400 to-emerald-500 rounded-full flex items-center justify-center animate-pulse">
+                            <TrendingUp className="w-4 h-4 text-white" />
+                          </div>
                         </div>
                       </div>
-                      <Badge variant="secondary" className="text-xs">
-                        {services.length} {services.length === 1 ? 'service' : 'services'}
-                      </Badge>
                     </div>
 
                     {/* Cards Grid with proper gaps */}
@@ -365,21 +506,44 @@ export default function Dashboard() {
                           onMouseEnter={() => handleServiceHover(service.id)}
                           onMouseLeave={() => setHoveredService(null)}
                         >
-                          {/* Service Type Label above each card */}
-                          <div className="mb-2 text-center">
-                            <Badge 
-                              variant="outline" 
-                              className="text-xs bg-gradient-to-r from-purple-50 to-pink-50 dark:from-purple-900 dark:to-pink-900 border-purple-200 dark:border-purple-700 text-purple-700 dark:text-purple-300 font-medium"
-                            >
-                              {service.serviceType === 'youtube' ? '📺 YouTube Channel' :
-                               service.serviceType === 'instagram' ? '📸 Instagram Profile' :
-                               service.serviceType === 'telegram' ? '📱 Telegram Channel' :
-                               service.serviceType === 'discord' ? '🎮 Discord Server' :
-                               service.serviceType === 'reels' ? '🎬 Reels Bundle' :
-                               service.serviceType === 'video' ? '🎥 Video Service' :
-                               service.serviceType === 'tools' ? '🛠️ Digital Tool' :
-                               '🌐 Other Service'}
-                            </Badge>
+                          {/* Modern Floating Card Label */}
+                          <div className="mb-3 text-center relative">
+                            <div className="inline-flex items-center space-x-2 bg-gradient-to-r from-purple-500/90 via-pink-500/90 to-cyan-500/90 backdrop-blur-xl text-white px-4 py-2.5 rounded-2xl shadow-2xl border border-white/20 transform hover:scale-105 transition-all duration-300 group">
+                              {/* Shimmer Effect */}
+                              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 rounded-2xl transform skew-x-12 translate-x-full group-hover:translate-x-[-200%] duration-1000"></div>
+                              
+                              {/* Icon with Glow */}
+                              <div className="relative">
+                                <div className="w-5 h-5 flex items-center justify-center">
+                                  {service.serviceType === 'youtube' && <span className="text-red-300 animate-pulse">🔴</span>}
+                                  {service.serviceType === 'instagram' && <span className="text-pink-300 animate-pulse">📸</span>}
+                                  {service.serviceType === 'telegram' && <span className="text-blue-300 animate-pulse">💬</span>}
+                                  {service.serviceType === 'discord' && <span className="text-indigo-300 animate-pulse">🎮</span>}
+                                  {service.serviceType === 'reels' && <span className="text-purple-300 animate-pulse">🎬</span>}
+                                  {service.serviceType === 'video' && <span className="text-green-300 animate-pulse">🎥</span>}
+                                  {service.serviceType === 'tools' && <span className="text-orange-300 animate-pulse">🛠️</span>}
+                                  {!service.serviceType && <span className="text-gray-300 animate-pulse">🌐</span>}
+                                </div>
+                              </div>
+                              
+                              {/* Text with Gradient */}
+                              <span className="text-sm font-bold relative z-10 bg-gradient-to-r from-white via-gray-100 to-white bg-clip-text text-transparent">
+                                {service.serviceType === 'youtube' ? 'YouTube Channel' :
+                                 service.serviceType === 'instagram' ? 'Instagram Profile' :
+                                 service.serviceType === 'telegram' ? 'Telegram Channel' :
+                                 service.serviceType === 'discord' ? 'Discord Server' :
+                                 service.serviceType === 'reels' ? 'Reels Bundle' :
+                                 service.serviceType === 'video' ? 'Video Service' :
+                                 service.serviceType === 'tools' ? 'Digital Tool' :
+                                 'Premium Service'}
+                              </span>
+                              
+                              {/* Sparkle Effect */}
+                              <Sparkles className="w-3 h-3 text-yellow-300 animate-spin" />
+                            </div>
+                            
+                            {/* Floating Glow */}
+                            <div className="absolute inset-0 bg-gradient-to-r from-purple-500/20 via-pink-500/20 to-cyan-500/20 rounded-2xl blur-xl opacity-60 animate-pulse -z-10"></div>
                           </div>
                           <CourseCard
                             channel={service}
