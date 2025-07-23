@@ -45,53 +45,27 @@ export function Navbar() {
   };
 
   return (
-    <nav className="bg-white dark:bg-gray-900 shadow-sm border-b border-gray-200 dark:border-gray-700 w-full">
-      <div className="w-full max-w-[95vw] mx-auto px-2.5">
-        <div className="flex justify-between items-center h-14">
+    <nav className="bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm shadow-lg border-b border-purple-100 dark:border-purple-800 w-full">
+      <div className="w-full max-w-[95vw] mx-auto px-4">
+        <div className="flex justify-between items-center h-16">
           <div className="flex items-center">
             <div className="flex-shrink-0 flex items-center">
-              <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
-                <Smartphone className="text-white text-sm" />
+              <div className="w-10 h-10 bg-gradient-to-r from-purple-500 to-pink-500 rounded-xl flex items-center justify-center shadow-lg">
+                <Smartphone className="text-white text-lg" />
               </div>
-              <span className="ml-2 text-lg font-bold text-gray-900 dark:text-white">Channel Market</span>
+              <span className="ml-3 text-xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">Channel Market</span>
             </div>
           </div>
           
-          <div className="flex items-center space-x-2">
+          <div className="flex items-center">
             <Button 
               variant="ghost" 
               onClick={() => setLocation("/create-channel")}
-              className="text-blue-600 hover:text-blue-700 font-medium text-sm px-2 py-1"
+              className="bg-gradient-to-r from-purple-500 to-pink-500 text-white hover:from-purple-600 hover:to-pink-600 font-semibold text-sm px-6 py-2.5 rounded-full shadow-lg transform hover:scale-105 transition-all duration-300 border-2 border-white/20"
             >
-              <Megaphone className="mr-1 h-3 w-3" />
+              <Megaphone className="mr-2 h-4 w-4" />
               <span className="hidden sm:inline">Submit Channel</span>
-            </Button>
-            
-            <Button variant="ghost" size="icon" className="w-8 h-8">
-              <Bell className="h-4 w-4 text-gray-500" />
-            </Button>
-            
-            <Button 
-              variant="ghost" 
-              size="icon"
-              onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-              className="mr-2"
-            >
-              {theme === "dark" ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
-            </Button>
-            
-            <Button
-              variant="ghost"
-              onClick={() => setLocation("/profile")}
-              className="flex items-center space-x-2"
-            >
-              <Avatar className="h-8 w-8">
-                <AvatarImage src={user?.photoURL || ""} />
-                <AvatarFallback>
-                  <User className="h-4 w-4" />
-                </AvatarFallback>
-              </Avatar>
-              <span className="hidden sm:block text-sm font-medium">Profile</span>
+              <span className="sm:hidden">Submit</span>
             </Button>
           </div>
         </div>

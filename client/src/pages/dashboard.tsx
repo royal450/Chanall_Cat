@@ -152,12 +152,12 @@ export default function Dashboard() {
       </div>
 
       {/* Profile Icon */}
-      <div className="fixed top-4 right-4 z-50">
+      <div className="fixed top-20 right-4 z-50">
         <Button
           onClick={() => setLocation("/profile")}
-          className="w-14 h-14 rounded-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 shadow-2xl hover:shadow-purple-500/30 transform hover:scale-110 transition-all duration-300 border-2 border-white/20"
+          className="w-12 h-12 rounded-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 shadow-xl hover:shadow-purple-500/30 transform hover:scale-110 transition-all duration-300 border-2 border-white/20"
         >
-          <User className="w-6 h-6 text-white" />
+          <User className="w-5 h-5 text-white" />
         </Button>
       </div>
 
