@@ -215,7 +215,7 @@ export default function Dashboard() {
   };
 
   return (
-    <div className="w-full min-h-screen bg-gradient-to-br from-pink-50/40 via-rose-50/40 to-purple-50/40 dark:from-gray-900 dark:via-purple-900 dark:to-cyan-900 select-none p-0 m-0" style={{ backgroundColor: 'rgba(255, 192, 203, 0.1)' }}>
+    <div className="w-full min-h-screen bg-white dark:from-gray-900 dark:via-purple-900 dark:to-cyan-900 select-none p-0 m-0">
       <Navbar />
 
       {/* Animated Background Elements */}

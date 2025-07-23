@@ -4,11 +4,11 @@
 
 @layer base {
   :root {
-    --background: 340 15% 95%;
+    --background: 0 0% 100%;
     --foreground: 240 10% 3.9%;
-    --card: 340 15% 95%;
+    --card: 0 0% 100%;
     --card-foreground: 240 10% 3.9%;
-    --popover: 340 15% 95%;
+    --popover: 0 0% 100%;
     --popover-foreground: 240 10% 3.9%;
     --primary: 330 81% 60%;
     --primary-foreground: 355 100% 97%;
@@ -81,7 +81,7 @@ html, body {
   padding: 0;
   max-width: 100vw;
   box-sizing: border-box;
-  background: rgba(255, 192, 203, 0.4) !important;
+  background: white !important;
 }
 
 #root {
@@ -89,7 +89,7 @@ html, body {
   height: 100vh;
   margin: 0;
   padding: 0;
-  background: rgba(255, 182, 193, 0.3) !important;
+  background: white !important;
 }
 
 /* Hide all scrollbars */
