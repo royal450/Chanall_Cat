@@ -123,36 +123,7 @@
     <!-- This is a replit script which adds a banner on the top of the page when opened in development mode outside the replit environment -->
     <script type="text/javascript" src="https://replit.com/public/js/replit-dev-banner.js"></script>
 
-    <footer style="position: fixed; bottom: 0; left: 0; width: 100%; background-color: #f8f9fa; padding: 10px; text-align: center;">
-      <button id="install-button" style="background-color: #007bff; color: white; border: none; padding: 8px 12px; cursor: pointer;">Install App</button>
-      <script>
-        let deferredPrompt;
-        const installButton = document.getElementById('install-button');
-
-        window.addEventListener('beforeinstallprompt', (e) => {
-          e.preventDefault();
-          deferredPrompt = e;
-          installButton.style.display = 'block';
-
-          installButton.addEventListener('click', () => {
-            deferredPrompt.prompt();
-            deferredPrompt.userChoice.then((choiceResult) => {
-              if (choiceResult.outcome === 'accepted') {
-                console.log('User accepted the install prompt');
-              } else {
-                console.log('User dismissed the install prompt');
-              }
-              installButton.style.display = 'none';
-              deferredPrompt = null;
-            });
-          });
-        });
-
-        window.addEventListener('appinstalled', (evt) => {
-          console.log('App installed');
-        });
-      </script>
-    </footer>
+    
   </body>
 </html>
 `

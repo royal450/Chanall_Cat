@@ -1,10 +1,18 @@
 // Service Worker for PWA functionality
-const CACHE_NAME = 'channel-market-v1';
+const CACHE_NAME = 'channel-market-v2';
 const urlsToCache = [
   '/',
-  '/static/js/bundle.js',
-  '/static/css/main.css',
-  '/manifest.json'
+  '/manifest.json',
+  '/src/main.tsx',
+  '/src/index.css',
+  '/src/App.tsx',
+  '/src/pages/dashboard.tsx',
+  '/src/pages/login.tsx',
+  '/src/pages/signup.tsx',
+  '/src/pages/payment.tsx',
+  '/src/components/navbar.tsx',
+  '/src/components/footer.tsx',
+  'https://cdn.jsdelivr.net/gh/royal450/Ai_Video_Gen@main/file_0000000068d8622fb0c9568dfe1b5d55.png'
 ];
 
 // Install event

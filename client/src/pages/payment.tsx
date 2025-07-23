@@ -160,7 +160,7 @@ export default function Payment() {
 
   const handleCopyUPI = async () => {
     try {
-      await navigator.clipboard.writeText("CourseXx@yesg");
+      await navigator.clipboard.writeText("channelmarketdevides@yesg");
       setUpiCopied(true);
       setTimeout(() => setUpiCopied(false), 2000);
       toast({
@@ -558,7 +558,7 @@ export default function Payment() {
                               </Button>
                             </div>
                             <div className="text-lg font-bold text-green-600 dark:text-green-400">
-                              CourseXx@yesg
+                              channelmarketdevides@yesg
                             </div>
                           </CardContent>
                         </Card>

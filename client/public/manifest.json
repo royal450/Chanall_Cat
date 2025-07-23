@@ -4,7 +4,7 @@
   "description": "India's premier social media channel marketplace. Buy verified Instagram, YouTube, Facebook channels instantly.",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#f8fafc",
+  "background_color": "#8B5CF6",
   "theme_color": "#7c3aed",
   "orientation": "portrait-primary",
   "scope": "/",

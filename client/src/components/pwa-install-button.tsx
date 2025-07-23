@@ -3,6 +3,11 @@ import { Button } from '@/components/ui/button';
 import { Download, Smartphone } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
+import { useState, useEffect } from "react";
+import { Button } from "@/components/ui/button";
+import { useToast } from "@/hooks/use-toast";
+import { Smartphone, Download } from "lucide-react";
+
 interface BeforeInstallPromptEvent extends Event {
   prompt(): Promise<void>;
   userChoice: Promise<{ outcome: 'accepted' | 'dismissed' }>;
