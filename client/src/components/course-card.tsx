@@ -206,7 +206,17 @@ export function ChannelCard({ channel, onBuyNow }: ChannelCardProps) {
       };
 
       if (navigator.share && navigator.canShare && navigator.canShare(shareData)) {
-        await navigator.share(shareData);
+        try {
+          await navigator.share(shareData);
+        } catch (shareError: any) {
+          // Silently handle share cancellation
+          if (shareError.name === 'AbortError' || shareError.message === 'Share canceled' || shareError.message?.includes('cancel')) {
+            console.log('Share cancelled by user');
+            return;
+          }
+          // For actual errors, fallback to copy
+          throw shareError;
+        }
       } else {
         await navigator.clipboard.writeText(shareUrl);
         toast({
@@ -214,20 +224,23 @@ export function ChannelCard({ channel, onBuyNow }: ChannelCardProps) {
           description: "Channel link has been copied to clipboard with your referral code",
         });
       }
-    } catch (error) {
-      // Fallback for when share is cancelled or fails
-      const shareUrl = `${window.location.origin}/channel/${channelData.id}?ref=${user?.uid || 'guest'}`;
-      try {
-        await navigator.clipboard.writeText(shareUrl);
-        toast({
-          title: "Link Copied! 📋", 
-          description: "Channel link has been copied to clipboard",
-        });
-      } catch (clipboardError) {
-        toast({
-          title: "Share Ready! 📤",
-          description: "Use the share button to share this channel",
-        });
+    } catch (error: any) {
+      // Only show fallback for non-cancellation errors
+      if (error.name !== 'AbortError' && !error.message?.includes('cancel')) {
+        // Fallback for when share fails
+        const shareUrl = `${window.location.origin}/channel/${channelData.id}?ref=${user?.uid || 'guest'}`;
+        try {
+          await navigator.clipboard.writeText(shareUrl);
+          toast({
+            title: "Link Copied! 📋", 
+            description: "Channel link has been copied to clipboard",
+          });
+        } catch (clipboardError) {
+          toast({
+            title: "Share Ready! 📤",
+            description: "Use the share button to share this channel",
+          });
+        }
       }
     }
   };

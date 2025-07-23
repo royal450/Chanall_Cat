@@ -283,16 +283,17 @@ export default function Profile() {
           title: "Link Shared! 🎉",
           description: "Thanks for sharing your referral link!",
         });
-      } catch (err) {
-        if (err.name !== 'AbortError') {
-          console.error('Share failed:', err);
-          copyReferralLink();
-        } else {
-          toast({
-            title: "Share Cancelled",
-            description: "No worries! You can copy the link instead.",
-          });
+      } catch (err: any) {
+        // Silently handle all share cancellations and errors
+        if (err.name === 'AbortError' || err.message === 'Share canceled' || err.message?.includes('cancel')) {
+          // User cancelled share - this is normal behavior, don't show error
+          console.log('Share cancelled by user');
+          return;
         }
+        
+        // For actual errors, fallback to copy
+        console.log('Share failed, falling back to copy:', err);
+        copyReferralLink();
       }
     } else {
       copyReferralLink();

@@ -38,11 +38,21 @@ export function QRCodeComponent({ value, size = 200, className = "" }: QRCodePro
             const file = new File([blob], "payment-qr.png", { type: "image/png" });
             
             if (navigator.share && navigator.canShare({ files: [file] })) {
-              await navigator.share({
-                title: "CourseMarket Payment QR",
-                text: "Scan this QR code to complete your payment",
-                files: [file]
-              });
+              try {
+                await navigator.share({
+                  title: "CourseMarket Payment QR",
+                  text: "Scan this QR code to complete your payment",
+                  files: [file]
+                });
+              } catch (shareError: any) {
+                // Silently handle share cancellation
+                if (shareError.name === 'AbortError' || shareError.message === 'Share canceled' || shareError.message?.includes('cancel')) {
+                  console.log('Share cancelled by user');
+                  return;
+                }
+                // For actual errors, fallback to download
+                throw shareError;
+              }
             } else {
               // Fallback: copy to clipboard or download
               const url = URL.createObjectURL(blob);
@@ -60,11 +70,25 @@ export function QRCodeComponent({ value, size = 200, className = "" }: QRCodePro
           }
         });
       } catch (error) {
-        toast({
-          title: "Share Failed",
-          description: "Unable to share QR code",
-          variant: "destructive",
-        });
+        // Fallback: copy to clipboard or download
+        const canvas = canvasRef.current;
+        if (canvas) {
+          canvas.toBlob((blob) => {
+            if (blob) {
+              const url = URL.createObjectURL(blob);
+              const link = document.createElement('a');
+              link.href = url;
+              link.download = 'payment-qr.png';
+              link.click();
+              URL.revokeObjectURL(url);
+              
+              toast({
+                title: "QR Code Downloaded! 📱",
+                description: "QR code has been saved to your device",
+              });
+            }
+          });
+        }
       }
     }
   };
