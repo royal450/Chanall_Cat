@@ -48,15 +48,18 @@ export default function Dashboard() {
   const [activeFilter, setActiveFilter] = useState<string>("all");
   const [shuffledServices, setShuffledServices] = useState<Service[]>([]);
 
+  // Updated categories based on Channel Creation service types
   const categories = [
     { id: "all", label: "All Services", icon: Target, color: "from-purple-500 to-pink-500" },
-    { id: "youtube", label: "YouTube Channels", icon: Youtube, color: "from-red-500 to-orange-500" },
-    { id: "instagram", label: "Instagram Profiles", icon: Instagram, color: "from-pink-500 to-purple-500" },
-    { id: "reels", label: "Reels & Videos", icon: Play, color: "from-blue-500 to-cyan-500" },
-    { id: "discord", label: "Discord Servers", icon: Users, color: "from-green-500 to-emerald-500" },
-    { id: "telegram", label: "Telegram Channels", icon: Megaphone, color: "from-indigo-500 to-blue-500" },
-    { id: "bundles", label: "Video Bundles", icon: BookOpen, color: "from-orange-500 to-red-500" },
-    { id: "tutorials", label: "Tutorials", icon: Award, color: "from-violet-500 to-purple-500" },
+    { id: "youtube", label: "YouTube", icon: Youtube, color: "from-red-500 to-red-600" },
+    { id: "instagram", label: "Instagram", icon: Instagram, color: "from-pink-500 to-purple-500" },
+    { id: "tiktok", label: "TikTok", icon: Play, color: "from-black to-gray-700" },
+    { id: "telegram", label: "Telegram", icon: Megaphone, color: "from-blue-500 to-cyan-500" },
+    { id: "discord", label: "Discord", icon: Users, color: "from-indigo-500 to-blue-500" },
+    { id: "reels", label: "Reels", icon: Play, color: "from-orange-500 to-red-500" },
+    { id: "video", label: "Video", icon: Play, color: "from-green-500 to-teal-500" },
+    { id: "tools", label: "Tools", icon: Bot, color: "from-gray-500 to-slate-500" },
+    { id: "other", label: "Others", icon: Target, color: "from-gray-400 to-gray-600" },
   ];
 
   // Fisher-Yates shuffle algorithm
@@ -314,7 +317,7 @@ export default function Dashboard() {
               type="text"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-12 pr-20 py-3 border-2 border-purple-200 dark:border-purple-700 rounded-xl focus:ring-2 focus:ring-purple-200 focus:border-purple-500 text-sm bg-white/95 dark:bg-gray-800/95 backdrop-blur-sm shadow-lg hover:shadow-xl transition-all duration-300 placeholder:text-gray-400 text-gray-900 dark:text-white"
+              className="w-full pl-12 pr-20 py-4 border-2 border-purple-200 dark:border-purple-700 rounded-xl focus:ring-2 focus:ring-purple-200 focus:border-purple-500 text-base bg-white/95 dark:bg-gray-800/95 backdrop-blur-sm shadow-lg hover:shadow-xl transition-all duration-300 placeholder:text-gray-400 text-gray-900 dark:text-white font-medium"
               placeholder="Search channels, services, platforms, prices..."
             />
             {/* Search Results Counter */}
@@ -349,14 +352,16 @@ export default function Dashboard() {
                 </Button>
               </div>
               
-              {/* Working Quick Search Buttons */}
+              {/* Working Quick Search Buttons - Updated with all service types */}
               <div className="flex flex-wrap gap-2">
                 {[
-                  { label: 'YouTube', value: 'youtube' },
-                  { label: 'Instagram', value: 'instagram' },
-                  { label: 'Telegram', value: 'telegram' },
-                  { label: 'Budget', value: 'cheap' },
-                  { label: 'Verified', value: 'verified' }
+                  { label: 'YouTube', value: 'youtube', icon: Youtube },
+                  { label: 'Instagram', value: 'instagram', icon: Instagram },
+                  { label: 'TikTok', value: 'tiktok', icon: Play },
+                  { label: 'Telegram', value: 'telegram', icon: Megaphone },
+                  { label: 'Discord', value: 'discord', icon: Users },
+                  { label: 'Budget', value: 'cheap', icon: Target },
+                  { label: 'Verified', value: 'verified', icon: Crown }
                 ].map((suggestion) => (
                   <Button
                     key={suggestion.value}
@@ -373,13 +378,16 @@ export default function Dashboard() {
                     }}
                     variant="outline"
                     size="sm"
-                    className={`text-xs h-7 px-3 transition-all duration-200 transform hover:scale-105 active:scale-95 ${
+                    className={`text-xs h-8 px-3 transition-all duration-200 transform hover:scale-105 active:scale-95 ${
                       searchTerm === suggestion.value 
                         ? 'bg-purple-100 dark:bg-purple-900 border-purple-300 dark:border-purple-600 text-purple-700 dark:text-purple-300' 
                         : 'bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700'
                     }`}
                   >
-                    {suggestion.label}
+                    <div className="flex items-center space-x-1.5">
+                      <suggestion.icon className="w-3 h-3" />
+                      <span>{suggestion.label}</span>
+                    </div>
                   </Button>
                 ))}
               </div>
@@ -460,6 +468,7 @@ export default function Dashboard() {
                         <div className="w-8 h-8 bg-gradient-to-r from-purple-500 to-pink-500 rounded-lg flex items-center justify-center">
                           {serviceType === 'youtube' && <Youtube className="w-4 h-4 text-white" />}
                           {serviceType === 'instagram' && <Instagram className="w-4 h-4 text-white" />}
+                          {serviceType === 'tiktok' && <Play className="w-4 h-4 text-white" />}
                           {serviceType === 'telegram' && <Megaphone className="w-4 h-4 text-white" />}
                           {serviceType === 'discord' && <Users className="w-4 h-4 text-white" />}
                           {serviceType === 'reels' && <Play className="w-4 h-4 text-white" />}
@@ -470,6 +479,7 @@ export default function Dashboard() {
                         <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
                           {serviceType === 'youtube' ? 'YouTube Channels' :
                            serviceType === 'instagram' ? 'Instagram Profiles' :
+                           serviceType === 'tiktok' ? 'TikTok Accounts' :
                            serviceType === 'telegram' ? 'Telegram Channels' :
                            serviceType === 'discord' ? 'Discord Servers' :
                            serviceType === 'reels' ? 'Reels & Videos' :
@@ -483,8 +493,8 @@ export default function Dashboard() {
                       </Badge>
                     </div>
 
-                    {/* Cards Grid with proper gaps */}
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 gap-6 w-full">
+                    {/* Cards Grid with better scaling */}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 gap-4 w-full">
                       {services.map((service, index) => (
                         <div
                           key={service.id}
@@ -493,17 +503,31 @@ export default function Dashboard() {
                           onMouseEnter={() => handleServiceHover(service.id)}
                           onMouseLeave={() => setHoveredService(null)}
                         >
-                          {/* Small Cute Label */}
+                          {/* Cute Label with Background & Icon */}
                           <div className="mb-2 text-center">
-                            <Badge variant="outline" className="text-xs px-2 py-1 bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300">
-                              {service.serviceType === 'youtube' ? 'YouTube' :
-                               service.serviceType === 'instagram' ? 'Instagram' :
-                               service.serviceType === 'telegram' ? 'Telegram' :
-                               service.serviceType === 'discord' ? 'Discord' :
-                               service.serviceType === 'reels' ? 'Reels' :
-                               service.serviceType === 'video' ? 'Video' :
-                               service.serviceType === 'tools' ? 'Tools' :
-                               'Service'}
+                            <Badge className="text-xs px-3 py-1.5 bg-gradient-to-r from-purple-100 to-pink-100 dark:from-purple-900/50 dark:to-pink-900/50 border border-purple-200 dark:border-purple-700 text-purple-700 dark:text-purple-300 font-medium shadow-sm">
+                              <div className="flex items-center space-x-1.5">
+                                {service.serviceType === 'youtube' && <Youtube className="w-3 h-3" />}
+                                {service.serviceType === 'instagram' && <Instagram className="w-3 h-3" />}
+                                {service.serviceType === 'tiktok' && <Play className="w-3 h-3" />}
+                                {service.serviceType === 'telegram' && <Megaphone className="w-3 h-3" />}
+                                {service.serviceType === 'discord' && <Users className="w-3 h-3" />}
+                                {service.serviceType === 'reels' && <Play className="w-3 h-3" />}
+                                {service.serviceType === 'video' && <Play className="w-3 h-3" />}
+                                {service.serviceType === 'tools' && <Bot className="w-3 h-3" />}
+                                {!service.serviceType && <Target className="w-3 h-3" />}
+                                <span>
+                                  {service.serviceType === 'youtube' ? 'YouTube' :
+                                   service.serviceType === 'instagram' ? 'Instagram' :
+                                   service.serviceType === 'tiktok' ? 'TikTok' :
+                                   service.serviceType === 'telegram' ? 'Telegram' :
+                                   service.serviceType === 'discord' ? 'Discord' :
+                                   service.serviceType === 'reels' ? 'Reels' :
+                                   service.serviceType === 'video' ? 'Video' :
+                                   service.serviceType === 'tools' ? 'Tools' :
+                                   'Service'}
+                                </span>
+                              </div>
                             </Badge>
                           </div>
                           <CourseCard

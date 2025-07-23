@@ -394,7 +394,7 @@ export function ChannelCard({ channel, onBuyNow }: ChannelCardProps) {
   };
 
     return (
-    <div className="relative w-full bg-white rounded-2xl shadow-lg overflow-hidden group hover:shadow-xl transition-all duration-300">
+    <div className="relative w-full bg-white rounded-2xl shadow-lg overflow-hidden group hover:shadow-xl transition-all duration-300 transform hover:scale-[1.02]">
       {/* Sold Out Glassmorphism Overlay - Only on sold out cards */}
       {channelData.soldOut && (
         <div className="absolute inset-0 bg-white/80 backdrop-blur-sm z-30 flex items-center justify-center rounded-2xl">
@@ -406,8 +406,8 @@ export function ChannelCard({ channel, onBuyNow }: ChannelCardProps) {
         </div>
       )}
 
-      {/* Image Section */}
-      <div className="relative h-48 overflow-hidden">
+      {/* Image Section - Increased height for better scale */}
+      <div className="relative h-52 overflow-hidden">
         <img
           src={channelData.thumbnail || getAutoThumbnail(channelData.category || '', channelData.serviceType || '')}
           alt={channelData.title}
@@ -472,7 +472,7 @@ export function ChannelCard({ channel, onBuyNow }: ChannelCardProps) {
       <div className="p-6">
         {/* Title and PRO Badge */}
         <div className="flex items-start justify-between mb-3">
-          <h3 className="text-xl font-bold text-gray-900 leading-tight">
+          <h3 className="text-lg font-bold text-gray-900 leading-tight">
             {channelData.title}
           </h3>
           {channelData.bonusBadge && (
