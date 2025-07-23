@@ -12,6 +12,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { Youtube, Instagram, Facebook, MessageSquare, Play, Video, Settings, Star, TrendingUp, User, Eye, Heart, Clock, Award, CheckCircle } from "lucide-react";
+import { FaYoutube, FaInstagram, FaTiktok, FaDiscord, FaTelegram, FaTools, FaGlobe, FaVideo, FaBook, FaCamera, FaLightbulb, FaRocket, FaFire } from "react-icons/fa";
 import { motion } from "framer-motion";
 import { useFirebaseServices } from "@/hooks/use-firebase-realtime";
 import { useAuth } from "@/hooks/use-auth";
@@ -49,16 +50,17 @@ const channelSubmissionSchema = z.object({
 
 type ChannelSubmissionForm = z.infer<typeof channelSubmissionSchema>;
 
-// Service type options with icons
+// Service type options with React Icons  
 const serviceTypes = [
-  { value: 'youtube', label: 'YouTube', icon: Youtube, followers: 'Subscribers' },
-  { value: 'instagram', label: 'Instagram', icon: Instagram, followers: 'Followers' },
-  { value: 'facebook', label: 'Facebook', icon: Facebook, followers: 'Followers' },
-  { value: 'telegram', label: 'Telegram', icon: MessageSquare, followers: 'Members' },
-  { value: 'reels', label: 'Reels Bundle', icon: Play, followers: 'Followers' },
-  { value: 'video', label: 'Video Services', icon: Video, followers: 'Followers' },
-  { value: 'tools', label: 'Tools', icon: Settings, followers: 'Users' },
-  { value: 'other', label: 'Other/Custom', icon: Star, followers: 'Followers' },
+  { value: 'youtube', label: 'YouTube Channel', icon: FaYoutube, followers: 'Subscribers', color: 'text-red-500' },
+  { value: 'instagram', label: 'Instagram Profile', icon: FaInstagram, followers: 'Followers', color: 'text-pink-500' },
+  { value: 'tiktok', label: 'TikTok Account', icon: FaTiktok, followers: 'Followers', color: 'text-black' },
+  { value: 'telegram', label: 'Telegram Channel', icon: FaTelegram, followers: 'Members', color: 'text-blue-500' },
+  { value: 'discord', label: 'Discord Server', icon: FaDiscord, followers: 'Members', color: 'text-indigo-500' },
+  { value: 'reels', label: 'Reels Bundle', icon: FaVideo, followers: 'Views', color: 'text-purple-500' },
+  { value: 'video', label: 'Video Services', icon: FaCamera, followers: 'Subscribers', color: 'text-green-500' },
+  { value: 'tools', label: 'Digital Tools', icon: FaTools, followers: 'Users', color: 'text-orange-500' },
+  { value: 'other', label: 'Other Services', icon: FaGlobe, followers: 'Followers', color: 'text-gray-500' },
 ];
 
 // 20+ predefined categories

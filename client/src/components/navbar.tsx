@@ -12,6 +12,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { useTheme } from "@/components/theme-provider";
 import { Smartphone, Bell, ChevronDown, User, Megaphone, Moon, Sun, Settings, LogOut } from "lucide-react";
+import { FaStore, FaPlus } from "react-icons/fa";
 
 interface UserStats {
   wallet: number;
@@ -51,7 +52,7 @@ export function Navbar() {
           <div className="flex items-center">
             <div className="flex-shrink-0 flex items-center">
               <div className="w-10 h-10 bg-gradient-to-r from-purple-500 to-pink-500 rounded-xl flex items-center justify-center shadow-lg">
-                <Smartphone className="text-white text-lg" />
+                <FaStore className="text-white text-lg" />
               </div>
               <span className="ml-3 text-xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">Channel Market</span>
             </div>
@@ -61,11 +62,11 @@ export function Navbar() {
             <Button 
               variant="ghost" 
               onClick={() => setLocation("/create-channel")}
-              className="bg-gradient-to-r from-purple-500 to-pink-500 text-white hover:from-purple-600 hover:to-pink-600 font-semibold text-sm px-6 py-2.5 rounded-full shadow-lg transform hover:scale-105 transition-all duration-300 border-2 border-white/20"
+              className="bg-gradient-to-r from-purple-500 to-pink-500 text-white hover:from-purple-600 hover:to-pink-600 font-bold text-sm px-6 py-2.5 rounded-full shadow-lg transform hover:scale-105 transition-all duration-300 border-2 border-white/20"
             >
-              <Megaphone className="mr-2 h-4 w-4" />
-              <span className="hidden sm:inline">Submit Channel</span>
-              <span className="sm:hidden">Submit</span>
+              <FaPlus className="mr-2 h-4 w-4" />
+              <span className="hidden sm:inline">List Your Channel</span>
+              <span className="sm:hidden">List</span>
             </Button>
           </div>
         </div>

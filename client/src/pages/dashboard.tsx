@@ -457,9 +457,68 @@ export default function Dashboard() {
           </div>
         </div>
 
-        {/* CTA Section */}
+        {/* Popular Categories Section */}
+        <div className="mb-16 animate-fadeIn">
+          <div className="text-center mb-12">
+            <h2 className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-orange-600 to-red-600 bg-clip-text text-transparent mb-4">
+              Popular Categories
+            </h2>
+            <p className="text-lg text-gray-600 dark:text-gray-300">
+              Explore top-performing digital services across all platforms
+            </p>
+          </div>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-6 max-w-6xl mx-auto">
+            {categories.slice(1, 9).map((category, index) => {
+              const IconComponent = category.icon;
+              return (
+                <Card key={category.id} className="bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm border-0 shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2 cursor-pointer group"
+                      onClick={() => setActiveFilter(category.id)}>
+                  <CardContent className="p-6 text-center">
+                    <div className={`w-12 h-12 mx-auto mb-4 bg-gradient-to-r ${category.color} rounded-full flex items-center justify-center transform group-hover:scale-110 transition-all duration-300`}>
+                      <IconComponent className="w-6 h-6 text-white" />
+                    </div>
+                    <h3 className="font-bold text-gray-900 dark:text-white mb-2">{category.label}</h3>
+                    <p className="text-sm text-gray-600 dark:text-gray-400">Premium quality</p>
+                  </CardContent>
+                </Card>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* Statistics Section */}
+        <div className="mb-16 animate-fadeIn">
+          <div className="text-center mb-12">
+            <h2 className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-cyan-600 to-blue-600 bg-clip-text text-transparent mb-4">
+              Platform Statistics
+            </h2>
+            <p className="text-lg text-gray-600 dark:text-gray-300">
+              Join thousands of successful digital entrepreneurs
+            </p>
+          </div>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-8 max-w-6xl mx-auto">
+            <div className="text-center">
+              <div className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent mb-2">2K+</div>
+              <p className="text-lg text-gray-600 dark:text-gray-300">Active Users</p>
+            </div>
+            <div className="text-center">
+              <div className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-blue-600 to-cyan-600 bg-clip-text text-transparent mb-2">800+</div>
+              <p className="text-lg text-gray-600 dark:text-gray-300">Digital Services</p>
+            </div>
+            <div className="text-center">
+              <div className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-green-600 to-emerald-600 bg-clip-text text-transparent mb-2">98%</div>
+              <p className="text-lg text-gray-600 dark:text-gray-300">Success Rate</p>
+            </div>
+            <div className="text-center">
+              <div className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-orange-600 to-red-600 bg-clip-text text-transparent mb-2">24/7</div>
+              <p className="text-lg text-gray-600 dark:text-gray-300">Support Available</p>
+            </div>
+          </div>
+        </div>
+
+        {/* Enhanced CTA Section */}
         <div className="text-center mb-16">
-          <Card className="bg-gradient-to-r from-purple-600 to-pink-600 border-0 shadow-2xl max-w-4xl mx-auto">
+          <Card className="bg-gradient-to-r from-purple-600 via-pink-600 to-cyan-600 border-0 shadow-2xl max-w-4xl mx-auto">
             <CardContent className="p-12">
               <div className="flex items-center justify-center mb-6">
                 <div className="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center">
@@ -472,13 +531,21 @@ export default function Dashboard() {
               <p className="text-xl text-white/90 mb-8 max-w-2xl mx-auto">
                 Join thousands of entrepreneurs who've grown their business with premium digital services
               </p>
-              <Button
-                onClick={() => setLocation("/list-channel")}
-                className="bg-white text-purple-600 hover:bg-gray-100 px-8 py-4 rounded-full font-bold text-lg shadow-2xl transform hover:scale-105 transition-all duration-300"
-              >
-                <Flame className="w-5 h-5 mr-2" />
-                List Your Channel
-              </Button>
+              <div className="flex flex-col sm:flex-row gap-4 justify-center">
+                <Button
+                  onClick={() => setLocation("/create-channel")}
+                  className="bg-white text-purple-600 hover:bg-gray-100 px-8 py-4 rounded-full font-bold text-lg shadow-2xl transform hover:scale-105 transition-all duration-300"
+                >
+                  <Flame className="w-5 h-5 mr-2" />
+                  List Your Service
+                </Button>
+                <Button
+                  variant="outline"
+                  className="border-white text-white hover:bg-white hover:text-purple-600 px-8 py-4 rounded-full font-bold text-lg shadow-2xl transform hover:scale-105 transition-all duration-300"
+                >
+                  Browse All Services
+                </Button>
+              </div>
             </CardContent>
           </Card>
         </div>
