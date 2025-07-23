@@ -177,14 +177,14 @@ export default function Payment() {
   };
 
   const handlePayNow = () => {
-    const upiUrl = `upi://pay?pa=channelmarkets@yesbank&pn=Channel Market Payment&am=${courseDetails.price}&tn=Channel Market Payment`;
+    const upiUrl = `upi://pay?pa=channelmarketdevides@yesg&pn=Channel Market Payment&am=${courseDetails.price}&tn=Channel Market Payment`;
     
     try {
       // Try to open UPI app directly
       window.location.href = upiUrl;
     } catch (error) {
       // Fallback to Google Pay web
-      const googlePayUrl = `https://pay.google.com/gp/p/ui/pay?pa=channelmarkets@yesbank&pn=Channel Market Payment&am=${courseDetails.price}&tn=Channel Market Payment`;
+      const googlePayUrl = `https://pay.google.com/gp/p/ui/pay?pa=channelmarketdevides@yesg&pn=Channel Market Payment&am=${courseDetails.price}&tn=Channel Market Payment`;
       window.open(googlePayUrl, '_blank');
     }
     
@@ -323,7 +323,7 @@ export default function Payment() {
 
   const getQrCodeValue = () => {
     try {
-      return `upi://pay?pa=channelmarkets@yesbank&pn=Channel Market Payment&am=${courseDetails.price}&tn=Channel Market Payment`;
+      return `upi://pay?pa=channelmarketdevides@yesg&pn=Channel Market Payment&am=${courseDetails.price}&tn=Channel Market Payment`;
     } catch (error) {
       console.error("Error generating QR code value:", error);
       return "";

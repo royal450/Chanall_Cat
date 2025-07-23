@@ -28,6 +28,60 @@ interface Comment {
   avatar: string;
 }
 
+// Auto thumbnail generator function
+const getAutoThumbnail = (category: string, serviceType: string) => {
+  const thumbnailCategories = {
+    'Tech & Technology': 'https://images.unsplash.com/photo-1518709268805-4e9042af2176?w=400&h=200&fit=crop',
+    'Cooking & Food': 'https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=400&h=200&fit=crop',
+    'Entertainment': 'https://images.unsplash.com/photo-1489599687944-2d4b76d5e7b3?w=400&h=200&fit=crop',
+    'Fun & Comedy': 'https://images.unsplash.com/photo-1517702087094-af3b692b3db5?w=400&h=200&fit=crop',
+    'Gaming': 'https://images.unsplash.com/photo-1552820728-8b83bb6b773f?w=400&h=200&fit=crop',
+    'Health & Fitness': 'https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=400&h=200&fit=crop',
+    'Lifestyle': 'https://images.unsplash.com/photo-1513475382585-d06e58bcb0e0?w=400&h=200&fit=crop',
+    'Travel': 'https://images.unsplash.com/photo-1488646953014-85cb44e25828?w=400&h=200&fit=crop',
+    'Education': 'https://images.unsplash.com/photo-1522202176988-66273c2fd55f?w=400&h=200&fit=crop',
+    'Music': 'https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=400&h=200&fit=crop',
+    'Sports': 'https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=400&h=200&fit=crop',
+    'Fashion & Beauty': 'https://images.unsplash.com/photo-1445205170230-053b83016050?w=400&h=200&fit=crop',
+    'Business & Finance': 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&h=200&fit=crop',
+    'DIY & Crafts': 'https://images.unsplash.com/photo-1452860606245-08befc0ff44b?w=400&h=200&fit=crop',
+    'News & Politics': 'https://images.unsplash.com/photo-1585776245991-cf89dd7fc73a?w=400&h=200&fit=crop',
+    'Science': 'https://images.unsplash.com/photo-1532094349884-543bc11b234d?w=400&h=200&fit=crop',
+    'Art & Design': 'https://images.unsplash.com/photo-1541961017774-22349e4a1262?w=400&h=200&fit=crop',
+    'Photography': 'https://images.unsplash.com/photo-1502920917128-1aa500764cbd?w=400&h=200&fit=crop',
+    'Cars & Automotive': 'https://images.unsplash.com/photo-1542362567-b07e54358753?w=400&h=200&fit=crop',
+    'Pets & Animals': 'https://images.unsplash.com/photo-1415369629372-26f2fe60c467?w=400&h=200&fit=crop',
+    'History & Culture': 'https://images.unsplash.com/photo-1513475382585-d06e58bcb0e0?w=400&h=200&fit=crop',
+    'Spirituality': 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=400&h=200&fit=crop'
+  };
+
+  // Service type specific thumbnails
+  const serviceTypeThumbnails = {
+    'youtube': 'https://images.unsplash.com/photo-1611224923853-80b023f02d71?w=400&h=200&fit=crop',
+    'instagram': 'https://images.unsplash.com/photo-1611262588024-d12430b98920?w=400&h=200&fit=crop',
+    'tiktok': 'https://images.unsplash.com/photo-1598300042247-d088f8ab3a91?w=400&h=200&fit=crop',
+    'telegram': 'https://images.unsplash.com/photo-1611224923853-80b023f02d71?w=400&h=200&fit=crop',
+    'discord': 'https://images.unsplash.com/photo-1542831371-29b0f74f9713?w=400&h=200&fit=crop',
+    'reels': 'https://images.unsplash.com/photo-1611224923853-80b023f02d71?w=400&h=200&fit=crop',
+    'video': 'https://images.unsplash.com/photo-1492691527719-9d1e07e534b4?w=400&h=200&fit=crop',
+    'tools': 'https://images.unsplash.com/photo-1518709268805-4e9042af2176?w=400&h=200&fit=crop',
+    'other': 'https://images.unsplash.com/photo-1611224923853-80b023f02d71?w=400&h=200&fit=crop'
+  };
+
+  // First priority: category-specific thumbnail
+  if (category && thumbnailCategories[category]) {
+    return thumbnailCategories[category];
+  }
+
+  // Second priority: service type specific thumbnail
+  if (serviceType && serviceTypeThumbnails[serviceType]) {
+    return serviceTypeThumbnails[serviceType];
+  }
+
+  // Default fallback
+  return 'https://images.unsplash.com/photo-1611224923853-80b023f02d71?w=400&h=200&fit=crop';
+};
+
 export function ChannelCard({ channel, onBuyNow }: ChannelCardProps) {
   // Backward compatibility support
   const channelData = channel;
@@ -355,9 +409,14 @@ export function ChannelCard({ channel, onBuyNow }: ChannelCardProps) {
       {/* Image Section */}
       <div className="relative h-48 overflow-hidden">
         <img
-          src={channelData.thumbnail || 'https://images.unsplash.com/photo-1611224923853-80b023f02d71?w=400&h=200&fit=crop'}
+          src={channelData.thumbnail || getAutoThumbnail(channelData.category, channelData.serviceType)}
           alt={channelData.title}
           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+          onError={(e) => {
+            // If image fails to load, use category-based fallback
+            const target = e.target as HTMLImageElement;
+            target.src = getAutoThumbnail(channelData.category, channelData.serviceType);
+          }}
         />
         
         {/* Discount Badge - Top Left */}
@@ -367,26 +426,32 @@ export function ChannelCard({ channel, onBuyNow }: ChannelCardProps) {
           </div>
         )}
 
-        {/* Platform Badge - Top Right */}
-        <div className="absolute top-3 right-3 bg-red-600 text-white px-3 py-1 rounded-md text-sm font-bold">
-          {channelData.platform === 'youtube' ? 'Youtube' : 
-           channelData.platform === 'instagram' ? 'Instagram' :
-           channelData.platform === 'facebook' ? 'Facebook' :
-           channelData.platform === 'tiktok' ? 'TikTok' :
-           channelData.platform === 'twitter' ? 'Twitter' :
-           channelData.platform === 'linkedin' ? 'LinkedIn' :
-           channelData.platform === 'telegram' ? 'Telegram' : 'Youtube'}
-        </div>
+        {/* Platform Badge - Top Right (only if platform exists) */}
+        {channelData.platform && (
+          <div className="absolute top-3 right-3 bg-red-600 text-white px-3 py-1 rounded-md text-sm font-bold">
+            {channelData.platform === 'youtube' ? 'Youtube' : 
+             channelData.platform === 'instagram' ? 'Instagram' :
+             channelData.platform === 'facebook' ? 'Facebook' :
+             channelData.platform === 'tiktok' ? 'TikTok' :
+             channelData.platform === 'twitter' ? 'Twitter' :
+             channelData.platform === 'linkedin' ? 'LinkedIn' :
+             channelData.platform === 'telegram' ? 'Telegram' : channelData.platform}
+          </div>
+        )}
 
-        {/* Service Type Badge - Bottom Left */}
-        <div className="absolute bottom-3 left-3 bg-purple-600 text-white px-2 py-1 rounded-md text-xs font-bold">
-          {channelData.serviceType || 'Channel'}
-        </div>
+        {/* Service Type Badge - Bottom Left (only if provided by user) */}
+        {channelData.serviceType && (
+          <div className="absolute bottom-3 left-3 bg-purple-600 text-white px-2 py-1 rounded-md text-xs font-bold">
+            {channelData.serviceType}
+          </div>
+        )}
 
-        {/* Category Badge - Bottom Center */}
-        <div className="absolute bottom-3 left-1/2 transform -translate-x-1/2 bg-blue-500 text-white px-2 py-1 rounded-md text-xs font-bold">
-          {channelData.category || 'General'}
-        </div>
+        {/* Category Badge - Bottom Center (only if provided by user) */}
+        {channelData.category && (
+          <div className="absolute bottom-3 left-1/2 transform -translate-x-1/2 bg-blue-500 text-white px-2 py-1 rounded-md text-xs font-bold">
+            {channelData.category}
+          </div>
+        )}
 
         {/* Monetized Badge - Top Left (if monetized) */}
         {channelData.monetizationStatus === 'monetized' && (
