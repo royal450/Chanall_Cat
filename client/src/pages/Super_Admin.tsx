@@ -553,7 +553,7 @@ export default function SuperAdmin() {
         </div>
       </div>
 
-      <div className="container mx-auto px-2 md:px-4 py-4 md:py-8 max-w-[80%]">
+      <div className="container mx-auto px-2 md:px-4 py-4 md:py-8 max-w-[90%]">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
           <TabsList className="grid grid-cols-4 md:grid-cols-7 w-full h-auto">
             <TabsTrigger value="overview" className="flex flex-col md:flex-row items-center gap-1 md:gap-2 p-2 md:p-3 text-xs md:text-sm">
