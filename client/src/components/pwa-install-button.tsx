@@ -66,20 +66,23 @@ export function PWAInstallButton() {
   };
 
   const handleInstallClick = async () => {
-    if (!deferredPrompt) return;
-
-    try {
-      await deferredPrompt.prompt();
-      const { outcome } = await deferredPrompt.userChoice;
-      
-      if (outcome === 'accepted') {
-        setIsInstalled(true);
-        setIsInstallable(false);
-        setDeferredPrompt(null);
-        trackPWAInstall();
+    if (deferredPrompt) {
+      try {
+        await deferredPrompt.prompt();
+        const { outcome } = await deferredPrompt.userChoice;
+        
+        if (outcome === 'accepted') {
+          setIsInstalled(true);
+          setIsInstallable(false);
+          setDeferredPrompt(null);
+          trackPWAInstall();
+        }
+      } catch (error) {
+        console.error('Installation failed:', error);
       }
-    } catch (error) {
-      console.error('Installation failed:', error);
+    } else {
+      // Show manual install instructions
+      alert('To install this app:\n\n• Chrome/Edge: Click the install icon in the address bar\n• Safari: Tap Share → Add to Home Screen\n• Firefox: Look for the install prompt or add to home screen option');
     }
   };
 
@@ -101,7 +104,13 @@ export function PWAInstallButton() {
     <Button
       onClick={handleInstallClick}
       size="sm"
-      className="bg-gradient-to-r from-pink-500 to-rose-600 hover:from-pink-600 hover:to-rose-700 text-white shadow-lg transform hover:scale-105 transition-all duration-200 animate-pulse"
+      className="bg-gradient-to-r from-pink-500 to-rose-600 hover:from-pink-600 hover:to-rose-700 text-white shadow-lg transform hover:scale-105 transition-all duration-200 animate-pulse active:scale-95"
+      onMouseDown={(e) => {
+        e.currentTarget.style.transform = 'scale(0.95)';
+        setTimeout(() => {
+          e.currentTarget.style.transform = 'scale(1.05)';
+        }, 100);
+      }}
     >
       <Download className="w-4 h-4 mr-2" />
       Install App ⭐

@@ -16,8 +16,19 @@ export function TestPWAPopup() {
     return () => clearTimeout(timer);
   }, []);
 
-  const handleInstall = () => {
-    alert('PWA Install button clicked! ⭐');
+  const handleInstall = async () => {
+    // Try to trigger native PWA install
+    if ('serviceWorker' in navigator) {
+      try {
+        // Check if app can be installed
+        window.dispatchEvent(new Event('beforeinstallprompt'));
+        alert('PWA Install triggered! Check your browser for install prompt ⭐');
+      } catch (error) {
+        alert('To install:\n• Chrome: Click install icon in address bar\n• Safari: Share → Add to Home Screen\n• Edge: Apps → Install this site as an app');
+      }
+    } else {
+      alert('To install:\n• Chrome: Click install icon in address bar\n• Safari: Share → Add to Home Screen\n• Edge: Apps → Install this site as an app');
+    }
     setShowPopup(false);
   };
 
