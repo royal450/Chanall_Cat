@@ -86,13 +86,15 @@ export default function Dashboard() {
       filtered = filtered.filter(service => service.category === activeFilter);
     }
 
-    // Apply search filter
+    // Apply search filter - Enhanced with service type search
     if (searchTerm) {
       filtered = filtered.filter(service =>
         service.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
         service.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
         service.seller?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        service.category.toLowerCase().includes(searchTerm.toLowerCase())
+        service.category.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        service.serviceType?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        service.platform?.toLowerCase().includes(searchTerm.toLowerCase())
       );
     }
 
@@ -168,10 +170,10 @@ export default function Dashboard() {
             <Sparkles className="w-3 h-3 md:w-4 md:h-4" />
             <span>Premium Digital Services</span>
           </div>
-          <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold bg-gradient-to-r from-purple-600 via-pink-600 to-cyan-600 bg-clip-text text-transparent mb-4 leading-tight">
+          <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold bg-gradient-to-r from-purple-600 via-pink-600 to-cyan-600 bg-clip-text text-transparent mb-4 leading-tight">
             Digital Marketplace
           </h1>
-          <p className="text-sm sm:text-base md:text-lg text-gray-600 dark:text-gray-300 mb-6 max-w-full px-2">
+          <p className="text-base sm:text-lg md:text-xl lg:text-2xl text-gray-600 dark:text-gray-300 mb-6 max-w-full px-2 font-medium">
             Premium YouTube channels, Instagram profiles, Discord servers, video bundles & digital services
           </p>
 
@@ -247,7 +249,7 @@ export default function Dashboard() {
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="w-full pl-12 pr-4 py-3 border-2 border-purple-200 dark:border-purple-700 rounded-xl focus:ring-2 focus:ring-purple-200 focus:border-purple-500 text-sm bg-white/95 dark:bg-gray-800/95 backdrop-blur-sm shadow-lg hover:shadow-xl transition-all duration-300 placeholder:text-gray-400 text-gray-900 dark:text-white"
-              placeholder="Search channels, profiles, and more..."
+              placeholder="Search by title, service type (youtube, instagram, telegram), category..."
             />
           </div>
         </div>
@@ -305,21 +307,101 @@ export default function Dashboard() {
               <p className="text-gray-500 dark:text-gray-400">Try adjusting your search or filter criteria</p>
             </div>
           ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 gap-[3px] w-full px-[3px]">
-              {filteredServices.map((service, index) => (
-                <div
-                  key={service.id}
-                  className="animate-fadeIn"
-                  style={{ animationDelay: `${index * 0.1}s` }}
-                  onMouseEnter={() => handleServiceHover(service.id)}
-                  onMouseLeave={() => setHoveredService(null)}
-                >
-                  <CourseCard
-                    channel={service}
-                    onBuyNow={handleBuyNow}
-                  />
-                </div>
-              ))}
+            <div className="space-y-8">
+              {/* Group services by service type */}
+              {(() => {
+                const groupedByServiceType = filteredServices.reduce((acc, service) => {
+                  const serviceType = service.serviceType || 'other';
+                  if (!acc[serviceType]) {
+                    acc[serviceType] = [];
+                  }
+                  acc[serviceType].push(service);
+                  return acc;
+                }, {} as Record<string, typeof filteredServices>);
+
+                return Object.entries(groupedByServiceType).map(([serviceType, services], groupIndex) => (
+                  <div key={serviceType} className="space-y-4">
+                    {/* Service Type Label */}
+                    <div className="flex items-center justify-between border-b border-gray-200 dark:border-gray-700 pb-3">
+                      <div className="flex items-center space-x-3">
+                        <div className="w-8 h-8 bg-gradient-to-r from-purple-500 to-pink-500 rounded-lg flex items-center justify-center">
+                          {serviceType === 'youtube' && <Youtube className="w-4 h-4 text-white" />}
+                          {serviceType === 'instagram' && <Instagram className="w-4 h-4 text-white" />}
+                          {serviceType === 'telegram' && <Megaphone className="w-4 h-4 text-white" />}
+                          {serviceType === 'discord' && <Users className="w-4 h-4 text-white" />}
+                          {serviceType === 'reels' && <Play className="w-4 h-4 text-white" />}
+                          {serviceType === 'video' && <Play className="w-4 h-4 text-white" />}
+                          {serviceType === 'tools' && <Bot className="w-4 h-4 text-white" />}
+                          {serviceType === 'other' && <Target className="w-4 h-4 text-white" />}
+                        </div>
+                        <div>
+                          <h3 className="text-xl md:text-2xl font-bold text-gray-900 dark:text-white capitalize">
+                            {serviceType === 'youtube' ? 'YouTube Channels' :
+                             serviceType === 'instagram' ? 'Instagram Profiles' :
+                             serviceType === 'telegram' ? 'Telegram Channels' :
+                             serviceType === 'discord' ? 'Discord Servers' :
+                             serviceType === 'reels' ? 'Reels & Videos' :
+                             serviceType === 'video' ? 'Video Services' :
+                             serviceType === 'tools' ? 'Digital Tools' :
+                             'Other Services'} ({services.length})
+                          </h3>
+                          <p className="text-sm text-gray-600 dark:text-gray-400">
+                            Channel creation provided by user
+                          </p>
+                        </div>
+                      </div>
+                      <Badge variant="secondary" className="text-xs">
+                        {services.length} {services.length === 1 ? 'service' : 'services'}
+                      </Badge>
+                    </div>
+
+                    {/* Cards Grid with proper gaps */}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 gap-6 w-full">
+                      {services.map((service, index) => (
+                        <div
+                          key={service.id}
+                          className="animate-fadeIn"
+                          style={{ animationDelay: `${(groupIndex * services.length + index) * 0.1}s` }}
+                          onMouseEnter={() => handleServiceHover(service.id)}
+                          onMouseLeave={() => setHoveredService(null)}
+                        >
+                          {/* Service Type Label above each card */}
+                          <div className="mb-2 text-center">
+                            <Badge 
+                              variant="outline" 
+                              className="text-xs bg-gradient-to-r from-purple-50 to-pink-50 dark:from-purple-900 dark:to-pink-900 border-purple-200 dark:border-purple-700 text-purple-700 dark:text-purple-300 font-medium"
+                            >
+                              {service.serviceType === 'youtube' ? '📺 YouTube Channel' :
+                               service.serviceType === 'instagram' ? '📸 Instagram Profile' :
+                               service.serviceType === 'telegram' ? '📱 Telegram Channel' :
+                               service.serviceType === 'discord' ? '🎮 Discord Server' :
+                               service.serviceType === 'reels' ? '🎬 Reels Bundle' :
+                               service.serviceType === 'video' ? '🎥 Video Service' :
+                               service.serviceType === 'tools' ? '🛠️ Digital Tool' :
+                               '🌐 Other Service'}
+                            </Badge>
+                          </div>
+                          <CourseCard
+                            channel={service}
+                            onBuyNow={handleBuyNow}
+                          />
+                        </div>
+                      ))}
+                    </div>
+
+                    {/* Divider between service type groups */}
+                    {groupIndex < Object.keys(groupedByServiceType).length - 1 && (
+                      <div className="flex items-center justify-center py-8">
+                        <div className="flex-1 h-px bg-gradient-to-r from-transparent via-gray-300 dark:via-gray-600 to-transparent"></div>
+                        <div className="mx-4 px-4 py-2 bg-white dark:bg-gray-800 rounded-full shadow-lg border border-gray-200 dark:border-gray-700">
+                          <Sparkles className="w-4 h-4 text-purple-500" />
+                        </div>
+                        <div className="flex-1 h-px bg-gradient-to-r from-transparent via-gray-300 dark:via-gray-600 to-transparent"></div>
+                      </div>
+                    )}
+                  </div>
+                ));
+              })()}
             </div>
           )}
         </div>

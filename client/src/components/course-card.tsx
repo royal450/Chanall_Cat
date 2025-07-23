@@ -69,13 +69,13 @@ const getAutoThumbnail = (category: string, serviceType: string) => {
   };
 
   // First priority: category-specific thumbnail
-  if (category && thumbnailCategories[category]) {
-    return thumbnailCategories[category];
+  if (category && thumbnailCategories[category as keyof typeof thumbnailCategories]) {
+    return thumbnailCategories[category as keyof typeof thumbnailCategories];
   }
 
   // Second priority: service type specific thumbnail
-  if (serviceType && serviceTypeThumbnails[serviceType]) {
-    return serviceTypeThumbnails[serviceType];
+  if (serviceType && serviceTypeThumbnails[serviceType as keyof typeof serviceTypeThumbnails]) {
+    return serviceTypeThumbnails[serviceType as keyof typeof serviceTypeThumbnails];
   }
 
   // Default fallback
@@ -409,13 +409,13 @@ export function ChannelCard({ channel, onBuyNow }: ChannelCardProps) {
       {/* Image Section */}
       <div className="relative h-48 overflow-hidden">
         <img
-          src={channelData.thumbnail || getAutoThumbnail(channelData.category, channelData.serviceType)}
+          src={channelData.thumbnail || getAutoThumbnail(channelData.category || '', channelData.serviceType || '')}
           alt={channelData.title}
           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
           onError={(e) => {
             // If image fails to load, use category-based fallback
             const target = e.target as HTMLImageElement;
-            target.src = getAutoThumbnail(channelData.category, channelData.serviceType);
+            target.src = getAutoThumbnail(channelData.category || '', channelData.serviceType || '');
           }}
         />
         
