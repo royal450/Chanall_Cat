@@ -32,6 +32,7 @@ import { Service } from "@/types/course";
 import { useAuth } from "@/hooks/use-auth";
 import { useFirebaseServices } from "@/hooks/use-firebase-realtime";
 import { PWAInstallButton } from "@/components/pwa-install-button";
+import { PWAInstallPopup } from "@/components/pwa-install-popup";
 
 // Services Marketplace Dashboard
 
@@ -246,6 +247,11 @@ export default function Dashboard() {
           <p className="text-base sm:text-lg md:text-xl lg:text-2xl text-gray-600 dark:text-gray-300 mb-6 max-w-full px-2 font-medium">
             Premium YouTube channels, Instagram profiles, Discord servers, video bundles & digital services
           </p>
+
+          {/* PWA Install Button */}
+          <div className="flex justify-center mb-4">
+            <PWAInstallButton />
+          </div>
 
           {/* Compact Stats Counter */}
           <div className="flex flex-wrap justify-center gap-2 mb-6 w-full px-2">
@@ -781,6 +787,9 @@ export default function Dashboard() {
       </div>
 
       <Footer />
+      
+      {/* PWA Install Popup */}
+      <PWAInstallPopup />
     </div>
   );
 }

@@ -1035,6 +1035,55 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // PWA Install tracking endpoint
+  app.post("/api/pwa-installs", async (req, res) => {
+    try {
+      const { userAgent, platform, language, timestamp } = req.body;
+      
+      // Extract device and browser information from user agent
+      const deviceType = /Mobile|Android|iPhone|iPad/.test(userAgent) ? 'mobile' : 
+                        /Tablet|iPad/.test(userAgent) ? 'tablet' : 'desktop';
+      
+      const browserName = userAgent.includes('Chrome') ? 'Chrome' :
+                         userAgent.includes('Firefox') ? 'Firefox' :
+                         userAgent.includes('Safari') ? 'Safari' :
+                         userAgent.includes('Edge') ? 'Edge' : 'Other';
+      
+      const installData = {
+        userId: null, // For anonymous installs
+        userAgent,
+        platform,
+        language,
+        deviceType,
+        browserName,
+        browserVersion: null,
+        osName: platform,
+        osVersion: null,
+        ipAddress: req.ip || req.connection.remoteAddress,
+        country: null,
+        city: null,
+        installMethod: 'prompt',
+        isOnline: true,
+      };
+
+      const install = await storage.createPwaInstall(installData);
+      res.json({ success: true, install });
+    } catch (error) {
+      console.error('PWA install tracking error:', error);
+      res.status(500).json({ error: "Failed to track PWA installation" });
+    }
+  });
+
+  // Get PWA installations (for admin)
+  app.get("/api/pwa-installs", async (req, res) => {
+    try {
+      const installs = await storage.getPwaInstalls();
+      res.json(installs);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch PWA installations" });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }

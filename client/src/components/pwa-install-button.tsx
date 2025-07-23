@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Download, Smartphone } from 'lucide-react';
-import { useToast } from '@/hooks/use-toast';
 
 interface BeforeInstallPromptEvent extends Event {
   prompt(): Promise<void>;
@@ -12,13 +11,15 @@ export function PWAInstallButton() {
   const [deferredPrompt, setDeferredPrompt] = useState<BeforeInstallPromptEvent | null>(null);
   const [isInstallable, setIsInstallable] = useState(false);
   const [isInstalled, setIsInstalled] = useState(false);
-  const { toast } = useToast();
 
   useEffect(() => {
     // Check if app is already installed
-    if (window.matchMedia('(display-mode: standalone)').matches) {
+    if (window.navigator && 'standalone' in window.navigator) {
+      // iOS Safari
+      setIsInstalled((window.navigator as any).standalone);
+    } else if (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches) {
+      // Desktop and Android
       setIsInstalled(true);
-      return;
     }
 
     const handleBeforeInstallPrompt = (e: Event) => {
@@ -31,10 +32,9 @@ export function PWAInstallButton() {
       setIsInstalled(true);
       setIsInstallable(false);
       setDeferredPrompt(null);
-      toast({
-        title: "App Installed Successfully!",
-        description: "Channel Market has been installed on your device.",
-      });
+      
+      // Track PWA installation
+      trackPWAInstall();
     };
 
     window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
@@ -44,7 +44,26 @@ export function PWAInstallButton() {
       window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
       window.removeEventListener('appinstalled', handleAppInstalled);
     };
-  }, [toast]);
+  }, []);
+
+  const trackPWAInstall = async () => {
+    try {
+      await fetch('/api/pwa-installs', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          userAgent: navigator.userAgent,
+          platform: navigator.platform,
+          language: navigator.language,
+          timestamp: new Date().toISOString(),
+        }),
+      });
+    } catch (error) {
+      console.log('PWA install tracking failed:', error);
+    }
+  };
 
   const handleInstallClick = async () => {
     if (!deferredPrompt) return;
@@ -54,37 +73,40 @@ export function PWAInstallButton() {
       const { outcome } = await deferredPrompt.userChoice;
       
       if (outcome === 'accepted') {
-        toast({
-          title: "Installing App...",
-          description: "Channel Market is being installed on your device.",
-        });
+        setIsInstalled(true);
+        setIsInstallable(false);
+        setDeferredPrompt(null);
+        trackPWAInstall();
       }
-      
-      setDeferredPrompt(null);
-      setIsInstallable(false);
     } catch (error) {
-      console.error('Install failed:', error);
-      toast({
-        title: "Installation Failed",
-        description: "Please try again or install manually from your browser menu.",
-        variant: "destructive",
-      });
+      console.error('Installation failed:', error);
     }
   };
 
-  // Don't show button if already installed or not installable
-  if (isInstalled || !isInstallable) {
+  if (isInstalled) {
+    return (
+      <Button
+        variant="outline"
+        size="sm"
+        className="bg-green-50 text-green-700 border-green-200 hover:bg-green-100 cursor-default"
+      >
+        <Smartphone className="w-4 h-4 mr-2" />
+        App Installed
+      </Button>
+    );
+  }
+
+  if (!isInstallable) {
     return null;
   }
 
   return (
     <Button
       onClick={handleInstallClick}
-      className="bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white font-medium shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105"
       size="sm"
+      className="bg-gradient-to-r from-pink-500 to-rose-600 hover:from-pink-600 hover:to-rose-700 text-white shadow-lg transform hover:scale-105 transition-all duration-200"
     >
-      <Smartphone className="w-4 h-4 mr-2" />
-      <Download className="w-4 h-4 mr-1" />
+      <Download className="w-4 h-4 mr-2" />
       Install App
     </Button>
   );

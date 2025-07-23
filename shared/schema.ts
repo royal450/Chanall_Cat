@@ -134,6 +134,25 @@ export const userBonuses = pgTable("user_bonuses", {
   createdAt: timestamp("created_at").defaultNow(),
 });
 
+export const pwaInstalls = pgTable("pwa_installs", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").references(() => users.id),
+  userAgent: text("user_agent").notNull(),
+  platform: text("platform").notNull(),
+  language: text("language").notNull(),
+  deviceType: text("device_type"), // 'mobile' | 'desktop' | 'tablet'
+  browserName: text("browser_name"),
+  browserVersion: text("browser_version"),
+  osName: text("os_name"),
+  osVersion: text("os_version"),
+  ipAddress: text("ip_address"),
+  country: text("country"),
+  city: text("city"),
+  installMethod: text("install_method").default("prompt"), // 'prompt' | 'manual' | 'share'
+  isOnline: boolean("is_online").default(true),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
 export const insertUserSchema = createInsertSchema(users).omit({
   id: true,
   createdAt: true,
@@ -178,6 +197,11 @@ export const insertUserBonusSchema = createInsertSchema(userBonuses).omit({
   createdAt: true,
 });
 
+export const insertPwaInstallSchema = createInsertSchema(pwaInstalls).omit({
+  id: true,
+  createdAt: true,
+});
+
 export type User = typeof users.$inferSelect;
 export type Channel = typeof channels.$inferSelect;
 export type Payment = typeof payments.$inferSelect;
@@ -186,6 +210,7 @@ export type Analytics = typeof analytics.$inferSelect;
 export type ReferralBonus = typeof referralBonuses.$inferSelect;
 export type WithdrawalRequest = typeof withdrawalRequests.$inferSelect;
 export type UserBonus = typeof userBonuses.$inferSelect;
+export type PwaInstall = typeof pwaInstalls.$inferSelect;
 export type InsertUser = z.infer<typeof insertUserSchema>;
 export type InsertChannel = z.infer<typeof insertChannelSchema>;
 export type InsertPayment = z.infer<typeof insertPaymentSchema>;
@@ -193,6 +218,7 @@ export type InsertListing = z.infer<typeof insertListingSchema>;
 export type InsertReferralBonus = z.infer<typeof insertReferralBonusSchema>;
 export type InsertWithdrawalRequest = z.infer<typeof insertWithdrawalRequestSchema>;
 export type InsertUserBonus = z.infer<typeof insertUserBonusSchema>;
+export type InsertPwaInstall = z.infer<typeof insertPwaInstallSchema>;
 
 // For backward compatibility (to be removed after full migration)
 export const courses = channels;

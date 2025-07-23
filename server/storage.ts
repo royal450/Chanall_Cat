@@ -1,4 +1,4 @@
-import { users, channels, payments, referralBonuses, withdrawalRequests, userBonuses, type User, type InsertUser, type Channel, type InsertChannel, type Payment, type InsertPayment, type ReferralBonus, type WithdrawalRequest, type InsertWithdrawalRequest, type UserBonus, type InsertUserBonus } from "@shared/schema";
+import { users, channels, payments, referralBonuses, withdrawalRequests, userBonuses, pwaInstalls, type User, type InsertUser, type Channel, type InsertChannel, type Payment, type InsertPayment, type ReferralBonus, type WithdrawalRequest, type InsertWithdrawalRequest, type UserBonus, type InsertUserBonus, type PwaInstall, type InsertPwaInstall } from "@shared/schema";
 
 // modify the interface with any CRUD methods
 // you might need
@@ -42,6 +42,11 @@ export interface IStorage {
   getUserBonuses(userId: number): Promise<UserBonus[]>;
   getAllBonuses(): Promise<UserBonus[]>;
 
+  // PWA Install tracking methods
+  createPwaInstall(install: InsertPwaInstall): Promise<PwaInstall>;
+  getPwaInstalls(): Promise<PwaInstall[]>;
+  getPwaInstallsByUser(userId: number): Promise<PwaInstall[]>;
+
   // User methods
   getUserById(userId: number): Promise<User | undefined>;
   getAllUsers(): Promise<User[]>;
@@ -58,12 +63,14 @@ export class MemStorage implements IStorage {
   private referrals: Map<number, ReferralBonus>;
   private withdrawals: Map<number, WithdrawalRequest>;
   private bonuses: Map<number, UserBonus>;
+  private pwaInstalls: Map<number, PwaInstall>;
   currentUserId: number;
   currentCourseId: number;
   currentPaymentId: number;
   currentReferralId: number;
   currentWithdrawalId: number;
   currentBonusId: number;
+  currentPwaInstallId: number;
 
   constructor() {
     this.users = new Map();
@@ -72,12 +79,14 @@ export class MemStorage implements IStorage {
     this.referrals = new Map();
     this.withdrawals = new Map();
     this.bonuses = new Map();
+    this.pwaInstalls = new Map();
     this.currentUserId = 1;
     this.currentCourseId = 1;
     this.currentPaymentId = 1;
     this.currentReferralId = 1;
     this.currentWithdrawalId = 1;
     this.currentBonusId = 1;
+    this.currentPwaInstallId = 1;
 
     // Add some sample data for testing
     this.initializeSampleData();
@@ -209,8 +218,7 @@ export class MemStorage implements IStorage {
         bonusBadge: false,
         badgeType: null,
         badgeText: null,
-        badgeAddedAt: null,
-        badgeAddedBy: null
+        badgeAddedAt: null
       },
       {
         id: 2,
@@ -251,8 +259,7 @@ export class MemStorage implements IStorage {
         bonusBadge: false,
         badgeType: null,
         badgeText: null,
-        badgeAddedAt: null,
-        badgeAddedBy: null
+        badgeAddedAt: null
       },
       {
         id: 3,
@@ -293,8 +300,7 @@ export class MemStorage implements IStorage {
         bonusBadge: false,
         badgeType: null,
         badgeText: null,
-        badgeAddedAt: null,
-        badgeAddedBy: null
+        badgeAddedAt: null
       }
     ];
 
@@ -402,8 +408,7 @@ export class MemStorage implements IStorage {
       bonusBadge: false,
       badgeType: null,
       badgeText: null,
-      badgeAddedAt: null,
-      badgeAddedBy: null
+      badgeAddedAt: null
     };
     this.courses.set(id.toString(), course);
     return course;
@@ -702,6 +707,39 @@ export class MemStorage implements IStorage {
   }
 
   // Admin methods
+  // PWA Install tracking methods
+  async createPwaInstall(installData: InsertPwaInstall): Promise<PwaInstall> {
+    const id = this.currentPwaInstallId++;
+    const install: PwaInstall = {
+      id,
+      userId: installData.userId,
+      userAgent: installData.userAgent,
+      platform: installData.platform,
+      language: installData.language,
+      deviceType: installData.deviceType || null,
+      browserName: installData.browserName || null,
+      browserVersion: installData.browserVersion || null,
+      osName: installData.osName || null,
+      osVersion: installData.osVersion || null,
+      ipAddress: installData.ipAddress || null,
+      country: installData.country || null,
+      city: installData.city || null,
+      installMethod: installData.installMethod || 'prompt',
+      isOnline: installData.isOnline || true,
+      createdAt: new Date(),
+    };
+    this.pwaInstalls.set(id, install);
+    return install;
+  }
+
+  async getPwaInstalls(): Promise<PwaInstall[]> {
+    return Array.from(this.pwaInstalls.values());
+  }
+
+  async getPwaInstallsByUser(userId: number): Promise<PwaInstall[]> {
+    return Array.from(this.pwaInstalls.values()).filter(install => install.userId === userId);
+  }
+
   async getAdminStats(): Promise<any> {
     const totalUsers = this.users.size;
     const totalCourses = this.courses.size;
@@ -709,6 +747,7 @@ export class MemStorage implements IStorage {
     const pendingCourses = Array.from(this.courses.values()).filter(c => c.status === 'pending').length;
     const totalPayments = this.payments.size;
     const totalReferrals = this.referrals.size;
+    const totalPwaInstalls = this.pwaInstalls.size;
 
     return {
       totalUsers,
@@ -718,7 +757,8 @@ export class MemStorage implements IStorage {
       rejectedCourses: Array.from(this.courses.values()).filter(c => c.status === 'rejected').length,
       totalSales: totalPayments,
       totalRevenue: Array.from(this.payments.values()).reduce((sum, p) => sum + p.amount, 0),
-      avgRating: 4.5
+      avgRating: 4.5,
+      totalPwaInstalls
     };
   }
 }

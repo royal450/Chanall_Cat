@@ -2,6 +2,58 @@
 @tailwind components;
 @tailwind utilities;
 
+@layer base {
+  :root {
+    --background: 0 0% 100%;
+    --foreground: 240 10% 3.9%;
+    --card: 0 0% 100%;
+    --card-foreground: 240 10% 3.9%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 240 10% 3.9%;
+    --primary: 330 81% 60%;
+    --primary-foreground: 355 100% 97%;
+    --secondary: 330 20% 92%;
+    --secondary-foreground: 330 10% 15%;
+    --muted: 330 20% 96%;
+    --muted-foreground: 330 8% 45%;
+    --accent: 330 40% 90%;
+    --accent-foreground: 330 20% 15%;
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 0 85.7% 97.3%;
+    --border: 330 20% 92%;
+    --input: 330 20% 92%;
+    --ring: 330 81% 60%;
+    --radius: 0.5rem;
+    --chart-1: 330 81% 60%;
+    --chart-2: 310 70% 55%;
+    --chart-3: 280 65% 60%;
+    --chart-4: 340 85% 65%;
+    --chart-5: 315 75% 55%;
+  }
+
+  .dark {
+    --background: 240 10% 3.9%;
+    --foreground: 0 0% 98%;
+    --card: 240 10% 3.9%;
+    --card-foreground: 0 0% 98%;
+    --popover: 240 10% 3.9%;
+    --popover-foreground: 0 0% 98%;
+    --primary: 330 81% 60%;
+    --primary-foreground: 355 100% 97%;
+    --secondary: 240 3.7% 15.9%;
+    --secondary-foreground: 0 0% 98%;
+    --muted: 240 3.7% 15.9%;
+    --muted-foreground: 240 5% 64.9%;
+    --accent: 240 3.7% 15.9%;
+    --accent-foreground: 0 0% 98%;
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 0 85.7% 97.3%;
+    --border: 240 3.7% 15.9%;
+    --input: 240 3.7% 15.9%;
+    --ring: 330 81% 60%;
+  }
+}
+
 /* Custom Utilities */
 .line-clamp-2 {
   display: -webkit-box;

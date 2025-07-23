@@ -15,13 +15,15 @@ import {
   CheckCircle, XCircle, Edit3, Trash2, Image, Award, Ban, 
   Gift, Settings, Download, Upload, Star, AlertTriangle,
   RefreshCw, Clock, Calendar, BarChart3, Activity, Target,
-  Zap, Heart, MessageSquare, Share2, ThumbsUp, Lock, Wallet
+  Zap, Heart, MessageSquare, Share2, ThumbsUp, Lock, Wallet,
+  Smartphone
 } from "lucide-react";
 import { motion } from "framer-motion";
 import { useFirebaseServices, useFirebaseUsers, useFirebaseAdminStats } from "@/hooks/use-firebase-realtime";
 import { ref, onValue, off, update, push, get } from 'firebase/database';
 import { database } from '@/lib/firebase';
 import { adminOperations } from "@/lib/admin-firebase";
+import { PWAUsersSection } from "@/components/pwa-users-section";
 import type { Channel, User, AdminStats } from "@shared/schema";
 
 // Complex admin password
@@ -570,6 +572,11 @@ export default function SuperAdmin() {
               <Users className="w-3 h-3 md:w-4 md:h-4" />
               <span className="hidden md:inline">Users</span>
               <span className="md:hidden">Users</span>
+            </TabsTrigger>
+            <TabsTrigger value="pwa-users" className="flex flex-col md:flex-row items-center gap-1 md:gap-2 p-2 md:p-3 text-xs md:text-sm">
+              <Smartphone className="w-3 h-3 md:w-4 md:h-4" />
+              <span className="hidden md:inline">PWA Users</span>
+              <span className="md:hidden">PWA</span>
             </TabsTrigger>
             <TabsTrigger value="withdrawals" className="flex flex-col md:flex-row items-center gap-1 md:gap-2 p-2 md:p-3 text-xs md:text-sm">
               <DollarSign className="w-3 h-3 md:w-4 md:h-4" />
@@ -1944,6 +1951,11 @@ export default function SuperAdmin() {
                 </CardContent>
               </Card>
             </div>
+          </TabsContent>
+
+          {/* PWA Users Tab */}
+          <TabsContent value="pwa-users" className="space-y-6">
+            <PWAUsersSection />
           </TabsContent>
         </Tabs>
       </div>
