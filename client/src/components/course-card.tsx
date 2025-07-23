@@ -378,9 +378,19 @@ export function ChannelCard({ channel, onBuyNow }: ChannelCardProps) {
            channelData.platform === 'telegram' ? 'Telegram' : 'Youtube'}
         </div>
 
-        {/* Monetized Badge - Bottom Left */}
+        {/* Service Type Badge - Bottom Left */}
+        <div className="absolute bottom-3 left-3 bg-purple-600 text-white px-2 py-1 rounded-md text-xs font-bold">
+          {channelData.serviceType || 'Channel'}
+        </div>
+
+        {/* Category Badge - Bottom Center */}
+        <div className="absolute bottom-3 left-1/2 transform -translate-x-1/2 bg-blue-500 text-white px-2 py-1 rounded-md text-xs font-bold">
+          {channelData.category || 'General'}
+        </div>
+
+        {/* Monetized Badge - Top Left (if monetized) */}
         {channelData.monetizationStatus === 'monetized' && (
-          <div className="absolute bottom-3 left-3 bg-blue-600 text-white px-3 py-1 rounded-md text-sm font-bold">
+          <div className="absolute top-12 left-3 bg-green-600 text-white px-2 py-1 rounded-md text-xs font-bold">
             Monetized
           </div>
         )}

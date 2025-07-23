@@ -347,7 +347,7 @@ export default function Profile() {
       return;
     }
 
-    const link = `https://coursemarket.web.app/signup?ref=${profile.referralCode}`;
+    const link = `https://channelmarkets.web.app/signup?ref=${profile.referralCode}`;
 
     try {
       // Method 1: Modern Clipboard API (works on most devices)
@@ -433,7 +433,7 @@ export default function Profile() {
       return;
     }
 
-    const link = `https://coursemarket.web.app/signup?ref=${profile.referralCode}`;
+    const link = `https://channelmarkets.web.app/signup?ref=${profile.referralCode}`;
     const text = `🚀 Join this amazing course platform and get ₹10 bonus! Use my referral link: ${link}`;
 
     // Method 1: Try Native Share API (works on all modern mobiles)
@@ -775,7 +775,7 @@ export default function Profile() {
                     <div className="text-sm text-gray-600 mb-2">Your Referral Code: <span className="font-mono font-bold text-purple-600">{profile.referralCode || 'Generating...'}</span></div>
                     <div className="flex items-center gap-2">
                       <Input 
-                        value={`https://coursemarket.web.app/signup?ref=${profile.referralCode || 'loading'}`} 
+                        value={`https://channelmarkets.web.app/signup?ref=${profile.referralCode || 'loading'}`} 
                         readOnly 
                         className="font-mono text-sm bg-white"
                       />
@@ -814,7 +814,7 @@ export default function Profile() {
                   {profile.referralCode && (
                     <div className="text-center">
                       <QRCodeComponent 
-                        value={`https://coursemarket.web.app/signup?ref=${profile.referralCode}`}
+                        value={`https://channelmarkets.web.app/signup?ref=${profile.referralCode}`}
                         size={200}
                         className="mb-4"
                         level="M"
