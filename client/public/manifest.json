@@ -1,0 +1,35 @@
+{
+  "name": "Channel Market - Social Media Marketplace",
+  "short_name": "Channel Market",
+  "description": "India's premier social media channel marketplace. Buy verified Instagram, YouTube, Facebook channels instantly.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#8B5CF6",
+  "theme_color": "#8B5CF6",
+  "orientation": "portrait-primary",
+  "scope": "/",
+  "lang": "en",
+  "icons": [
+    {
+      "src": "https://cdn.jsdelivr.net/gh/royal450/Ai_Video_Gen@main/file_0000000068d8622fb0c9568dfe1b5d55.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "https://cdn.jsdelivr.net/gh/royal450/Ai_Video_Gen@main/file_0000000068d8622fb0c9568dfe1b5d55.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["business", "social", "marketplace"],
+  "screenshots": [
+    {
+      "src": "https://cdn.jsdelivr.net/gh/royal450/Ai_Video_Gen@main/file_0000000068d8622fb0c9568dfe1b5d55.png",
+      "type": "image/png",
+      "sizes": "1280x720",
+      "form_factor": "wide"
+    }
+  ]
+}

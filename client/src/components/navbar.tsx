@@ -46,7 +46,7 @@ export function Navbar() {
   };
 
   return (
-    <nav className="bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm shadow-lg border-b border-purple-100 dark:border-purple-800 w-full">
+    <nav className="sticky top-0 z-50 bg-white/95 dark:bg-gray-900/95 backdrop-blur-md shadow-lg border-b border-purple-100 dark:border-purple-800 w-full">
       <div className="w-full max-w-[95vw] mx-auto px-4">
         <div className="flex justify-between items-center h-16">
           <div className="flex items-center">

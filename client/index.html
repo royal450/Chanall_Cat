@@ -5,8 +5,40 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1" />
     <title>Channel Market - Buy & Sell Premium Social Media Channels</title>
     <meta name="description" content="India's premier social media channel marketplace. Buy verified Instagram, YouTube, Facebook channels instantly. Grow your digital presence with trusted sellers." />
-    <meta name="keywords" content="social media channels, Instagram channels, YouTube channels, Facebook pages, TikTok accounts, buy social media, sell channels, verified accounts, channel marketplace" />
+    <meta name="keywords" content="social media channels, Instagram channels, YouTube channels, Facebook pages, TikTok accounts, buy social media, sell channels, verified accounts, channel marketplace, digital marketing, influencer marketing, social media marketing" />
     <meta name="author" content="Channel Market" />
+    
+    <!-- Advanced SEO Meta Tags -->
+    <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
+    <meta name="googlebot" content="index, follow" />
+    <meta name="bingbot" content="index, follow" />
+    <link rel="canonical" href="https://channelmarket.web.app" />
+    
+    <!-- PWA Meta Tags -->
+    <meta name="theme-color" content="#8B5CF6" />
+    <meta name="background_color" content="#8B5CF6" />
+    <meta name="display" content="standalone" />
+    <meta name="orientation" content="portrait" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <meta name="apple-mobile-web-app-title" content="Channel Market" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    
+    <!-- Structured Data for SEO -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebSite",
+      "name": "Channel Market",
+      "description": "India's premier social media channel marketplace",
+      "url": "https://channelmarket.web.app",
+      "potentialAction": {
+        "@type": "SearchAction",
+        "target": "https://channelmarket.web.app/search?q={search_term_string}",
+        "query-input": "required name=search_term_string"
+      }
+    }
+    </script>
     
     <!-- Open Graph Meta Tags -->
     <meta property="og:title" content="Channel Market - Buy & Sell Premium Social Media Channels" />
@@ -22,13 +54,69 @@
     <meta name="twitter:description" content="India's premier social media channel marketplace. Buy verified Instagram, YouTube, Facebook channels instantly. Grow your digital presence with trusted sellers." />
     <meta name="twitter:image" content="https://cdn.jsdelivr.net/gh/royal450/Ai_Video_Gen@main/file_0000000068d8622fb0c9568dfe1b5d55.png" />
     
-    <!-- Favicon -->
+    <!-- PWA Manifest -->
+    <link rel="manifest" href="/manifest.json" />
+    
+    <!-- Favicon and Icons -->
     <link rel="icon" type="image/png" href="https://cdn.jsdelivr.net/gh/royal450/Ai_Video_Gen@main/file_0000000068d8622fb0c9568dfe1b5d55.png" />
     <link rel="apple-touch-icon" href="https://cdn.jsdelivr.net/gh/royal450/Ai_Video_Gen@main/file_0000000068d8622fb0c9568dfe1b5d55.png" />
+    <link rel="apple-touch-icon" sizes="152x152" href="https://cdn.jsdelivr.net/gh/royal450/Ai_Video_Gen@main/file_0000000068d8622fb0c9568dfe1b5d55.png" />
+    <link rel="apple-touch-icon" sizes="180x180" href="https://cdn.jsdelivr.net/gh/royal450/Ai_Video_Gen@main/file_0000000068d8622fb0c9568dfe1b5d55.png" />
+    <link rel="apple-touch-icon" sizes="167x167" href="https://cdn.jsdelivr.net/gh/royal450/Ai_Video_Gen@main/file_0000000068d8622fb0c9568dfe1b5d55.png" />
   </head>
   <body>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
+    
+    <!-- Bot Protection & Security -->
+    <script>
+      // Basic bot protection
+      (function() {
+        // Disable right-click context menu
+        document.addEventListener('contextmenu', function(e) {
+          e.preventDefault();
+        });
+        
+        // Disable F12, Ctrl+Shift+I, Ctrl+U
+        document.addEventListener('keydown', function(e) {
+          if (e.key === 'F12' || 
+              (e.ctrlKey && e.shiftKey && e.key === 'I') ||
+              (e.ctrlKey && e.key === 'u')) {
+            e.preventDefault();
+          }
+        });
+        
+        // Anti-scraping detection
+        let devtools = {open: false,orientation: null};
+        const threshold = 160;
+        const detectDevTools = function() {
+          if (window.outerHeight - window.innerHeight > threshold || 
+              window.outerWidth - window.innerWidth > threshold) {
+            if (!devtools.open) {
+              devtools.open = true;
+              console.clear();
+              console.log('%cAccess Restricted', 'color: red; font-size: 40px; font-weight: bold;');
+              console.log('%cThis website is protected against unauthorized access.', 'color: red; font-size: 16px;');
+            }
+          } else {
+            devtools.open = false;
+          }
+        };
+        
+        // User agent validation
+        const userAgent = navigator.userAgent.toLowerCase();
+        const botPatterns = ['bot', 'crawler', 'spider', 'scraper', 'python', 'curl', 'wget'];
+        const isBot = botPatterns.some(pattern => userAgent.includes(pattern));
+        
+        if (isBot) {
+          console.log('Automated access detected');
+          // Redirect bots or show alternative content
+        }
+        
+        setInterval(detectDevTools, 500);
+      })();
+    </script>
+    
     <!-- This is a replit script which adds a banner on the top of the page when opened in development mode outside the replit environment -->
     <script type="text/javascript" src="https://replit.com/public/js/replit-dev-banner.js"></script>
   </body>
