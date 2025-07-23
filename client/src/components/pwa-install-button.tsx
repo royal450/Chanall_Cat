@@ -96,18 +96,15 @@ export function PWAInstallButton() {
     );
   }
 
-  if (!isInstallable) {
-    return null;
-  }
-
+  // Always show button for testing - remove the installable check
   return (
     <Button
       onClick={handleInstallClick}
       size="sm"
-      className="bg-gradient-to-r from-pink-500 to-rose-600 hover:from-pink-600 hover:to-rose-700 text-white shadow-lg transform hover:scale-105 transition-all duration-200"
+      className="bg-gradient-to-r from-pink-500 to-rose-600 hover:from-pink-600 hover:to-rose-700 text-white shadow-lg transform hover:scale-105 transition-all duration-200 animate-pulse"
     >
       <Download className="w-4 h-4 mr-2" />
-      Install App
+      Install App ⭐
     </Button>
   );
 }

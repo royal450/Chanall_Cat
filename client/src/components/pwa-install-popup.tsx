@@ -33,10 +33,10 @@ export function PWAInstallPopup() {
       e.preventDefault();
       setDeferredPrompt(e as BeforeInstallPromptEvent);
       
-      // Show popup after 3 seconds
+      // Show popup immediately for testing
       setTimeout(() => {
         setShowPopup(true);
-      }, 3000);
+      }, 1000);
     };
 
     const handleAppInstalled = () => {
@@ -47,6 +47,13 @@ export function PWAInstallPopup() {
       // Track PWA installation
       trackPWAInstall();
     };
+
+    // Show popup automatically for testing
+    setTimeout(() => {
+      if (!isInstalled) {
+        setShowPopup(true);
+      }
+    }, 2000);
 
     window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
     window.addEventListener('appinstalled', handleAppInstalled);
