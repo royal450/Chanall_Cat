@@ -11,7 +11,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { QRCodeComponent } from '@/components/qr-code';
 import { useToast } from '@/hooks/use-toast';
-import { Copy, Share2, Users, Wallet, BookOpen, Star, TrendingUp, IndianRupee, CheckCircle, XCircle, Clock, Eye, UserPlus, Gift } from 'lucide-react';
+import { Copy, Share2, Users, Wallet, BookOpen, Star, TrendingUp, IndianRupee, CheckCircle, XCircle, Clock, Eye, UserPlus, Gift, Camera, Upload } from 'lucide-react';
 
 interface UserProfile {
   id: string;
@@ -61,6 +61,89 @@ interface ReferralStats {
   conversionRate: number;
 }
 
+// Generate gradient based on first character of name
+const getGradientForUser = (name: string) => {
+  const gradients = [
+    'from-purple-400 via-pink-500 to-red-500',
+    'from-blue-400 via-purple-500 to-pink-500', 
+    'from-green-400 via-blue-500 to-purple-500',
+    'from-yellow-400 via-orange-500 to-red-500',
+    'from-pink-400 via-red-500 to-orange-500',
+    'from-cyan-400 via-blue-500 to-purple-500',
+    'from-indigo-400 via-purple-500 to-pink-500',
+    'from-teal-400 via-green-500 to-blue-500',
+    'from-orange-400 via-red-500 to-pink-500',
+    'from-emerald-400 via-cyan-500 to-blue-500'
+  ];
+  
+  const firstChar = name.charAt(0).toUpperCase();
+  const charCode = firstChar.charCodeAt(0);
+  const index = charCode % gradients.length;
+  return gradients[index];
+};
+
+// ProfileAvatar Component
+const ProfileAvatar = ({ user, onImageUpload, isUploading, toast }: {
+  user: UserProfile;
+  onImageUpload: (file: File) => void;
+  isUploading: boolean;
+  toast: any;
+}) => {
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file && file.type.startsWith('image/')) {
+      if (file.size > 5 * 1024 * 1024) { // 5MB limit
+        toast({
+          title: "File Too Large",
+          description: "Please select an image smaller than 5MB",
+          variant: "destructive",
+        });
+        return;
+      }
+      onImageUpload(file);
+    }
+  };
+
+  const firstLetter = user.displayName?.charAt(0)?.toUpperCase() || 'U';
+  const gradientClass = getGradientForUser(user.displayName || 'User');
+
+  return (
+    <div className="relative group">
+      {user.photoURL ? (
+        <img
+          src={user.photoURL}
+          alt={user.displayName}
+          className="w-24 h-24 rounded-full border-4 border-white shadow-xl object-cover"
+        />
+      ) : (
+        <div className={`w-24 h-24 rounded-full border-4 border-white shadow-xl bg-gradient-to-br ${gradientClass} flex items-center justify-center`}>
+          <span className="text-white text-3xl font-bold">{firstLetter}</span>
+        </div>
+      )}
+      
+      {/* Upload button overlay */}
+      <div className="absolute inset-0 rounded-full bg-black bg-opacity-50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300 cursor-pointer">
+        <label htmlFor="profile-upload" className="cursor-pointer">
+          {isUploading ? (
+            <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-white"></div>
+          ) : (
+            <Camera className="w-6 h-6 text-white" />
+          )}
+        </label>
+      </div>
+      
+      <input
+        id="profile-upload"
+        type="file"
+        accept="image/*"
+        onChange={handleFileSelect}
+        className="hidden"
+        disabled={isUploading}
+      />
+    </div>
+  );
+};
+
 export default function Profile() {
   const { user } = useAuth();
   const { toast } = useToast();
@@ -73,6 +156,8 @@ export default function Profile() {
   const [withdrawalHistory, setWithdrawalHistory] = useState([]);
   const [isWithdrawing, setIsWithdrawing] = useState(false);
   const [isUpdatingChannel, setIsUpdatingChannel] = useState<string | null>(null);
+  const [profileImage, setProfileImage] = useState<string | null>(null);
+  const [isUploadingImage, setIsUploadingImage] = useState(false);
 
   // Generate referral code from user ID
   const generateReferralCode = (userId: string) => {
@@ -214,7 +299,43 @@ export default function Profile() {
     };
   }, [user]);
 
-  // Remove regenerate function - code is permanent once generated
+  // Image upload handler
+  const handleImageUpload = async (file: File) => {
+    if (!user) return;
+    
+    setIsUploadingImage(true);
+    
+    try {
+      // Convert file to base64 for display
+      const reader = new FileReader();
+      reader.onload = async (e) => {
+        const base64Image = e.target?.result as string;
+        setProfileImage(base64Image);
+        
+        // Update user profile with new image
+        const userRef = ref(database, `users/${user.uid}`);
+        await update(userRef, {
+          photoURL: base64Image
+        });
+        
+        toast({
+          title: "Profile Updated! 📸",
+          description: "Your profile photo has been updated successfully",
+        });
+      };
+      reader.readAsDataURL(file);
+    } catch (error) {
+      toast({
+        title: "Upload Failed",
+        description: "Failed to upload image. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsUploadingImage(false);
+    }
+  };
+
+
 
   const copyReferralLink = async () => {
     if (!profile?.referralCode) {
@@ -477,15 +598,18 @@ export default function Profile() {
     );
   }
 
+
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-purple-50 p-4">
       <div className="max-w-6xl mx-auto">
         <div className="mb-8 text-center">
           <div className="relative inline-block">
-            <img
-              src={profile.photoURL || '/api/placeholder/120/120'}
-              alt={profile.displayName}
-              className="w-24 h-24 rounded-full mx-auto mb-4 border-4 border-white shadow-lg"
+            <ProfileAvatar 
+              user={profile} 
+              onImageUpload={handleImageUpload}
+              isUploading={isUploadingImage}
+              toast={toast}
             />
             <div className="absolute -bottom-2 -right-2 bg-green-500 w-6 h-6 rounded-full border-2 border-white"></div>
           </div>
