@@ -119,7 +119,7 @@ export default function Dashboard() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-purple-50 flex items-center justify-center">
+      <div className="w-full h-screen bg-gradient-to-br from-blue-50 to-purple-50 flex items-center justify-center p-0 m-0">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600 mx-auto mb-4"></div>
           <p className="text-gray-600">Loading services...</p>
@@ -141,7 +141,7 @@ export default function Dashboard() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-purple-50 to-cyan-50 dark:from-gray-900 dark:via-purple-900 dark:to-cyan-900 select-none">
+    <div className="w-full min-h-screen bg-gradient-to-br from-slate-50 via-purple-50 to-cyan-50 dark:from-gray-900 dark:via-purple-900 dark:to-cyan-900 select-none p-0 m-0">
       <Navbar />
 
       {/* Animated Background Elements */}
@@ -162,63 +162,63 @@ export default function Dashboard() {
       </div>
 
       {/* Hero Section */}
-      <div className="relative w-full px-4 sm:px-6 lg:px-8 py-12">
-        <div className="text-center mb-12">
-          <div className="inline-flex items-center space-x-2 bg-gradient-to-r from-purple-600 to-pink-600 text-white px-6 py-2 rounded-full text-sm font-medium mb-6 shadow-lg">
-            <Sparkles className="w-4 h-4" />
+      <div className="relative w-full max-w-[95vw] mx-auto px-2.5 py-4">
+        <div className="text-center mb-6">
+          <div className="inline-flex items-center space-x-2 bg-gradient-to-r from-purple-600 to-pink-600 text-white px-4 py-2 rounded-full text-xs md:text-sm font-medium mb-4 shadow-lg">
+            <Sparkles className="w-3 h-3 md:w-4 md:h-4" />
             <span>Premium Digital Services</span>
           </div>
-          <h1 className="text-5xl md:text-7xl font-bold bg-gradient-to-r from-purple-600 via-pink-600 to-cyan-600 bg-clip-text text-transparent mb-6 leading-tight">
+          <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold bg-gradient-to-r from-purple-600 via-pink-600 to-cyan-600 bg-clip-text text-transparent mb-4 leading-tight">
             Digital Marketplace
           </h1>
-          <p className="text-xl text-gray-600 dark:text-gray-300 mb-8 max-w-2xl mx-auto">
+          <p className="text-sm sm:text-base md:text-lg text-gray-600 dark:text-gray-300 mb-6 max-w-full px-2">
             Premium YouTube channels, Instagram profiles, Discord servers, video bundles & digital services
           </p>
 
           {/* Compact Stats Counter */}
-          <div className="flex flex-wrap justify-center gap-3 mb-8 max-w-3xl mx-auto">
-            <div className="bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm px-4 py-2 rounded-full shadow-lg border border-blue-200 dark:border-blue-600 hover:shadow-xl transition-all duration-300">
-              <div className="flex items-center space-x-2">
-                <div className="w-6 h-6 bg-gradient-to-r from-blue-500 to-cyan-500 rounded-full flex items-center justify-center">
-                  <Youtube className="w-3 h-3 text-white" />
+          <div className="flex flex-wrap justify-center gap-2 mb-6 w-full px-2">
+            <div className="bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm px-3 py-1.5 rounded-full shadow-lg border border-blue-200 dark:border-blue-600 hover:shadow-xl transition-all duration-300">
+              <div className="flex items-center space-x-1.5">
+                <div className="w-5 h-5 bg-gradient-to-r from-blue-500 to-cyan-500 rounded-full flex items-center justify-center">
+                  <Youtube className="w-2.5 h-2.5 text-white" />
                 </div>
-                <span className="text-sm font-bold text-gray-900 dark:text-white">500+</span>
+                <span className="text-xs font-bold text-gray-900 dark:text-white">500+</span>
                 <span className="text-xs text-gray-600 dark:text-gray-400">Channels</span>
               </div>
             </div>
-            <div className="bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm px-4 py-2 rounded-full shadow-lg border border-green-200 dark:border-green-600 hover:shadow-xl transition-all duration-300">
-              <div className="flex items-center space-x-2">
-                <div className="w-6 h-6 bg-gradient-to-r from-green-500 to-emerald-500 rounded-full flex items-center justify-center">
-                  <Instagram className="w-3 h-3 text-white" />
+            <div className="bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm px-3 py-1.5 rounded-full shadow-lg border border-green-200 dark:border-green-600 hover:shadow-xl transition-all duration-300">
+              <div className="flex items-center space-x-1.5">
+                <div className="w-5 h-5 bg-gradient-to-r from-green-500 to-emerald-500 rounded-full flex items-center justify-center">
+                  <Instagram className="w-2.5 h-2.5 text-white" />
                 </div>
-                <span className="text-sm font-bold text-gray-900 dark:text-white">300+</span>
+                <span className="text-xs font-bold text-gray-900 dark:text-white">300+</span>
                 <span className="text-xs text-gray-600 dark:text-gray-400">Profiles</span>
               </div>
             </div>
-            <div className="bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm px-4 py-2 rounded-full shadow-lg border border-yellow-200 dark:border-yellow-600 hover:shadow-xl transition-all duration-300">
-              <div className="flex items-center space-x-2">
-                <div className="w-6 h-6 bg-gradient-to-r from-yellow-500 to-orange-500 rounded-full flex items-center justify-center">
-                  <Star className="w-3 h-3 text-white" />
+            <div className="bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm px-3 py-1.5 rounded-full shadow-lg border border-yellow-200 dark:border-yellow-600 hover:shadow-xl transition-all duration-300">
+              <div className="flex items-center space-x-1.5">
+                <div className="w-5 h-5 bg-gradient-to-r from-yellow-500 to-orange-500 rounded-full flex items-center justify-center">
+                  <Star className="w-2.5 h-2.5 text-white" />
                 </div>
-                <span className="text-sm font-bold text-gray-900 dark:text-white">4.9</span>
+                <span className="text-xs font-bold text-gray-900 dark:text-white">4.9</span>
                 <span className="text-xs text-gray-600 dark:text-gray-400">Rating</span>
               </div>
             </div>
-            <div className="bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm px-4 py-2 rounded-full shadow-lg border border-purple-200 dark:border-purple-600 hover:shadow-xl transition-all duration-300">
-              <div className="flex items-center space-x-2">
-                <div className="w-6 h-6 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full flex items-center justify-center">
-                  <Award className="w-3 h-3 text-white" />
+            <div className="bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm px-3 py-1.5 rounded-full shadow-lg border border-purple-200 dark:border-purple-600 hover:shadow-xl transition-all duration-300">
+              <div className="flex items-center space-x-1.5">
+                <div className="w-5 h-5 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full flex items-center justify-center">
+                  <Award className="w-2.5 h-2.5 text-white" />
                 </div>
-                <span className="text-sm font-bold text-gray-900 dark:text-white">95%</span>
+                <span className="text-xs font-bold text-gray-900 dark:text-white">95%</span>
                 <span className="text-xs text-gray-600 dark:text-gray-400">Success</span>
               </div>
             </div>
-            <div className="bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm px-4 py-2 rounded-full shadow-lg border border-red-200 dark:border-red-600 hover:shadow-xl transition-all duration-300">
-              <div className="flex items-center space-x-2">
-                <div className="w-6 h-6 bg-gradient-to-r from-red-500 to-pink-500 rounded-full flex items-center justify-center">
-                  <Zap className="w-3 h-3 text-white" />
+            <div className="bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm px-3 py-1.5 rounded-full shadow-lg border border-red-200 dark:border-red-600 hover:shadow-xl transition-all duration-300">
+              <div className="flex items-center space-x-1.5">
+                <div className="w-5 h-5 bg-gradient-to-r from-red-500 to-pink-500 rounded-full flex items-center justify-center">
+                  <Zap className="w-2.5 h-2.5 text-white" />
                 </div>
-                <span className="text-sm font-bold text-gray-900 dark:text-white">24/7</span>
+                <span className="text-xs font-bold text-gray-900 dark:text-white">24/7</span>
                 <span className="text-xs text-gray-600 dark:text-gray-400">Support</span>
               </div>
             </div>
@@ -235,32 +235,27 @@ export default function Dashboard() {
         </div>
 
         {/* Enhanced Search Bar */}
-        <div className="mb-8 animate-fadeIn">
-          <div className="relative max-w-2xl mx-auto">
-            <div className="absolute inset-y-0 left-0 pl-6 flex items-center pointer-events-none z-10">
-              <div className="w-8 h-8 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full flex items-center justify-center">
-                <Search className="h-4 w-4 text-white" />
+        <div className="mb-4 animate-fadeIn">
+          <div className="relative w-full max-w-full mx-auto px-2">
+            <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none z-10">
+              <div className="w-6 h-6 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full flex items-center justify-center">
+                <Search className="h-3 w-3 text-white" />
               </div>
             </div>
             <Input
               type="text"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-16 pr-16 py-6 border-2 border-purple-200 dark:border-purple-700 rounded-2xl focus:ring-4 focus:ring-purple-200 focus:border-purple-500 text-lg bg-white/95 dark:bg-gray-800/95 backdrop-blur-sm shadow-2xl hover:shadow-3xl transition-all duration-300 placeholder:text-gray-400 text-gray-900 dark:text-white"
-              placeholder="Search courses, skills, and more..."
+              className="w-full pl-12 pr-4 py-3 border-2 border-purple-200 dark:border-purple-700 rounded-xl focus:ring-2 focus:ring-purple-200 focus:border-purple-500 text-sm bg-white/95 dark:bg-gray-800/95 backdrop-blur-sm shadow-lg hover:shadow-xl transition-all duration-300 placeholder:text-gray-400 text-gray-900 dark:text-white"
+              placeholder="Search channels, profiles, and more..."
             />
-            <div className="absolute inset-y-0 right-0 pr-6 flex items-center">
-              <kbd className="bg-gradient-to-r from-purple-100 to-pink-100 dark:from-purple-800 dark:to-pink-800 text-purple-700 dark:text-purple-300 px-3 py-2 rounded-lg text-sm font-medium shadow-md">
-                ⌘K
-              </kbd>
-            </div>
           </div>
         </div>
 
         {/* Enhanced Filter Buttons - Horizontal Scrollable */}
-        <div className="mb-12 animate-fadeIn">
-          <div className="px-4 max-w-6xl mx-auto">
-            <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-hide">
+        <div className="mb-6 animate-fadeIn">
+          <div className="px-2 w-full">
+            <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
               {categories.map((category, index) => {
                 const IconComponent = category.icon;
                 const isActive = activeFilter === category.id;
@@ -269,10 +264,10 @@ export default function Dashboard() {
                     key={category.id}
                     onClick={() => setActiveFilter(category.id)}
                     variant={isActive ? "default" : "outline"}
-                    className={`flex-shrink-0 px-6 py-3 rounded-full font-medium transition-all duration-300 whitespace-nowrap transform hover:scale-105 group relative overflow-hidden ${
+                    className={`flex-shrink-0 px-3 py-2 rounded-full font-medium transition-all duration-300 whitespace-nowrap transform hover:scale-105 group relative overflow-hidden text-xs ${
                       isActive
-                        ? `bg-gradient-to-r ${category.color} text-white hover:shadow-2xl border-0`
-                        : "bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm text-gray-700 dark:text-gray-300 border-2 border-gray-200 dark:border-gray-700 hover:bg-white dark:hover:bg-gray-700 hover:border-purple-300 dark:hover:border-purple-600 hover:shadow-xl"
+                        ? `bg-gradient-to-r ${category.color} text-white hover:shadow-lg border-0`
+                        : "bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-700 hover:bg-white dark:hover:bg-gray-700 hover:border-purple-300 dark:hover:border-purple-600 hover:shadow-lg"
                     }`}
                     style={{ animationDelay: `${index * 0.1}s` }}
                   >
@@ -291,12 +286,12 @@ export default function Dashboard() {
         </div>
 
         {/* Featured Services */}
-        <div className="mb-12 animate-fadeIn">
-          <div className="text-center mb-8">
-            <h2 className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent mb-4">
+        <div className="mb-6 animate-fadeIn">
+          <div className="text-center mb-4">
+            <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent mb-2">
               {activeFilter === "all" ? "Featured Services" : `${categories.find(c => c.id === activeFilter)?.label || activeFilter} Services`}
             </h2>
-            <p className="text-lg text-gray-600 dark:text-gray-300">
+            <p className="text-sm md:text-base text-gray-600 dark:text-gray-300 px-2">
               Premium digital services including channels, profiles, servers & content bundles
             </p>
           </div>
@@ -310,7 +305,7 @@ export default function Dashboard() {
               <p className="text-gray-500 dark:text-gray-400">Try adjusting your search or filter criteria</p>
             </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8 w-full">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 w-full px-2">
               {filteredServices.map((service, index) => (
                 <div
                   key={service.id}

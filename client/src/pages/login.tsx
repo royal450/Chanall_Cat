@@ -43,18 +43,18 @@ export default function Login() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-600 to-purple-700 flex items-center justify-center p-4">
-      <Card className="w-full max-w-md">
-        <CardContent className="p-8">
-          <div className="text-center mb-8">
-            <div className="mx-auto w-16 h-16 bg-primary rounded-full flex items-center justify-center mb-4">
-              <GraduationCap className="text-white text-2xl" />
+    <div className="w-full h-screen bg-gradient-to-br from-blue-600 to-purple-700 flex items-center justify-center p-2.5 m-0">
+      <Card className="w-full max-w-[95vw] sm:max-w-md">
+        <CardContent className="p-4 sm:p-6">
+          <div className="text-center mb-6">
+            <div className="mx-auto w-12 h-12 sm:w-16 sm:h-16 bg-primary rounded-full flex items-center justify-center mb-3">
+              <GraduationCap className="text-white text-lg sm:text-2xl" />
             </div>
-            <h1 className="text-3xl font-bold text-gray-900">Welcome Back</h1>
-            <p className="text-gray-600 mt-2">Sign in to continue learning</p>
+            <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Welcome Back</h1>
+            <p className="text-sm sm:text-base text-gray-600 mt-2">Sign in to continue learning</p>
           </div>
           
-          <form onSubmit={handleSubmit} className="space-y-6">
+          <form onSubmit={handleSubmit} className="space-y-4">
             <div>
               <Label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
                 Email Address
@@ -64,7 +64,7 @@ export default function Login() {
                 type="email"
                 value={formData.email}
                 onChange={(e) => setFormData(prev => ({ ...prev, email: e.target.value }))}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+                className="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
                 placeholder="Enter your email"
                 required
               />

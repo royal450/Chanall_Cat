@@ -45,32 +45,30 @@ export function Navbar() {
   };
 
   return (
-    <nav className="bg-white dark:bg-gray-900 shadow-sm border-b border-gray-200 dark:border-gray-700">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between items-center h-16">
+    <nav className="bg-white dark:bg-gray-900 shadow-sm border-b border-gray-200 dark:border-gray-700 w-full">
+      <div className="w-full max-w-[95vw] mx-auto px-2.5">
+        <div className="flex justify-between items-center h-14">
           <div className="flex items-center">
             <div className="flex-shrink-0 flex items-center">
-              <div className="w-10 h-10 bg-primary rounded-lg flex items-center justify-center">
-                <Smartphone className="text-white text-lg" />
+              <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
+                <Smartphone className="text-white text-sm" />
               </div>
-              <span className="ml-3 text-xl font-bold text-gray-900 dark:text-white">Channel Market</span>
+              <span className="ml-2 text-lg font-bold text-gray-900 dark:text-white">Channel Market</span>
             </div>
           </div>
           
-          <div className="flex items-center space-x-4">
+          <div className="flex items-center space-x-2">
             <Button 
               variant="ghost" 
               onClick={() => setLocation("/create-channel")}
-              className="text-blue-600 hover:text-blue-700 font-medium"
+              className="text-blue-600 hover:text-blue-700 font-medium text-sm px-2 py-1"
             >
-              <Megaphone className="mr-2 h-4 w-4" />
-              Submit Channel
+              <Megaphone className="mr-1 h-3 w-3" />
+              <span className="hidden sm:inline">Submit Channel</span>
             </Button>
             
-
-            
-            <Button variant="ghost" size="icon">
-              <Bell className="h-5 w-5 text-gray-500" />
+            <Button variant="ghost" size="icon" className="w-8 h-8">
+              <Bell className="h-4 w-4 text-gray-500" />
             </Button>
             
             <Button 

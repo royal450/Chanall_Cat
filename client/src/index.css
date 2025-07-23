@@ -12,10 +12,22 @@
   display: none;  /* Chrome, Safari, and Opera */
 }
 
-/* Prevent horizontal scrolling on entire page */
+/* Prevent horizontal scrolling and ensure full width/height */
 html, body {
   overflow-x: hidden;
+  width: 100vw;
+  height: 100vh;
+  margin: 0;
+  padding: 0;
   max-width: 100vw;
+  box-sizing: border-box;
+}
+
+#root {
+  width: 100vw;
+  height: 100vh;
+  margin: 0;
+  padding: 0;
 }
 
 /* Hide all scrollbars */

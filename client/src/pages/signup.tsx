@@ -8,7 +8,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { useToast } from "@/hooks/use-toast";
 import { ref, set, update, onValue, get } from "firebase/database";
 import { database } from "@/lib/firebase";
-import { Eye, EyeOff, User, Mail, Lock, UserPlus } from "lucide-react";
+import { FaEye, FaEyeSlash, FaUser, FaEnvelope, FaLock, FaUserPlus } from "react-icons/fa";
 
 export default function Signup() {
   const [, setLocation] = useLocation();
@@ -122,57 +122,57 @@ export default function Signup() {
   }, [user, setLocation]);
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-purple-50 to-blue-50 p-4">
-      <Card className="w-full max-w-md shadow-2xl">
-        <CardHeader className="text-center">
-          <CardTitle className="text-2xl font-bold text-gray-900">Create Account</CardTitle>
-          <CardDescription>Join RoyalDev Learning Platform</CardDescription>
+    <div className="w-full h-screen flex items-center justify-center bg-gradient-to-br from-purple-50 to-blue-50 p-2.5 m-0">
+      <Card className="w-full max-w-[95vw] sm:max-w-md shadow-2xl">
+        <CardHeader className="text-center p-4">
+          <CardTitle className="text-xl sm:text-2xl font-bold text-gray-900">Create Account</CardTitle>
+          <CardDescription className="text-sm">Join RoyalDev Learning Platform</CardDescription>
         </CardHeader>
-        <CardContent>
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="fullName">Full Name</Label>
+        <CardContent className="p-4">
+          <form onSubmit={handleSubmit} className="space-y-3">
+            <div className="space-y-1">
+              <Label htmlFor="fullName" className="text-sm">Full Name</Label>
               <div className="relative">
-                <User className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+                <FaUser className="absolute left-3 top-3 h-3 w-3 text-gray-400" />
                 <Input
                   id="fullName"
                   type="text"
                   placeholder="Enter your full name"
                   value={formData.fullName}
                   onChange={(e) => setFormData({...formData, fullName: e.target.value})}
-                  className="pl-10"
+                  className="pl-8 py-2"
                   required
                 />
               </div>
             </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
+            <div className="space-y-1">
+              <Label htmlFor="email" className="text-sm">Email</Label>
               <div className="relative">
-                <Mail className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+                <FaEnvelope className="absolute left-3 top-3 h-3 w-3 text-gray-400" />
                 <Input
                   id="email"
                   type="email"
                   placeholder="Enter your email"
                   value={formData.email}
                   onChange={(e) => setFormData({...formData, email: e.target.value})}
-                  className="pl-10"
+                  className="pl-8 py-2"
                   required
                 />
               </div>
             </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="phoneNumber">Phone Number 😎</Label>
+            <div className="space-y-1">
+              <Label htmlFor="phoneNumber" className="text-sm">Phone Number</Label>
               <div className="relative">
-                <span className="absolute left-3 top-3 text-gray-400 text-sm">📱</span>
+                <span className="absolute left-3 top-3 text-gray-400 text-xs">📱</span>
                 <Input
                   id="phoneNumber"
                   type="tel"
                   placeholder="Enter your phone number"
                   value={formData.phoneNumber}
                   onChange={(e) => setFormData({...formData, phoneNumber: e.target.value})}
-                  className="pl-10"
+                  className="pl-8 py-2"
                   required
                 />
               </div>

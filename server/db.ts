@@ -2,20 +2,25 @@
 let pool = null;
 let db = null;
 
-try {
-  if (process.env.DATABASE_URL) {
-    const { Pool, neonConfig } = await import('@neondatabase/serverless');
-    const { drizzle } = await import('drizzle-orm/neon-serverless');
-    const ws = await import("ws");
-    const schema = await import("@shared/schema");
+async function initializeDatabase() {
+  try {
+    if (process.env.DATABASE_URL) {
+      const { Pool, neonConfig } = await import('@neondatabase/serverless');
+      const { drizzle } = await import('drizzle-orm/neon-serverless');
+      const ws = await import("ws");
+      const schema = await import("@shared/schema");
 
-    neonConfig.webSocketConstructor = ws.default;
-    pool = new Pool({ connectionString: process.env.DATABASE_URL });
-    db = drizzle({ client: pool, schema });
+      neonConfig.webSocketConstructor = ws.default;
+      pool = new Pool({ connectionString: process.env.DATABASE_URL });
+      db = drizzle({ client: pool, schema });
+    }
+  } catch (error) {
+    console.log('PostgreSQL not configured, using Firebase only');
   }
-} catch (error) {
-  console.log('PostgreSQL not configured, using Firebase only');
 }
+
+// Initialize database on module load
+initializeDatabase();
 
 export { pool, db };
 
