@@ -48,5 +48,11 @@ This is a full-stack JavaScript application that serves as a marketplace for soc
   - Service categories updated to match Channel Creation (YouTube, Instagram, TikTok, Telegram, Discord, Reels, Video, Tools, Others)
   - Enhanced card scaling with hover effects and better spacing
   - Larger search bar with improved fonts and visual appeal
+  - Search filter buttons now properly working (YouTube, Instagram, TikTok, etc.)
+  - All emojis removed from sharing and notifications
+  - Custom brand image (https://cdn.jsdelivr.net/gh/royal450/Ai_Video_Gen@main/file_0000000068d8622fb0c9568dfe1b5d55.png) set for:
+    - Website favicon (tab icon)
+    - Open Graph meta tags (social media sharing)
+    - Twitter Card meta tags
   - Clean modern design without excessive animations
 → Ready for further development and feature additions
