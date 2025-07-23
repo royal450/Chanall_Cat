@@ -226,37 +226,80 @@ export default function Profile() {
       return;
     }
 
-    const link = `${window.location.origin}/signup?ref=${profile.referralCode}`;
+    const link = `https://coursemarket.web.app/signup?ref=${profile.referralCode}`;
 
     try {
+      // Method 1: Modern Clipboard API (works on most devices)
       if (navigator.clipboard && window.isSecureContext) {
         await navigator.clipboard.writeText(link);
-      } else {
-        // Fallback for browsers that don't support clipboard API
-        const textArea = document.createElement('textarea');
-        textArea.value = link;
-        textArea.style.position = 'fixed';
-        textArea.style.left = '-999999px';
-        textArea.style.top = '-999999px';
-        document.body.appendChild(textArea);
-        textArea.focus();
-        textArea.select();
-        document.execCommand('copy');
-        document.body.removeChild(textArea);
+        toast({
+          title: "Link Copied! 📋",
+          description: "Referral link copied successfully",
+        });
+        return;
       }
-
-      toast({
-        title: "Link Copied! 📋",
-        description: "Referral link has been copied to clipboard",
-      });
     } catch (error) {
-      console.error('Copy failed:', error);
-      toast({
-        title: "Copy Failed",
-        description: "Unable to copy link. Please try again.",
-        variant: "destructive",
-      });
+      console.log('Clipboard API failed, trying fallback...');
     }
+
+    try {
+      // Method 2: Legacy execCommand fallback (works on older browsers)
+      const textArea = document.createElement('textarea');
+      textArea.value = link;
+      textArea.style.position = 'fixed';
+      textArea.style.left = '-999999px';
+      textArea.style.top = '-999999px';
+      textArea.style.opacity = '0';
+      document.body.appendChild(textArea);
+      textArea.focus();
+      textArea.select();
+      textArea.setSelectionRange(0, 99999); // For mobile devices
+      
+      const successful = document.execCommand('copy');
+      document.body.removeChild(textArea);
+      
+      if (successful) {
+        toast({
+          title: "Link Copied! 📋",
+          description: "Referral link copied successfully",
+        });
+        return;
+      }
+    } catch (error) {
+      console.log('execCommand failed, showing manual copy...');
+    }
+
+    // Method 3: Manual copy prompt (works on all devices)
+    const input = document.createElement('input');
+    input.value = link;
+    input.style.position = 'fixed';
+    input.style.top = '50%';
+    input.style.left = '50%';
+    input.style.transform = 'translate(-50%, -50%)';
+    input.style.zIndex = '9999';
+    input.style.background = 'white';
+    input.style.border = '2px solid #007bff';
+    input.style.padding = '10px';
+    input.style.borderRadius = '5px';
+    input.style.fontSize = '16px';
+    input.readOnly = true;
+    
+    document.body.appendChild(input);
+    input.focus();
+    input.select();
+    input.setSelectionRange(0, 99999);
+    
+    toast({
+      title: "Select & Copy! 📋",
+      description: "Link is selected. Press Ctrl+C (Android/PC) or Cmd+C (iPhone) to copy",
+    });
+    
+    // Remove the input after 10 seconds
+    setTimeout(() => {
+      if (document.body.contains(input)) {
+        document.body.removeChild(input);
+      }
+    }, 10000);
   };
 
   const shareReferralLink = async () => {
@@ -269,10 +312,11 @@ export default function Profile() {
       return;
     }
 
-    const link = `${window.location.origin}/signup?ref=${profile.referralCode}`;
+    const link = `https://coursemarket.web.app/signup?ref=${profile.referralCode}`;
     const text = `🚀 Join this amazing course platform and get ₹10 bonus! Use my referral link: ${link}`;
 
-    if (navigator.share && /Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) {
+    // Method 1: Try Native Share API (works on all modern mobiles)
+    if (navigator.share) {
       try {
         await navigator.share({
           title: 'Course Platform Referral',
@@ -283,21 +327,62 @@ export default function Profile() {
           title: "Link Shared! 🎉",
           description: "Thanks for sharing your referral link!",
         });
-      } catch (err: any) {
-        // Silently handle all share cancellations and errors
-        if (err.name === 'AbortError' || err.message === 'Share canceled' || err.message?.includes('cancel')) {
-          // User cancelled share - this is normal behavior, don't show error
+        return;
+      } catch (shareErr: any) {
+        // Silently handle share cancellation
+        if (shareErr.name === 'AbortError' || shareErr.message === 'Share canceled' || shareErr.message?.includes('cancel')) {
           console.log('Share cancelled by user');
           return;
         }
-        
-        // For actual errors, fallback to copy
-        console.log('Share failed, falling back to copy:', err);
-        copyReferralLink();
+        console.log('Native share failed, trying WhatsApp fallback...');
       }
-    } else {
-      copyReferralLink();
     }
+
+    // Method 2: WhatsApp Direct Share (works on all Android/iPhone)
+    try {
+      const whatsappText = encodeURIComponent(`🚀 Join this amazing course platform and get ₹10 bonus!\n\nUse my referral link: ${link}\n\n💰 Get instant ₹10 bonus on signup!`);
+      const whatsappUrl = `https://wa.me/?text=${whatsappText}`;
+      
+      // Try to open WhatsApp
+      const whatsappWindow = window.open(whatsappUrl, '_blank');
+      
+      if (whatsappWindow) {
+        toast({
+          title: "Opening WhatsApp! 📱",
+          description: "Share your referral link through WhatsApp",
+        });
+        return;
+      }
+    } catch (error) {
+      console.log('WhatsApp share failed, trying Telegram...');
+    }
+
+    // Method 3: Telegram Share (alternative for non-WhatsApp users)
+    try {
+      const telegramText = encodeURIComponent(`🚀 Join this amazing course platform and get ₹10 bonus! Use my referral link: ${link}`);
+      const telegramUrl = `https://t.me/share/url?url=${link}&text=${telegramText}`;
+      
+      const telegramWindow = window.open(telegramUrl, '_blank');
+      
+      if (telegramWindow) {
+        toast({
+          title: "Opening Telegram! 📱",
+          description: "Share your referral link through Telegram",
+        });
+        return;
+      }
+    } catch (error) {
+      console.log('Telegram share failed, falling back to copy...');
+    }
+
+    // Method 4: Always reliable fallback - Copy to clipboard
+    copyReferralLink();
+    
+    // Show additional sharing options
+    toast({
+      title: "Link Copied! 📋",
+      description: "Paste this link in any app to share with friends",
+    });
   };
 
   const requestWithdrawal = async () => {
