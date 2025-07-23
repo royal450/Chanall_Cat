@@ -516,12 +516,14 @@ export function ChannelCard({ channel, onBuyNow }: ChannelCardProps) {
           </Button>
         </div>
 
-        {/* Trust Badge */}
-        <div className="mt-4 text-center">
-          <span className="inline-block bg-green-100 text-green-800 text-xs px-3 py-1 rounded-full font-semibold">
-            This is 100% Trusted Seller ✓ Verified By Admin Received Trusted Badge
-          </span>
-        </div>
+        {/* Trust Badge - Only show if admin has given badge */}
+        {channelData.bonusBadge && (
+          <div className="mt-4 text-center">
+            <span className="inline-block bg-green-100 text-green-800 text-xs px-3 py-1 rounded-full font-semibold">
+              This is 100% Trusted Seller ✓ Verified By Admin Received Trusted Badge
+            </span>
+          </div>
+        )}
       </div>
 
       {/* Comments View Modal */}
