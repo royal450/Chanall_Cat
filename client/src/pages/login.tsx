@@ -79,7 +79,7 @@ export default function Login() {
                 type="password"
                 value={formData.password}
                 onChange={(e) => setFormData(prev => ({ ...prev, password: e.target.value }))}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+                className="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
                 placeholder="Enter your password"
                 required
               />
@@ -106,13 +106,13 @@ export default function Login() {
             <Button 
               type="submit" 
               disabled={loading}
-              className="w-full bg-primary text-white py-3 rounded-lg font-semibold hover:bg-blue-700 transition duration-200"
+              className="w-full bg-primary text-white py-2.5 rounded-lg font-semibold hover:bg-blue-700 transition duration-200"
             >
               {loading ? "Signing in..." : "Sign In"}
             </Button>
           </form>
           
-          <div className="mt-6 text-center">
+          <div className="mt-4 text-center">
             <p className="text-gray-600">
               Don't have an account?{" "}
               <Button 

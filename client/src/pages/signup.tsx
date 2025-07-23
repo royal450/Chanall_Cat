@@ -178,63 +178,63 @@ export default function Signup() {
               </div>
             </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="password">Password</Label>
+            <div className="space-y-1">
+              <Label htmlFor="password" className="text-sm">Password</Label>
               <div className="relative">
-                <Lock className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+                <FaLock className="absolute left-3 top-3 h-3 w-3 text-gray-400" />
                 <Input
                   id="password"
                   type={showPassword ? "text" : "password"}
                   placeholder="Enter your password"
                   value={formData.password}
                   onChange={(e) => setFormData({...formData, password: e.target.value})}
-                  className="pl-10 pr-10"
+                  className="pl-8 pr-8 py-2"
                   required
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-3 h-4 w-4 text-gray-400"
+                  className="absolute right-3 top-3 text-gray-400 hover:text-gray-600"
                 >
-                  {showPassword ? <EyeOff /> : <Eye />}
+                  {showPassword ? <FaEyeSlash className="h-3 w-3" /> : <FaEye className="h-3 w-3" />}
                 </button>
               </div>
             </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="confirmPassword">Confirm Password</Label>
+            <div className="space-y-1">
+              <Label htmlFor="confirmPassword" className="text-sm">Confirm Password</Label>
               <div className="relative">
-                <Lock className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+                <FaLock className="absolute left-3 top-3 h-3 w-3 text-gray-400" />
                 <Input
                   id="confirmPassword"
                   type={showConfirmPassword ? "text" : "password"}
                   placeholder="Confirm your password"
                   value={formData.confirmPassword}
                   onChange={(e) => setFormData({...formData, confirmPassword: e.target.value})}
-                  className="pl-10 pr-10"
+                  className="pl-8 pr-8 py-2"
                   required
                 />
                 <button
                   type="button"
                   onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                  className="absolute right-3 top-3 h-4 w-4 text-gray-400"
+                  className="absolute right-3 top-3 text-gray-400 hover:text-gray-600"
                 >
-                  {showConfirmPassword ? <EyeOff /> : <Eye />}
+                  {showConfirmPassword ? <FaEyeSlash className="h-3 w-3" /> : <FaEye className="h-3 w-3" />}
                 </button>
               </div>
             </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="referralCode">Referral Code (Optional)</Label>
+            <div className="space-y-1">
+              <Label htmlFor="referralCode" className="text-sm">Referral Code (Optional)</Label>
               <div className="relative">
-                <UserPlus className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+                <FaUserPlus className="absolute left-3 top-3 h-3 w-3 text-gray-400" />
                 <Input
                   id="referralCode"
                   type="text"
                   placeholder="Enter referral code"
                   value={referralCode}
                   onChange={(e) => setReferralCode(e.target.value)}
-                  className="pl-10"
+                  className="pl-8 py-2"
                   disabled={referralCodeDisabled}
                 />
                 {referralCodeDisabled && (
@@ -252,14 +252,14 @@ export default function Signup() {
 
             <Button
               type="submit"
-              className="w-full bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700"
+              className="w-full bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 py-2.5"
               disabled={loading}
             >
               {loading ? "Creating Account..." : "Create Account"}
             </Button>
           </form>
 
-          <div className="mt-6 text-center">
+          <div className="mt-4 text-center">
             <p className="text-sm text-gray-600">
               Already have an account?{" "}
               <button
