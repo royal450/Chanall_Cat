@@ -340,17 +340,11 @@ export function ChannelCard({ channel, onBuyNow }: ChannelCardProps) {
   };
 
     return (
-    <div className="w-[99%] mx-auto bg-white rounded-2xl shadow-lg overflow-hidden group hover:shadow-xl transition-all duration-300">
-      {/* Sold Out Overlay */}
+    <div className="w-full bg-white rounded-2xl shadow-lg overflow-hidden group hover:shadow-xl transition-all duration-300">
+      {/* Sold Out Badge - Top Center */}
       {channelData.soldOut && (
-        <div className="absolute inset-0 bg-black/80 z-30 flex items-center justify-center rounded-2xl">
-          <div className="text-center text-white p-6">
-            <div className="text-4xl mb-3">✅</div>
-            <div className="bg-red-500 text-white px-4 py-2 rounded-full text-lg font-bold mb-3">
-              SOLD OUT
-            </div>
-            <p className="text-gray-200 text-sm">This channel is sold out</p>
-          </div>
+        <div className="absolute top-3 left-1/2 transform -translate-x-1/2 bg-red-600 text-white px-4 py-2 rounded-md text-sm font-bold z-20 shadow-lg">
+          SOLD OUT
         </div>
       )}
 
@@ -419,12 +413,19 @@ export function ChannelCard({ channel, onBuyNow }: ChannelCardProps) {
         </div>
 
         {/* Description */}
-        <p className="text-gray-600 text-sm mb-4 leading-relaxed">
-          {channelData.description}
+        <div className="text-gray-600 text-sm mb-4 leading-relaxed">
+          <p className={`${!showFullDescription ? 'line-clamp-2' : ''}`}>
+            {channelData.description}
+          </p>
           {channelData.description && channelData.description.length > 100 && (
-            <span className="text-purple-600 cursor-pointer ml-1">Read More</span>
+            <button 
+              onClick={() => setShowFullDescription(!showFullDescription)}
+              className="text-purple-600 hover:text-purple-800 cursor-pointer ml-1 font-medium transition-colors"
+            >
+              {showFullDescription ? 'Show Less' : 'Read More'}
+            </button>
           )}
-        </p>
+        </div>
 
         {/* Price Section */}
         <div className="flex items-center gap-3 mb-4">
