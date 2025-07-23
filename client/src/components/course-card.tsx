@@ -236,7 +236,7 @@ export function ChannelCard({ channel, onBuyNow }: ChannelCardProps) {
       });
 
       toast({
-        title: newLikedState ? "Added to likes! ❤️" : "Removed from likes ❤️",
+        title: newLikedState ? "Added to likes!" : "Removed from likes",
         description: newLikedState ? "Channel added to your likes" : "Channel removed from your likes",
       });
     } catch (error) {
@@ -273,7 +273,7 @@ export function ChannelCard({ channel, onBuyNow }: ChannelCardProps) {
       } else {
         await navigator.clipboard.writeText(shareUrl);
         toast({
-          title: "Link Copied! 📋",
+          title: "Link Copied!",
           description: "Channel link has been copied to clipboard with your referral code",
         });
       }
@@ -285,12 +285,12 @@ export function ChannelCard({ channel, onBuyNow }: ChannelCardProps) {
         try {
           await navigator.clipboard.writeText(shareUrl);
           toast({
-            title: "Link Copied! 📋", 
+            title: "Link Copied!", 
             description: "Channel link has been copied to clipboard",
           });
         } catch (clipboardError) {
           toast({
-            title: "Share Ready! 📤",
+            title: "Share Ready!",
             description: "Use the share button to share this channel",
           });
         }
@@ -313,7 +313,7 @@ export function ChannelCard({ channel, onBuyNow }: ChannelCardProps) {
     setNewComment("");
 
     toast({
-      title: "Comment Added! 💬",
+      title: "Comment Added!",
       description: "Your comment has been posted successfully",
     });
   };
@@ -339,7 +339,7 @@ export function ChannelCard({ channel, onBuyNow }: ChannelCardProps) {
     localStorage.setItem(`comments_${channelData.id}`, JSON.stringify(updatedComments));
 
     toast({
-      title: "Comment Added! 💬",
+      title: "Comment Added!",
       description: "Your comment has been posted successfully",
     });
   };

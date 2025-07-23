@@ -84,9 +84,9 @@ export default function Dashboard() {
   useEffect(() => {
     let filtered = shuffledServices;
 
-    // Apply category filter
+    // Apply service type filter - Fixed to use serviceType instead of category
     if (activeFilter !== "all") {
-      filtered = filtered.filter(service => service.category === activeFilter);
+      filtered = filtered.filter(service => service.serviceType === activeFilter);
     }
 
     // Advanced Smart Search Filter
