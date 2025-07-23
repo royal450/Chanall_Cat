@@ -41,6 +41,11 @@ export interface Service {
   sellerId?: number;
   approvedAt?: string;
   approvedBy?: string;
+  soldOut?: boolean;
+  monetizationStatus?: string;
+  bonusBadge?: boolean;
+  badgeText?: string;
+  reputation?: string;
 }
 
 export interface UserStats {
@@ -61,8 +66,6 @@ export interface AdminStats {
   referralTraffic: number;
 }
 
-// Backward compatibility
+// Backward compatibility  
 export interface Channel extends Service {}
 export interface Course extends Service {}
-export type { Service as Channel };
-export type { Service as Course };

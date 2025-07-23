@@ -305,7 +305,7 @@ export function ChannelCard({ channel, onBuyNow }: ChannelCardProps) {
   const displayLikes = likes; // Use real-time likes from state
   const displaySales = realTimeSales; // Use consistent sales value
   const displayViews = realTimeViews; // Use consistent views value
-  const displayRating = parseFloat(realTimeRating); // Ensure rating is between 1.1 and 5.0
+  const displayRating = parseFloat(realTimeRating.toString()); // Ensure rating is between 1.1 and 5.0
   const finalRating = Math.min(Math.max(displayRating, 1.1), 5.0);
 
   // Get service type specific follower label
@@ -340,408 +340,253 @@ export function ChannelCard({ channel, onBuyNow }: ChannelCardProps) {
   };
 
     return (
-    <div 
-      className="w-[98%] mx-auto p-[5px] group"
-      style={{ height: 'auto' }}
-    >
-      <div className={`${channelData.bonusBadge 
-        ? 'bg-gradient-to-br from-amber-50 via-yellow-50 to-orange-50 border-2 border-amber-300 shadow-2xl shadow-amber-200/30' 
-        : 'bg-gradient-to-br from-slate-50 via-white to-blue-50/30 border border-slate-200/60'} 
-        dark:from-slate-900 dark:via-slate-800 dark:to-slate-900 dark:border-slate-700 
-        rounded-3xl shadow-xl hover:shadow-2xl transition-all duration-700 group overflow-hidden 
-        relative backdrop-blur-sm hover:scale-[1.02] transform-gpu`}>
-        
-        {/* Sold Out Overlay */}
-        {channelData.soldOut && (
-          <div className="absolute inset-0 bg-gradient-to-br from-emerald-400/95 to-teal-500/95 z-20 flex items-center justify-center rounded-3xl backdrop-blur-sm">
-            <div className="text-center text-white p-6">
-              <div className="text-4xl mb-3">✅</div>
-              <div className="bg-gradient-to-r from-red-500 to-pink-500 text-white px-4 py-2 rounded-full text-lg font-bold mb-3 shadow-lg">
-                SOLD OUT
-              </div>
-              <p className="text-emerald-100 text-sm mb-4">This service is sold out 😎</p>
-              <p className="text-emerald-200 text-xs">Please explore other amazing services 😎</p>
-              <Button 
-                disabled 
-                className="mt-4 bg-gray-500 cursor-not-allowed text-sm py-2 shadow-md"
-              >
-                Service Unavailable
-              </Button>
+    <div className="w-full max-w-sm mx-auto bg-white rounded-2xl shadow-lg overflow-hidden group hover:shadow-xl transition-all duration-300">
+      {/* Sold Out Overlay */}
+      {channelData.soldOut && (
+        <div className="absolute inset-0 bg-black/80 z-30 flex items-center justify-center rounded-2xl">
+          <div className="text-center text-white p-6">
+            <div className="text-4xl mb-3">✅</div>
+            <div className="bg-red-500 text-white px-4 py-2 rounded-full text-lg font-bold mb-3">
+              SOLD OUT
             </div>
-          </div>
-        )}
-
-        {/* Floating Discount Badge */}
-        {discountPercentage > 0 && (
-          <div className="absolute top-4 right-4 z-10">
-            <div className="bg-gradient-to-r from-red-500 via-pink-500 to-red-600 text-white px-3 py-2 rounded-2xl text-sm font-bold animate-bounce shadow-xl border-2 border-white/20">
-              <Sparkles className="w-4 h-4 inline mr-1" />
-              {discountPercentage}% OFF
-            </div>
-          </div>
-        )}
-
-        {/* Image Section with Enhanced Overlay */}
-        <div className="relative overflow-hidden rounded-t-3xl">
-          <img
-            src={channelData.thumbnail || 'https://images.unsplash.com/photo-1611224923853-80b023f02d71?w=400&h=200&fit=crop'}
-            alt={channelData.title}
-            className="w-full h-52 object-cover transition-all duration-700 group-hover:scale-110 filter group-hover:brightness-110"
-          />
-
-          {/* Multi-layer Gradient Overlay */}
-          <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
-          <div className="absolute inset-0 bg-gradient-to-br from-purple-600/10 via-transparent to-blue-600/10" />
-
-          {/* Floating Stats Badges */}
-          <div className="absolute bottom-4 left-4 right-4 text-white z-10">
-            <div className="flex justify-between items-end">
-              <div className="flex items-center space-x-3">
-                <div className="bg-black/40 backdrop-blur-lg px-3 py-2 rounded-xl border border-white/20 shadow-lg">
-                  <div className="flex items-center gap-2">
-                    <Heart className="w-4 h-4 text-rose-400" />
-                    <span className="font-semibold">{displayLikes}</span>
-                  </div>
-                </div>
-                <div className="bg-black/40 backdrop-blur-lg px-3 py-2 rounded-xl border border-white/20 shadow-lg">
-                  <div className="flex items-center gap-2">
-                    <Eye className="w-4 h-4 text-cyan-400" />
-                    <span className="font-semibold">{formatViews(displayViews)}</span>
-                  </div>
-                </div>
-              </div>
-              <div className="bg-gradient-to-r from-amber-500/90 to-orange-500/90 backdrop-blur-lg px-3 py-2 rounded-xl border border-white/20 shadow-lg">
-                <div className="flex items-center gap-2">
-                  <Star className="w-4 h-4 text-white fill-white" />
-                  <span className="font-bold text-white">{finalRating}</span>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div className="p-6 space-y-4">
-          {/* Title Section with Enhanced Styling */}
-          <div className="space-y-3">
-            <div className="flex items-start gap-3">
-              <h3 className="text-xl font-bold text-slate-900 dark:text-white line-clamp-2 group-hover:text-purple-600 dark:group-hover:text-purple-400 transition-colors flex-1 leading-tight">
-                {channelData.title}
-              </h3>
-              {channelData.bonusBadge && (
-                <div className="bg-gradient-to-r from-amber-500 to-orange-500 text-white px-3 py-1 rounded-full text-xs font-bold animate-pulse shadow-lg border border-amber-300 shrink-0 flex items-center gap-1">
-                  <Award className="w-3 h-3" />
-                  {channelData.badgeText || "🔥 HOT"}
-                </div>
-              )}
-            </div>
-
-            {/* Service Type & Status Pills */}
-            <div className="flex items-center gap-2 flex-wrap">
-              <div className="bg-gradient-to-r from-blue-500 to-cyan-500 text-white px-3 py-1 rounded-full text-xs font-semibold shadow-md flex items-center gap-1">
-                <Play className="w-3 h-3" />
-                {channelData.serviceType || channelData.category || 'General'}
-              </div>
-              <div className={`${channelData.monetizationStatus === 'monetized' 
-                ? 'bg-gradient-to-r from-emerald-500 to-green-500' 
-                : 'bg-gradient-to-r from-slate-500 to-gray-500'} text-white px-3 py-1 rounded-full text-xs font-semibold shadow-md flex items-center gap-1`}>
-                <DollarSign className="w-3 h-3" />
-                {channelData.monetizationStatus === 'monetized' ? 'Monetized' : 'Non-Monetized'}
-              </div>
-            </div>
-
-            {/* Seller Info Card */}
-            <div className="bg-gradient-to-r from-purple-50 via-blue-50 to-cyan-50 dark:from-purple-900/20 dark:via-blue-900/20 dark:to-cyan-900/20 p-4 rounded-2xl border border-purple-200/50 dark:border-purple-700/30 shadow-sm">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-gradient-to-r from-purple-500 to-blue-500 rounded-full flex items-center justify-center text-white font-bold text-lg shadow-lg">
-                  {(channelData.seller || 'U').charAt(0).toUpperCase()}
-                </div>
-                <div className="flex-1">
-                  <div className="flex items-center gap-2">
-                    <span className="text-slate-700 dark:text-slate-300 font-medium text-sm">
-                      Seller: <span className="text-purple-600 dark:text-purple-400 font-bold">{channelData.seller || 'Unknown'}</span>
-                    </span>
-                    {channelData.bonusBadge && (
-                      <div className="bg-gradient-to-r from-amber-500 to-orange-500 text-white px-2 py-0.5 rounded-full text-xs font-bold flex items-center gap-1">
-                        <Award className="w-3 h-3" />
-                        PRO
-                      </div>
-                    )}
-                  </div>
-                  
-                  {/* Strike Info */}
-                  {channelData.reputation && (
-                    <div className="flex items-center gap-2 mt-1">
-                      <div className={`w-2 h-2 rounded-full ${getStrikeInfo(channelData.reputation).color}`}></div>
-                      <span className={`text-xs ${getStrikeInfo(channelData.reputation).textColor}`}>
-                        {getStrikeInfo(channelData.reputation).text}
-                      </span>
-                    </div>
-                  )}
-                </div>
-              </div>
-
-              {channelData.bonusBadge && (
-                <div className="mt-3 text-xs text-emerald-600 dark:text-emerald-400 flex items-center gap-2 bg-emerald-50 dark:bg-emerald-900/20 p-2 rounded-lg">
-                  <Shield className="w-4 h-4" />
-                  <span>Verified trusted seller with admin badge 😎</span>
-                </div>
-              )}
-            </div>
-          </div>
-
-          {/* Description Card */}
-          <div className="bg-slate-50 dark:bg-slate-800/50 p-4 rounded-2xl border border-slate-200 dark:border-slate-700">
-            <p className={`text-sm text-slate-600 dark:text-slate-300 leading-relaxed ${showFullDescription ? '' : 'line-clamp-3'}`}>
-              {channelData.description}
-            </p>
-            {channelData.description && channelData.description.length > 150 && (
-              <button
-                onClick={() => setShowFullDescription(!showFullDescription)}
-                className="text-purple-600 hover:text-purple-700 font-semibold mt-2 text-sm flex items-center gap-1 transition-colors"
-              >
-                {showFullDescription ? (
-                  <>
-                    <ChevronRight className="w-4 h-4 rotate-90" />
-                    Show Less
-                  </>
-                ) : (
-                  <>
-                    <ChevronRight className="w-4 h-4" />
-                    Read More
-                  </>
-                )}
-              </button>
-            )}
-          </div>
-
-          {/* Stats Grid with Cards */}
-          <div className="grid grid-cols-4 gap-3">
-            <div className="bg-gradient-to-br from-rose-50 to-pink-50 dark:from-rose-900/20 dark:to-pink-900/20 p-3 rounded-xl text-center border border-rose-200/50 dark:border-rose-700/50">
-              <div className="text-lg font-bold text-rose-600 dark:text-rose-400">{displayLikes}</div>
-              <div className="text-xs text-rose-500 dark:text-rose-400">Likes</div>
-            </div>
-            <div className="bg-gradient-to-br from-blue-50 to-cyan-50 dark:from-blue-900/20 dark:to-cyan-900/20 p-3 rounded-xl text-center border border-blue-200/50 dark:border-blue-700/50">
-              <div className="text-lg font-bold text-blue-600 dark:text-blue-400">{formatViews(displayViews)}</div>
-              <div className="text-xs text-blue-500 dark:text-blue-400">Views</div>
-            </div>
-            <div className="bg-gradient-to-br from-emerald-50 to-green-50 dark:from-emerald-900/20 dark:to-green-900/20 p-3 rounded-xl text-center border border-emerald-200/50 dark:border-emerald-700/50">
-              <div className="text-lg font-bold text-emerald-600 dark:text-emerald-400">
-                {channelData.followerCount ? formatViews(channelData.followerCount) : '0'}
-              </div>
-              <div className="text-xs text-emerald-500 dark:text-emerald-400">
-                {getFollowerLabel(channelData.serviceType || channelData.category || 'youtube')}
-              </div>
-            </div>
-            <div className="bg-gradient-to-br from-amber-50 to-orange-50 dark:from-amber-900/20 dark:to-orange-900/20 p-3 rounded-xl text-center border border-amber-200/50 dark:border-amber-700/50">
-              <div className="text-lg font-bold text-amber-600 dark:text-amber-400">{commentCount}</div>
-              <div className="text-xs text-amber-500 dark:text-amber-400">Comments</div>
-            </div>
-          </div>
-
-          {/* Pricing Section with Enhanced Design */}
-          <div className="bg-gradient-to-r from-green-50 via-emerald-50 to-teal-50 dark:from-green-900/20 dark:via-emerald-900/20 dark:to-teal-900/20 p-5 rounded-2xl border-2 border-green-200/50 dark:border-green-700/50 shadow-sm">
-            {channelData.fakePrice && channelData.fakePrice > channelData.price ? (
-              <div className="space-y-2">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-4">
-                    <span className="text-3xl font-bold text-green-600 dark:text-green-400">₹{channelData.price.toLocaleString()}</span>
-                    <span className="text-xl font-bold text-red-500 line-through decoration-red-500 decoration-2 bg-red-100 dark:bg-red-900/30 px-3 py-1 rounded-lg">
-                      ₹{channelData.fakePrice.toLocaleString()}
-                    </span>
-                  </div>
-                  <div className="bg-gradient-to-r from-red-500 to-pink-500 text-white px-3 py-1 rounded-full text-sm font-bold">
-                    SAVE {discountPercentage}%
-                  </div>
-                </div>
-                <div className="text-sm text-green-600 dark:text-green-400 font-semibold flex items-center gap-2">
-                  <Sparkles className="w-4 h-4" />
-                  You save ₹{(channelData.fakePrice - channelData.price).toLocaleString()} with this deal!
-                </div>
-              </div>
-            ) : (
-              <div className="flex justify-between items-center">
-                <span className="text-3xl font-bold text-green-600 dark:text-green-400">₹{channelData.price.toLocaleString()}</span>
-                <div className="bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 px-3 py-1 rounded-full text-sm font-semibold">
-                  Best Price
-                </div>
-              </div>
-            )}
-          </div>
-
-          {/* Action Buttons with Modern Design */}
-          <div className="space-y-3">
-            <Button 
-              onClick={() => {
-                if (channelData.soldOut) {
-                  toast({
-                    title: "Service Sold Out 😎",
-                    description: "This service is sold out 😎 Please explore other 😎",
-                    variant: "destructive",
-                  });
-                  return;
-                }
-                onBuyNow(channelData);
-              }}
-              disabled={channelData.soldOut}
-              className="w-full bg-gradient-to-r from-purple-600 via-blue-600 to-cyan-600 hover:from-purple-700 hover:via-blue-700 hover:to-cyan-700 text-white font-bold py-4 rounded-2xl shadow-xl hover:shadow-2xl transition-all duration-500 transform hover:-translate-y-1 text-lg relative overflow-hidden group"
-            >
-              <div className="absolute inset-0 bg-gradient-to-r from-purple-600/20 to-cyan-600/20 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000"></div>
-              <div className="relative flex items-center justify-center gap-3">
-                <ShoppingCart className="w-5 h-5" />
-                Buy Now - ₹{channelData.price.toLocaleString()}
-                <Sparkles className="w-5 h-5" />
-              </div>
-            </Button>
-
-            {/* Secondary Action Buttons */}
-            <div className="grid grid-cols-3 gap-3">
-              <Button
-                variant="outline"
-                onClick={handleLike}
-                className="bg-gradient-to-r from-rose-50 to-pink-50 dark:from-rose-900/20 dark:to-pink-900/20 border-2 border-rose-200 dark:border-rose-700 hover:bg-gradient-to-r hover:from-rose-100 hover:to-pink-100 dark:hover:from-rose-900/40 dark:hover:to-pink-900/40 transition-all duration-300 py-3 rounded-xl group"
-              >
-                <Heart className={`w-4 h-4 mr-2 transition-all duration-300 ${isLiked ? 'fill-current text-red-500 scale-110' : 'group-hover:scale-110'}`} />
-                <span className="font-semibold">{displayLikes}</span>
-              </Button>
-              <Button
-                variant="outline"
-                onClick={() => setShowCommentsView(true)}
-                className="bg-gradient-to-r from-blue-50 to-cyan-50 dark:from-blue-900/20 dark:to-cyan-900/20 border-2 border-blue-200 dark:border-blue-700 hover:bg-gradient-to-r hover:from-blue-100 hover:to-cyan-100 dark:hover:from-blue-900/40 dark:hover:to-cyan-900/40 transition-all duration-300 py-3 rounded-xl group"
-              >
-                <MessageCircle className="w-4 h-4 mr-2 group-hover:scale-110 transition-transform duration-300" />
-                <span className="font-semibold">{commentCount}</span>
-              </Button>
-              <Button
-                variant="outline"
-                onClick={handleShare}
-                className="bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20 border-2 border-green-200 dark:border-green-700 hover:bg-gradient-to-r hover:from-green-100 hover:to-emerald-100 dark:hover:from-green-900/40 dark:hover:to-emerald-900/40 transition-all duration-300 py-3 rounded-xl group"
-              >
-                <Share2 className="w-4 h-4 mr-2 group-hover:scale-110 transition-transform duration-300" />
-                <span className="font-semibold">Share</span>
-              </Button>
-            </div>
-          </div>
-
-          {/* Trust Indicators Footer */}
-          <div className="flex items-center justify-between pt-4 border-t-2 border-slate-200 dark:border-slate-700">
-            <div className="flex items-center gap-4 text-sm">
-              <div className="flex items-center gap-2 text-green-600 dark:text-green-400">
-                <Shield className="w-4 h-4" />
-                <span className="font-semibold">Verified</span>
-              </div>
-              <div className="flex items-center gap-2 text-amber-600 dark:text-amber-400">
-                <Award className="w-4 h-4" />
-                <span className="font-semibold">Premium</span>
-              </div>
-              <div className="flex items-center gap-2 text-blue-600 dark:text-blue-400">
-                <Zap className="w-4 h-4" />
-                <span className="font-semibold">Instant</span>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Comments View Modal - Enhanced */}
-      {showCommentsView && (
-        <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4 backdrop-blur-sm">
-          <div className="bg-white dark:bg-slate-800 rounded-3xl shadow-2xl max-w-2xl w-full max-h-[85vh] overflow-hidden flex flex-col border border-slate-200 dark:border-slate-700">
-            {/* Enhanced Header */}
-            <div className="bg-gradient-to-r from-purple-600 via-blue-600 to-cyan-600 text-white p-6 flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <div className="bg-white/20 p-2 rounded-xl backdrop-blur-sm">
-                  <MessageCircle className="w-6 h-6" />
-                </div>
-                <div>
-                  <h3 className="text-xl font-bold">Comments</h3>
-                  <p className="text-white/80 text-sm">{commentCount} total comments</p>
-                </div>
-              </div>
-              <Button
-                onClick={() => setShowCommentsView(false)}
-                variant="ghost"
-                size="sm"
-                className="text-white hover:bg-white/20 rounded-xl"
-              >
-                <X className="w-6 h-6" />
-              </Button>
-            </div>
-
-            {/* Comments List with Enhanced Styling */}
-            <div className="flex-1 overflow-y-auto p-6 space-y-4 max-h-[50vh]">
-              {comments.map((comment, index) => (
-                <div key={comment.id} className="bg-gradient-to-r from-slate-50 via-white to-slate-50 dark:from-slate-700 dark:via-slate-800 dark:to-slate-700 p-4 rounded-2xl border border-slate-200 dark:border-slate-600 shadow-sm hover:shadow-md transition-all duration-300 group">
-                  <div className="flex gap-4">
-                    <div className="w-12 h-12 bg-gradient-to-r from-purple-500 to-blue-500 rounded-full flex items-center justify-center text-white font-bold text-lg shadow-lg shrink-0 group-hover:scale-105 transition-transform duration-300">
-                      {comment.avatar}
-                    </div>
-                    <div className="flex-1">
-                      <div className="flex items-center gap-3 mb-2">
-                        <span className="font-bold text-slate-900 dark:text-white">{comment.user}</span>
-                        <span className="text-xs text-slate-500 dark:text-slate-400 bg-slate-100 dark:bg-slate-700 px-2 py-1 rounded-full">
-                          {typeof comment.timestamp === 'string' ? comment.timestamp : formatTimeAgo(comment.timestamp)}
-                        </span>
-                      </div>
-                      <p className="text-slate-700 dark:text-slate-300 leading-relaxed">{comment.text}</p>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-
-            {/* Enhanced Comment Input */}
-            <div className="border-t border-slate-200 dark:border-slate-700 p-6 bg-gradient-to-r from-slate-50 to-white dark:from-slate-900 dark:to-slate-800">
-              <div className="flex gap-4">
-                <Textarea
-                  value={comment}
-                  onChange={(e) => setComment(e.target.value)}
-                  placeholder="Share your thoughts about this channel... 💬"
-                  className="flex-1 min-h-[80px] resize-none border-2 border-purple-200 dark:border-purple-700 focus:border-purple-500 dark:focus:border-purple-400 rounded-2xl bg-white dark:bg-slate-800 shadow-sm"
-                />
-                <Button 
-                  onClick={handleComment}
-                  disabled={!comment.trim()}
-                  className="self-end bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 rounded-2xl px-6 py-3 shadow-lg hover:shadow-xl transition-all duration-300"
-                >
-                  <Send className="w-5 h-5" />
-                </Button>
-              </div>
-            </div>
+            <p className="text-gray-200 text-sm">This channel is sold out</p>
           </div>
         </div>
       )}
 
-      {/* Comment Dialog - Enhanced */}
-      <Dialog open={showCommentDialog} onOpenChange={setShowCommentDialog}>
-        <DialogContent className="max-w-md rounded-3xl border-2 border-purple-200 dark:border-purple-700">
-          <DialogHeader>
-            <DialogTitle className="text-xl font-bold bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">
-              Add a Comment
-            </DialogTitle>
-            <DialogDescription className="text-slate-600 dark:text-slate-400">
-              Share your thoughts about this channel
-            </DialogDescription>
-          </DialogHeader>
-          <div className="space-y-4">
-            <Textarea
-              value={comment}
-              onChange={(e) => setComment(e.target.value)}
-              placeholder="Write your comment here..."
-              className="min-h-[120px] border-2 border-purple-200 dark:border-purple-700 focus:border-purple-500 rounded-2xl"
-            />
+      {/* Image Section */}
+      <div className="relative h-48 overflow-hidden">
+        <img
+          src={channelData.thumbnail || 'https://images.unsplash.com/photo-1611224923853-80b023f02d71?w=400&h=200&fit=crop'}
+          alt={channelData.title}
+          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+        />
+        
+        {/* Discount Badge - Top Left */}
+        {discountPercentage > 0 && (
+          <div className="absolute top-3 left-3 bg-red-500 text-white px-3 py-1 rounded-full text-sm font-bold">
+            {discountPercentage}% OFF
           </div>
-          <DialogFooter className="gap-3">
-            <Button
-              onClick={() => setShowCommentDialog(false)}
-              variant="outline"
-              className="rounded-xl border-2 border-slate-200 dark:border-slate-700"
-            >
+        )}
+
+        {/* Platform Badge - Top Right */}
+        <div className="absolute top-3 right-3 bg-red-600 text-white px-3 py-1 rounded-md text-sm font-bold">
+          {channelData.platform === 'youtube' ? 'Youtube' : 
+           channelData.platform === 'instagram' ? 'Instagram' :
+           channelData.platform === 'facebook' ? 'Facebook' :
+           channelData.platform === 'tiktok' ? 'TikTok' :
+           channelData.platform === 'twitter' ? 'Twitter' :
+           channelData.platform === 'linkedin' ? 'LinkedIn' :
+           channelData.platform === 'telegram' ? 'Telegram' : 'Youtube'}
+        </div>
+
+        {/* Monetized Badge - Bottom Left */}
+        {channelData.monetizationStatus === 'monetized' && (
+          <div className="absolute bottom-3 left-3 bg-blue-600 text-white px-3 py-1 rounded-md text-sm font-bold">
+            Monetized
+          </div>
+        )}
+
+        {/* PRO SELLER Badge - Bottom Right */}
+        {channelData.bonusBadge && (
+          <div className="absolute bottom-3 right-3 bg-yellow-500 text-black px-3 py-1 rounded-md text-sm font-bold">
+            PRO SELLER
+          </div>
+        )}
+      </div>
+
+      {/* Content Section */}
+      <div className="p-6">
+        {/* Title and PRO Badge */}
+        <div className="flex items-start justify-between mb-3">
+          <h3 className="text-xl font-bold text-gray-900 leading-tight">
+            {channelData.title}
+          </h3>
+          {channelData.bonusBadge && (
+            <div className="bg-blue-600 text-white px-3 py-1 rounded-md text-sm font-bold ml-2 flex items-center gap-1">
+              <Star className="w-3 h-3 fill-white" />
+              PRO
+            </div>
+          )}
+        </div>
+
+        {/* Seller Info */}
+        <div className="flex items-center gap-2 mb-4">
+          <User className="w-4 h-4 text-gray-500" />
+          <span className="text-gray-600 text-sm">
+            By: <span className="font-semibold text-gray-900">{channelData.seller || 'user name'}</span>
+          </span>
+        </div>
+
+        {/* Description */}
+        <p className="text-gray-600 text-sm mb-4 leading-relaxed">
+          {channelData.description}
+          {channelData.description && channelData.description.length > 100 && (
+            <span className="text-purple-600 cursor-pointer ml-1">Read More</span>
+          )}
+        </p>
+
+        {/* Price Section */}
+        <div className="flex items-center gap-3 mb-4">
+          <span className="text-2xl font-bold text-green-600">₹{channelData.price.toLocaleString()}</span>
+          {channelData.fakePrice && channelData.fakePrice > channelData.price && (
+            <>
+              <span className="text-gray-500 line-through">₹{channelData.fakePrice.toLocaleString()}</span>
+              <div className="bg-red-500 text-white px-2 py-1 rounded-full text-xs font-bold">
+                {discountPercentage}% OFF
+              </div>
+            </>
+          )}
+          <div className="flex items-center gap-1 ml-auto">
+            <Star className="w-4 h-4 text-yellow-500 fill-yellow-500" />
+            <span className="font-semibold">{finalRating}</span>
+          </div>
+        </div>
+
+        {/* Stats Row */}
+        <div className="flex items-center gap-4 text-sm text-gray-600 mb-6">
+          <div className="flex items-center gap-1">
+            <Heart className="w-4 h-4" />
+            <span>{displayLikes}</span>
+          </div>
+          <div className="flex items-center gap-1">
+            <MessageCircle className="w-4 h-4" />
+            <span>{commentCount}</span>
+          </div>
+          <div className="flex items-center gap-1">
+            <Eye className="w-4 h-4" />
+            <span>{formatViews(displayViews)}</span>
+          </div>
+          <div className="flex items-center gap-1">
+            <ShoppingCart className="w-4 h-4" />
+            <span>{realTimeSales} sold</span>
+          </div>
+        </div>
+
+        {/* Buy Now Button */}
+        <Button 
+          onClick={() => {
+            if (channelData.soldOut) {
+              toast({
+                title: "Service Sold Out",
+                description: "This service is sold out. Please explore other options.",
+                variant: "destructive",
+              });
+              return;
+            }
+            onBuyNow(channelData);
+          }}
+          disabled={channelData.soldOut}
+          className="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3 rounded-lg mb-4"
+        >
+          <ShoppingCart className="w-4 h-4 mr-2" />
+          Buy Now - ₹{channelData.price.toLocaleString()}
+        </Button>
+
+        {/* Action Buttons Row */}
+        <div className="flex gap-2">
+          <Button
+            variant="outline"
+            onClick={handleLike}
+            className="flex-1 border-gray-300 hover:bg-gray-50"
+          >
+            <Heart className={`w-4 h-4 mr-1 ${isLiked ? 'fill-red-500 text-red-500' : ''}`} />
+            Like
+          </Button>
+          <Button
+            variant="outline"
+            onClick={() => setShowCommentsView(true)}
+            className="flex-1 border-gray-300 hover:bg-gray-50"
+          >
+            <MessageCircle className="w-4 h-4 mr-1" />
+            Comments ({commentCount})
+          </Button>
+          <Button
+            variant="outline"
+            onClick={handleShare}
+            className="flex-1 border-gray-300 hover:bg-gray-50"
+          >
+            <Share2 className="w-4 h-4 mr-1" />
+            Share
+          </Button>
+        </div>
+
+        {/* Trust Badge */}
+        <div className="mt-4 text-center">
+          <span className="inline-block bg-green-100 text-green-800 text-xs px-3 py-1 rounded-full font-semibold">
+            This is 100% Trusted Seller ✓ Verified By Admin Received Trusted Badge
+          </span>
+        </div>
+      </div>
+
+      {/* Comments View Modal */}
+      {showCommentsView && (
+        <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[85vh] overflow-hidden flex flex-col">
+            <div className="bg-blue-600 text-white p-4 flex items-center justify-between">
+              <h3 className="text-lg font-bold">Comments ({commentCount})</h3>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setShowCommentsView(false)}
+                className="text-white hover:bg-white/20"
+              >
+                <X className="w-4 h-4" />
+              </Button>
+            </div>
+            
+            <div className="flex-1 overflow-y-auto p-4 space-y-4">
+              {comments.map((comment) => (
+                <div key={comment.id} className="bg-gray-50 p-3 rounded-lg">
+                  <div className="flex items-center gap-2 mb-2">
+                    <div className="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center text-white text-sm font-bold">
+                      {comment.avatar}
+                    </div>
+                    <span className="font-semibold text-gray-900">{comment.user}</span>
+                    <span className="text-xs text-gray-500">{typeof comment.timestamp === 'string' ? comment.timestamp : comment.timestamp.toLocaleString()}</span>
+                  </div>
+                  <p className="text-gray-700 text-sm">{comment.text}</p>
+                </div>
+              ))}
+            </div>
+            
+            {user && (
+              <div className="p-4 border-t">
+                <div className="flex gap-2">
+                  <Textarea
+                    placeholder="Add a comment..."
+                    value={comment}
+                    onChange={(e) => setComment(e.target.value)}
+                    className="flex-1 min-h-[60px]"
+                  />
+                  <Button onClick={handleComment} disabled={!comment.trim()}>
+                    <Send className="w-4 h-4" />
+                  </Button>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* Comment Dialog */}
+      <Dialog open={showCommentDialog} onOpenChange={setShowCommentDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Add Comment</DialogTitle>
+            <DialogDescription>Share your thoughts about this channel</DialogDescription>
+          </DialogHeader>
+          <Textarea
+            placeholder="Write your comment here..."
+            value={comment}
+            onChange={(e) => setComment(e.target.value)}
+            className="min-h-[100px]"
+          />
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowCommentDialog(false)}>
               Cancel
             </Button>
-            <Button 
-              onClick={handleComment}
-              className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 rounded-xl"
-            >
+            <Button onClick={handleComment} disabled={!comment.trim()}>
               Post Comment
             </Button>
           </DialogFooter>
@@ -751,7 +596,5 @@ export function ChannelCard({ channel, onBuyNow }: ChannelCardProps) {
   );
 }
 
-// Export backward compatibility function at bottom
-export function CourseCard({ channel, onBuyNow }: CourseCardProps) {
-  return <ChannelCard channel={channel} onBuyNow={onBuyNow} />;
-}
+// Backward compatibility
+export const CourseCard = ChannelCard;
