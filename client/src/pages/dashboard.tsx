@@ -305,7 +305,7 @@ export default function Dashboard() {
               <p className="text-gray-500 dark:text-gray-400">Try adjusting your search or filter criteria</p>
             </div>
           ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-[5px] w-full px-[5px]">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-[2px] w-full px-[2px]">
               {filteredServices.map((service, index) => (
                 <div
                   key={service.id}

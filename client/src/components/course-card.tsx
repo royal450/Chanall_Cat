@@ -340,11 +340,15 @@ export function ChannelCard({ channel, onBuyNow }: ChannelCardProps) {
   };
 
     return (
-    <div className="w-full bg-white rounded-2xl shadow-lg overflow-hidden group hover:shadow-xl transition-all duration-300">
-      {/* Sold Out Badge - Top Center */}
+    <div className="relative w-full bg-white rounded-2xl shadow-lg overflow-hidden group hover:shadow-xl transition-all duration-300">
+      {/* Sold Out Glassmorphism Overlay - Only on sold out cards */}
       {channelData.soldOut && (
-        <div className="absolute top-3 left-1/2 transform -translate-x-1/2 bg-red-600 text-white px-4 py-2 rounded-md text-sm font-bold z-20 shadow-lg">
-          SOLD OUT
+        <div className="absolute inset-0 bg-white/80 backdrop-blur-sm z-30 flex items-center justify-center rounded-2xl">
+          <div className="text-center">
+            <div className="bg-red-600 text-white px-6 py-3 rounded-lg text-lg font-bold shadow-lg">
+              SOLD OUT
+            </div>
+          </div>
         </div>
       )}
 
