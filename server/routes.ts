@@ -385,10 +385,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
             totalBonuses: userBonuses.length,
             totalWithdrawals: userWithdrawals.length,
             avgChannelPrice: userChannels.length > 0 ? Math.round(userChannels.reduce((sum, c) => sum + c.price, 0) / userChannels.length) : 0,
-            channelEarnings: userChannels.reduce((sum, c) => sum + (c.price * (c.soldCount || 0)), 0),
+            channelEarnings: userChannels.reduce((sum, c) => sum + (c.price * (c.sales || 0)), 0),
             recentChannels: userChannels.slice(-3), // Last 3 channels
-            loginCount: user.loginCount || 0,
-            userLevel: user.totalEarnings > 1000 ? 'Premium' : user.totalEarnings > 500 ? 'Gold' : 'Silver'
+            loginCount: 0, // Default login count since this field doesn't exist in schema
+            userLevel: (user.totalEarnings || 0) > 1000 ? 'Premium' : (user.totalEarnings || 0) > 500 ? 'Gold' : 'Silver'
           };
         } catch (error) {
           console.error(`Error enhancing user ${user.id}:`, error);
@@ -485,7 +485,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         console.error('Error importing database:', error);
         return res.status(500).json({ 
           error: 'Database connection failed', 
-          details: error.message 
+          details: error instanceof Error ? error.message : 'Unknown error'
         });
       }
       
@@ -555,7 +555,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.error('❌ Error processing admin bonus:', error);
       res.status(500).json({ 
         error: 'Failed to process bonus request', 
-        details: error.message 
+        details: error instanceof Error ? error.message : 'Unknown error'
       });
     }
   });
@@ -620,7 +620,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         withdrawals: userWithdrawals,
         totalChannels: userChannels.length,
         avgChannelPrice: userChannels.length > 0 ? Math.round(userChannels.reduce((sum, c) => sum + c.price, 0) / userChannels.length) : 0,
-        channelEarnings: userChannels.reduce((sum, c) => sum + (c.price * (c.soldCount || 0)), 0)
+        channelEarnings: userChannels.reduce((sum, c) => sum + (c.price * (c.sales || 0)), 0)
       };
 
       res.json(detailedUser);
@@ -641,7 +641,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ error: "User not found" });
       }
 
-      const userBadges = user.badges || [];
+      const userBadges: any[] = [];
       const newBadge = {
         id: Date.now(),
         type: badgeType,
