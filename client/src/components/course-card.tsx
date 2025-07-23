@@ -340,7 +340,7 @@ export function ChannelCard({ channel, onBuyNow }: ChannelCardProps) {
   };
 
     return (
-    <div className="w-full max-w-sm mx-auto bg-white rounded-2xl shadow-lg overflow-hidden group hover:shadow-xl transition-all duration-300">
+    <div className="w-[99%] mx-auto bg-white rounded-2xl shadow-lg overflow-hidden group hover:shadow-xl transition-all duration-300">
       {/* Sold Out Overlay */}
       {channelData.soldOut && (
         <div className="absolute inset-0 bg-black/80 z-30 flex items-center justify-center rounded-2xl">
