@@ -1,5 +1,7 @@
 {
   "projects": {
-    "default": "cousemarket"
-  }
+    "default": "channelmarkets"
+  },
+  "targets": {},
+  "etags": {}
 }
