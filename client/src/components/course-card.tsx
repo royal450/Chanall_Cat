@@ -132,7 +132,7 @@ export function ChannelCard({ channel, onBuyNow }: ChannelCardProps) {
         "YouTube Studio mein sab kuch perfect setup", "Community tab bhi active rakha hai",
         "Shorts aur long form dono mein growth", "Copyright strike free channel hai completely"
       ],
-      
+
       // Instagram specific comments  
       instagram: [
         "Insta engagement rate dekh ke pagal ho gaya! 📸", "Story views aur reach kamaal ka hai",
@@ -232,6 +232,17 @@ export function ChannelCard({ channel, onBuyNow }: ChannelCardProps) {
         "Reaction videos genuine aur entertaining hain", "Celebrity interactions authentic aur fun hain"
       ],
 
+      // TikTok specific comments
+      tiktok: [
+        "TikTok engagement rate dekh ke pagal ho gaya! 📱", "Viral content ka potential 100% hai",
+        "FYP algorithm perfectly optimized hai", "Hashtag strategy bohot strong hai",
+        "Dance trends aur challenges trending hain", "Music sync aur timing perfect hai",
+        "Gen Z audience ka favorite account hai", "Brand partnerships ready audience",
+        "Content creation quality professional level", "Follower growth exponential hai",
+        "Video editing skills next level hain", "Trending sounds ka proper use kiya",
+        "Creative concepts unique aur catchy hain", "Short form content ka king hai ye"
+      ],
+
       // Default comments for other categories
       default: [
         "Content quality dekh ke impress ho gaya! ⭐", "Engagement rate bilkul solid hai bro",
@@ -263,7 +274,7 @@ export function ChannelCard({ channel, onBuyNow }: ChannelCardProps) {
     const getRelevantComments = () => {
       const serviceType = channelData.serviceType || '';
       const category = channelData.category || '';
-      
+
       // Priority: Service type > Category > Default
       if (serviceType && categoryComments[serviceType]) {
         return categoryComments[serviceType];
@@ -469,10 +480,10 @@ export function ChannelCard({ channel, onBuyNow }: ChannelCardProps) {
       // Save to Firebase Database in real-time
       const { ref, push, set } = await import("firebase/database");
       const { database } = await import("@/lib/firebase");
-      
+
       const commentsRef = ref(database, `comments/${channelData.id}`);
       const newCommentRef = push(commentsRef);
-      
+
       await set(newCommentRef, {
         ...newCommentObj,
         userId: user?.uid,
@@ -571,14 +582,14 @@ export function ChannelCard({ channel, onBuyNow }: ChannelCardProps) {
         <img
           src={channelData.thumbnail || getAutoThumbnail(channelData.category || '', channelData.serviceType || '')}
           alt={channelData.title}
-          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-30 duration-300"
           onError={(e) => {
             // If image fails to load, use category-based fallback
             const target = e.target as HTMLImageElement;
             target.src = getAutoThumbnail(channelData.category || '', channelData.serviceType || '');
           }}
         />
-        
+
         {/* Discount Badge - Top Left */}
         {discountPercentage > 0 && (
           <div className="absolute top-3 left-3 bg-red-500 text-white px-3 py-1 rounded-full text-sm font-bold">
@@ -776,7 +787,7 @@ export function ChannelCard({ channel, onBuyNow }: ChannelCardProps) {
                 <X className="w-4 h-4" />
               </Button>
             </div>
-            
+
             <div className="flex-1 overflow-y-auto p-4 space-y-4">
               {comments.map((comment) => (
                 <div key={comment.id} className="bg-gray-50 p-3 rounded-lg">
@@ -791,7 +802,7 @@ export function ChannelCard({ channel, onBuyNow }: ChannelCardProps) {
                 </div>
               ))}
             </div>
-            
+
             {user && (
               <div className="p-4 border-t">
                 <div className="flex gap-2">
