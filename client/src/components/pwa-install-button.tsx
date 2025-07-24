@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Download, Smartphone } from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
 
 interface BeforeInstallPromptEvent extends Event {
   prompt(): Promise<void>;
@@ -11,6 +12,7 @@ export function PWAInstallButton() {
   const [deferredPrompt, setDeferredPrompt] = useState<BeforeInstallPromptEvent | null>(null);
   const [isInstallable, setIsInstallable] = useState(false);
   const [isInstalled, setIsInstalled] = useState(false);
+  const { toast } = useToast();
 
   useEffect(() => {
     // Check if app is already installed
@@ -76,7 +78,11 @@ export function PWAInstallButton() {
           setIsInstallable(false);
           setDeferredPrompt(null);
           trackPWAInstall();
-          alert('App successfully installed! ⭐⭐⭐');
+          toast({
+            title: "App Successfully Installed! ⭐⭐⭐",
+            description: "Channel Market app is now on your home screen!",
+            duration: 5000,
+          });
         }
       } catch (error) {
         console.error('Installation failed:', error);
@@ -93,9 +99,17 @@ export function PWAInstallButton() {
         // Simulate install
         trackPWAInstall();
         setIsInstalled(true);
-        alert('App installed successfully! ⭐⭐⭐\n\nLook for Channel Market app on your home screen!');
+        toast({
+          title: "App Installed Successfully! ⭐⭐⭐",
+          description: "Look for Channel Market app on your home screen!",
+          duration: 5000,
+        });
       } catch (error) {
-        alert('Installing app... ⭐⭐⭐\n\nFor manual install:\n• Chrome: Menu → Install Channel Market\n• Safari: Share → Add to Home Screen');
+        toast({
+          title: "Installing App... ⭐⭐⭐",
+          description: "For manual install: Chrome → Menu → Install Channel Market, Safari → Share → Add to Home Screen",
+          duration: 7000,
+        });
       }
     }
   };

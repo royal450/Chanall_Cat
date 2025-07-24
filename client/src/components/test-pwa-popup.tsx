@@ -3,9 +3,11 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Download, X, Smartphone } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useToast } from '@/hooks/use-toast';
 
 export function TestPWAPopup() {
   const [showPopup, setShowPopup] = useState(false);
+  const { toast } = useToast();
 
   useEffect(() => {
     // Show popup after 2 seconds for testing
@@ -35,10 +37,18 @@ export function TestPWAPopup() {
         }),
       });
       
-      alert('Channel Market app installed successfully! ⭐⭐⭐\n\nApp added to your home screen!');
+      toast({
+        title: "App Installed Successfully! ⭐⭐⭐",
+        description: "Channel Market app added to your home screen!",
+        duration: 5000,
+      });
       setShowPopup(false);
     } catch (error) {
-      alert('App installing... ⭐⭐⭐\n\nChannel Market will appear on your home screen soon!');
+      toast({
+        title: "App Installing... ⭐⭐⭐",
+        description: "Channel Market will appear on your home screen soon!",
+        duration: 5000,
+      });
       setShowPopup(false);
     }
   };
@@ -50,12 +60,23 @@ export function TestPWAPopup() {
   return (
     <AnimatePresence>
       {showPopup && (
-        <motion.div
-          initial={{ opacity: 0, scale: 0.8 }}
-          animate={{ opacity: 1, scale: 1 }}
-          exit={{ opacity: 0, scale: 0.8 }}
-          className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-50 max-w-sm w-full mx-4"
-        >
+        <>
+          {/* Dark backdrop overlay */}
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-black/30 backdrop-blur-sm z-40"
+            onClick={handleClose}
+          />
+          
+          {/* Centered popup */}
+          <motion.div
+            initial={{ opacity: 0, scale: 0.8 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.8 }}
+            className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-50 max-w-sm w-full mx-4"
+          >
           <Card className="shadow-2xl border-2 border-pink-200 bg-gradient-to-br from-pink-50 to-rose-50">
             <CardContent className="p-4">
               <div className="flex items-start justify-between mb-3">
@@ -97,7 +118,8 @@ export function TestPWAPopup() {
               </div>
             </CardContent>
           </Card>
-        </motion.div>
+          </motion.div>
+        </>
       )}
     </AnimatePresence>
   );

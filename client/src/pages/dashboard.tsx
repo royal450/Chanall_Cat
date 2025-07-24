@@ -34,6 +34,7 @@ import { useFirebaseServices } from "@/hooks/use-firebase-realtime";
 import { PWAInstallButton } from "@/components/pwa-install-button";
 import { PWAInstallPopup } from "@/components/pwa-install-popup";
 import { TestPWAPopup } from "@/components/test-pwa-popup";
+import { Toaster } from "@/components/ui/toaster";
 
 // Services Marketplace Dashboard
 
