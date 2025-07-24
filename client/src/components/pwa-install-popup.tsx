@@ -28,7 +28,11 @@ export function PWAInstallPopup() {
       const userInstalled = localStorage.getItem('pwa-user-installed');
       const permanentlyDismissed = localStorage.getItem('pwa-permanently-dismissed');
       
-      if (userInstalled === 'true' || permanentlyDismissed === 'true') {
+      // Check if popup was shown today already
+      const lastShownDate = localStorage.getItem('pwa-popup-last-shown');
+      const today = new Date().toDateString();
+      
+      if (userInstalled === 'true' || permanentlyDismissed === 'true' || lastShownDate === today) {
         return;
       }
 
@@ -60,10 +64,11 @@ export function PWAInstallPopup() {
         }
       };
 
-      // Show popup automatically only for new users (not if they dismissed permanently)
+      // Show popup automatically only once per day
       setTimeout(() => {
-        if (!isInstalled && permanentlyDismissed !== 'true') {
+        if (!isInstalled && permanentlyDismissed !== 'true' && lastShownDate !== today) {
           setShowPopup(true);
+          localStorage.setItem('pwa-popup-last-shown', today);
         }
       }, 3000);
 
@@ -135,6 +140,9 @@ export function PWAInstallPopup() {
     try {
       setShowPopup(false);
       setError(null);
+      // Mark popup as shown for today when user closes it
+      const today = new Date().toDateString();
+      localStorage.setItem('pwa-popup-last-shown', today);
     } catch (error) {
       console.error('Error closing popup:', error);
     }

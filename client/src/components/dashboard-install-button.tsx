@@ -80,12 +80,12 @@ export function DashboardInstallButton() {
     <Button
       onClick={handleInstallClick}
       disabled={isLoading}
-      className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white px-4 py-2 rounded-lg font-medium shadow-lg hover:shadow-xl transition-all duration-300"
+      className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white px-3 py-2 rounded-lg font-medium shadow-lg hover:shadow-xl transition-all duration-300 text-sm"
     >
       {isLoading ? (
-        <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2" />
+        <div className="w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin mr-1" />
       ) : (
-        <Download className="w-4 h-4 mr-2" />
+        <Download className="w-3 h-3 mr-1" />
       )}
       {isLoading ? 'Installing...' : 'Install App'}
     </Button>
