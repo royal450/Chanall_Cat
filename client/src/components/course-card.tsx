@@ -124,24 +124,28 @@ export function ChannelCard({ channel, onBuyNow }: ChannelCardProps) {
     const categoryComments = {
       // YouTube specific comments
       youtube: [
-        "Monetized channel mila gaya bhai! 🔥", "Subscribers growth ekdam fire hai! 🚀",
-        "YouTube ke liye best investment yaar", "AdSense approved hai already! 💰",
-        "Content quality dekh ke shock ho gaya", "Viral potential hai isme bohot",
-        "Watch hours complete hain, monetization ready!", "CPM rates bhi achhe hain is channel ke",
-        "Thumbnail aur editing top class hai", "Algorithm friendly content hai bilkul",
-        "YouTube Studio mein sab kuch perfect setup", "Community tab bhi active rakha hai",
-        "Shorts aur long form dono mein growth", "Copyright strike free channel hai completely"
+        "YouTube channel fully monetized mil gaya bhai! AdSense earning start", "Subscribers growth exponential hai, 1K se 50K in months",
+        "YouTube algorithm perfectly favor kar raha hai content", "Watch hours aur CPM rates both amazing hain yahan",
+        "Content quality professional level hai, editing top notch", "Viral potential unlimited hai, trending videos regularly",
+        "Monetization requirements already complete, earning ready", "Analytics dashboard mein sab green signals show kar raha",
+        "Thumbnail aur SEO strategy perfectly optimized hai", "Algorithm friendly content strategy implemented successfully",
+        "YouTube Studio mein complete professional setup done", "Community tab engagement aur subscriber retention excellent",
+        "Shorts aur long form content both performing great", "Copyright strike free, clean channel history maintained",
+        "Niche authority established, brand partnerships incoming", "Revenue streams multiple, affiliate marketing ready",
+        "Video consistency maintained, upload schedule perfect", "Audience demographics valuable for advertisers targeting"
       ],
 
       // Instagram specific comments  
       instagram: [
-        "Insta engagement rate dekh ke pagal ho gaya! 📸", "Story views aur reach kamaal ka hai",
-        "Reels viral hone ka potential 100%", "Brand collaboration ready audience hai",
-        "Instagram verification ke liye eligible", "Story highlights professionally managed hain",
-        "IGTV content bhi bohot engaging hai", "Followers quality check kar liya, real hain sab",
-        "Fashion niche mein ye account gold mine hai", "Influencer marketing ke liye perfect setup",
-        "Bio link aur contact info properly optimized", "Grid aesthetic bilkul on point hai bro",
-        "Live streaming engagement bhi solid hai", "Shopping tags aur business features enabled"
+        "Instagram account ka engagement rate dekh ke pagal ho gaya! Like aur comments solid", "Story views aur reach kamaal ka hai, organic traffic hai",
+        "Reels viral hone ka potential 1000%, algorithm favor kar raha", "Brand collaboration ready audience hai, demographics perfect",
+        "Blue tick verification ke liye eligible hai account", "Story highlights professionally managed hain with covers",
+        "IGTV aur long form content bhi bohot engaging hai", "Followers quality check kar liya, real active users hain",
+        "Niche authority account hai, followers trust kar rahe", "Influencer marketing ke liye perfect setup hai bio mein",
+        "Bio link aur contact info properly optimized hai", "Grid aesthetic bilkul on point hai, theme consistent",
+        "Live streaming engagement bhi solid hai audience interactive", "Shopping tags aur business features properly enabled",
+        "Hashtag research aur strategy top notch hai", "Content calendar consistent posting schedule maintain",
+        "Analytics metrics strong growth trend show kar rahe", "Cross-platform promotion strategy effective hai yahan"
       ],
 
       // Tech & Technology comments
@@ -179,13 +183,14 @@ export function ChannelCard({ channel, onBuyNow }: ChannelCardProps) {
 
       // Telegram specific comments
       telegram: [
-        "Telegram channel ka content quality ekdam top! 📱", "Members engagement bohot active hai yahan",
-        "Daily updates aur news rapid fire mein aate hain", "File sharing aur resources ka treasure hai ye",
-        "Admin response time lightning fast hai", "Channel growth consistent aur organic hai",
-        "Content categorization perfectly organized hai", "Premium content ka access unlimited hai",
-        "Broadcasting reach wide audience tak jata hai", "Community polls aur interaction regular hain",
-        "Educational content ka quality professional level", "Business opportunities ka hub hai ye channel",
-        "Technical discussion aur support top class", "Content variety beginners se experts tak covers"
+        "Telegram channel ka subscriber base massive hai! Content quality top", "Daily active members engagement consistently high level maintain",
+        "Instant updates aur breaking news rapid delivery system", "File sharing unlimited resources treasure trove for users",
+        "Admin team response lightning fast 24/7 support available", "Organic growth steady hai without fake subscribers issue",
+        "Content perfectly categorized with clear channel organization", "Premium exclusive content access with commercial value",
+        "Broadcasting reach global audience multiple language support", "Interactive polls aur community engagement features active",
+        "Educational content university level quality maintained consistently", "Business networking opportunities through channel community hub",
+        "Technical support aur troubleshooting immediate response guaranteed", "Content range beginner to expert level comprehensive coverage",
+        "Monetization ready channel with affiliate marketing potential", "Channel analytics strong performance metrics showing growth"
       ],
 
       // Discord specific comments  
@@ -199,15 +204,16 @@ export function ChannelCard({ channel, onBuyNow }: ChannelCardProps) {
         "Community challenges aur competitions fun hain", "Knowledge sharing aur learning environment positive"
       ],
 
-      // Video Bundle comments
+      // Video Bundle comments  
       video: [
-        "Video bundle ka content variety incredible! 🎬", "Production quality Hollywood level ka hai",
-        "Editing aur effects professionally done hain", "Video length aur pacing perfect hai har content",
-        "Different genres ka mix bohot entertaining hai", "4K quality mein videos crystal clear hain", 
-        "Tutorial videos step-by-step clear explanation", "Entertainment content family-friendly hai",
-        "Video SEO aur thumbnails click-worthy hain", "Series format mein content well-organized hai",
-        "Behind-the-scenes footage exclusive aur interesting", "Video analytics aur performance metrics strong",
-        "Content calendar consistent aur reliable hai", "Video descriptions detailed aur SEO optimized"
+        "Video bundle ka content variety incredible hai! Multiple niches covered", "Production quality Hollywood level ka hai with professional equipment",
+        "Editing aur effects professionally done hain with motion graphics", "Video length aur pacing perfect hai, audience retention high",
+        "Multiple format videos included - reels, long form, shorts", "HD/4K quality mein sab videos crystal clear rendering",
+        "Tutorial series step-by-step clear explanation with graphics", "Entertainment content family-friendly aur brand safe hai",
+        "Video SEO optimization aur thumbnails click-worthy design", "Series format mein content strategically organized hai",
+        "Exclusive footage aur behind-the-scenes content included", "Video performance metrics consistently strong trending",
+        "Content calendar planned release schedule maintained", "Bulk video package saves time aur editing cost",
+        "Ready-to-upload format with descriptions aur tags", "Commercial rights included for business use cases"
       ],
 
       // Tools specific comments
@@ -234,13 +240,14 @@ export function ChannelCard({ channel, onBuyNow }: ChannelCardProps) {
 
       // TikTok specific comments
       tiktok: [
-        "TikTok engagement rate dekh ke pagal ho gaya! 📱", "Viral content ka potential 100% hai",
-        "FYP algorithm perfectly optimized hai", "Hashtag strategy bohot strong hai",
-        "Dance trends aur challenges trending hain", "Music sync aur timing perfect hai",
-        "Gen Z audience ka favorite account hai", "Brand partnerships ready audience",
-        "Content creation quality professional level", "Follower growth exponential hai",
-        "Video editing skills next level hain", "Trending sounds ka proper use kiya",
-        "Creative concepts unique aur catchy hain", "Short form content ka king hai ye"
+        "TikTok account ka engagement rate dekh ke pagal ho gaya! Views lakhs mein", "Viral content ka potential 1000% hai yaar",
+        "FYP algorithm perfectly optimized hai, har video trending", "Hashtag strategy bohot strong hai aur viral sounds use kiye",
+        "Dance trends aur challenges follow karne wala content", "Music sync aur timing perfect hai har video mein",
+        "Gen Z audience ka favorite account hai completely", "Brand partnerships ke liye ready audience available",
+        "Content creation quality professional level ka hai", "Follower growth exponential curve mein badh raha",
+        "Video editing skills next level hain with transitions", "Trending sounds ka proper use kiya gaya hai",
+        "Creative concepts unique aur catchy hain bilkul", "Short form content ka raja hai ye account bro",
+        "Duet aur collaboration potential unlimited hai", "For You Page mein regular feature hota rehta"
       ],
 
       // Default comments for other categories
@@ -276,10 +283,10 @@ export function ChannelCard({ channel, onBuyNow }: ChannelCardProps) {
       const category = channelData.category || '';
 
       // Priority: Service type > Category > Default
-      if (serviceType && categoryComments[serviceType]) {
-        return categoryComments[serviceType];
-      } else if (category && categoryComments[category]) {
-        return categoryComments[category];
+      if (serviceType && (categoryComments as any)[serviceType]) {
+        return (categoryComments as any)[serviceType];
+      } else if (category && (categoryComments as any)[category]) {
+        return (categoryComments as any)[category];
       } else {
         return categoryComments.default;
       }
@@ -774,7 +781,7 @@ export function ChannelCard({ channel, onBuyNow }: ChannelCardProps) {
 
       {/* Comments View Modal */}
       {showCommentsView && (
-        <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4">
+        <div className="fixed inset-0 bg-black/60 z-[999] flex items-center justify-center p-4">
           <div className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[85vh] overflow-hidden flex flex-col">
             <div className="bg-blue-600 text-white p-4 flex items-center justify-between">
               <h3 className="text-lg font-bold">Comments ({commentCount})</h3>
