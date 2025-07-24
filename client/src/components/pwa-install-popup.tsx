@@ -154,7 +154,7 @@ export function PWAInstallPopup() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black/60 z-[99998] backdrop-blur-sm"
+            className="fixed inset-0 bg-black/60 z-[999998] backdrop-blur-sm"
             onClick={handleClose}
           />
           
@@ -164,7 +164,7 @@ export function PWAInstallPopup() {
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.8, y: 50 }}
             transition={{ type: "spring", stiffness: 400, damping: 30 }}
-            className="fixed inset-0 z-[99999] flex items-center justify-center p-4"
+            className="fixed inset-0 z-[999999] flex items-center justify-center p-4"
             onClick={handleClose}
           >
             <div 
