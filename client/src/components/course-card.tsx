@@ -110,35 +110,148 @@ export function ChannelCard({ channel, onBuyNow }: ChannelCardProps) {
       "Neha Gupta", "Ravi Agarwal", "Sanjay Mishra", "Vikram Singh", "Rahul Jain",
       "Arjun Nair", "Kiran Kumar", "Amit Verma", "Deepika Singh", "Rohit Gupta",
       "Sneha Patel", "Manish Kumar", "Pooja Sharma", "Aakash Jain", "Shreya Reddy",
-      "Varun Singh", "Meera Gupta", "Harsh Agarwal", "Nisha Patel", "Kunal Sharma"
+      "Varun Singh", "Meera Gupta", "Harsh Agarwal", "Nisha Patel", "Kunal Sharma",
+      "Vikas Yadav", "Shweta Agarwal", "Mohit Bansal", "Ritu Singh", "Arpit Joshi"
     ];
 
     const internationalNames = [
       "Jennifer Smith", "Michael Johnson", "David Wilson", "Robert Brown", "James Davis",
       "Christopher Lee", "Emily Garcia", "Jessica Miller", "Sarah Anderson", "Amanda Taylor",
-      "Maria Rodriguez", "Lisa Thomas"
+      "Maria Rodriguez", "Lisa Thomas", "Alex Thompson", "Sophie Turner", "Chris Evans"
     ];
 
-    // 80% Indian comments in Hinglish, 20% international
-    const indianComments = [
-      "Yaar ye channel ekdam mast hai! 🔥", "Bhai sahab amazing channel hai, paisa vasool!",
-      "Best channel ever yaar! Highly recommend karta hun", "Superb quality hai bro, bahut followers mila",
-      "Value for money ka matlab ye channel hai", "Beginners aur experts dono ke liye perfect",
-      "Mind-blowing engagement rate hai bro", "Ye to pure sona hai audience wise",
-      "Growth potential ekdam top class hai", "Results pakke hain agar properly manage karo",
-      "Top-notch quality content already hai", "Business ke liye game-changer hai ye channel",
-      "Incredible followers count hai bhai", "Serious buyers ke liye must-purchase",
-      "Bilkul different niche hai growth ka", "Exceptional quality engagement hai channel mein",
-      "Kamaal ka channel hai yaar! 🚀", "Paisa double ho gaya is channel se",
-      "Seller bhai ka management amazing hai", "Life changing opportunity mila hai",
-      "Bas kar diya buy after seeing stats", "Ekdum solid channel hai bhai log"
-    ];
+    // Category and Service Type specific comments
+    const categoryComments = {
+      // YouTube specific comments
+      youtube: [
+        "Monetized channel mila gaya bhai! 🔥", "Subscribers growth ekdam fire hai! 🚀",
+        "YouTube ke liye best investment yaar", "AdSense approved hai already! 💰",
+        "Content quality dekh ke shock ho gaya", "Viral potential hai isme bohot",
+        "Watch hours complete hain, monetization ready!", "CPM rates bhi achhe hain is channel ke",
+        "Thumbnail aur editing top class hai", "Algorithm friendly content hai bilkul",
+        "YouTube Studio mein sab kuch perfect setup", "Community tab bhi active rakha hai",
+        "Shorts aur long form dono mein growth", "Copyright strike free channel hai completely"
+      ],
+      
+      // Instagram specific comments  
+      instagram: [
+        "Insta engagement rate dekh ke pagal ho gaya! 📸", "Story views aur reach kamaal ka hai",
+        "Reels viral hone ka potential 100%", "Brand collaboration ready audience hai",
+        "Instagram verification ke liye eligible", "Story highlights professionally managed hain",
+        "IGTV content bhi bohot engaging hai", "Followers quality check kar liya, real hain sab",
+        "Fashion niche mein ye account gold mine hai", "Influencer marketing ke liye perfect setup",
+        "Bio link aur contact info properly optimized", "Grid aesthetic bilkul on point hai bro",
+        "Live streaming engagement bhi solid hai", "Shopping tags aur business features enabled"
+      ],
+
+      // Tech & Technology comments
+      'Tech & Technology': [
+        "Tech reviews bilkul professional level ke hain! 💻", "Latest gadgets ka coverage amazing hai",
+        "Coding tutorials bohot helpful hain yaar", "AI aur ML content ka demand high hai",
+        "Software reviews unbiased aur detailed hain", "Tech news ki coverage timely aur accurate",
+        "Programming tutorials beginner-friendly hain", "Hardware reviews mein technical depth hai",
+        "Startup aur tech industry insights valuable hain", "Cybersecurity content bohot relevant hai",
+        "Mobile tech aur app reviews top notch", "Cloud computing content ka demand growing hai",
+        "Data science tutorials practical aur useful hain", "Tech career guidance content helpful hai"
+      ],
+
+      // Cooking & Food comments
+      'Cooking & Food': [
+        "Recipes try kiye, sabko bohot pasand aaye! 🍛", "Indian cuisine ka presentation world-class hai",
+        "Step-by-step cooking videos crystal clear hain", "Healthy recipes ka collection amazing hai",
+        "Regional dishes ka authentic taste capture kiya", "Food photography aur videography top level",
+        "Quick recipes working professionals ke liye perfect", "Traditional recipes modern twist ke saath",
+        "Vegetarian options ka variety bohot wide hai", "Street food recipes ghar mein try kar sakte hain",
+        "Baking tutorials beginner se expert level tak", "Nutrition information properly mentioned hai",
+        "Food styling aur presentation tips valuable hain", "Festival special recipes ka timing perfect hai"
+      ],
+
+      // Gaming comments
+      Gaming: [
+        "Gaming skills dekh ke inspired ho gaya! 🎮", "Live streaming quality professional level ki hai",
+        "Game reviews honest aur detailed hain", "Esports tournament coverage exciting hai",
+        "Gaming tips aur tricks bohot helpful hain", "New game launches ka coverage timely hai",
+        "Gaming setup aur gear reviews useful hain", "Multiplayer sessions mein community active hai",
+        "Game walkthroughs clear aur comprehensive hain", "Gaming news aur updates regular milte hain",
+        "Retro gaming content nostalgic aur fun hai", "Mobile gaming ka coverage bhi solid hai",
+        "Gaming tutorials beginner-friendly approach hai", "Speedrun videos aur challenges entertaining hain"
+      ],
+
+      // Telegram specific comments
+      telegram: [
+        "Telegram channel ka content quality ekdam top! 📱", "Members engagement bohot active hai yahan",
+        "Daily updates aur news rapid fire mein aate hain", "File sharing aur resources ka treasure hai ye",
+        "Admin response time lightning fast hai", "Channel growth consistent aur organic hai",
+        "Content categorization perfectly organized hai", "Premium content ka access unlimited hai",
+        "Broadcasting reach wide audience tak jata hai", "Community polls aur interaction regular hain",
+        "Educational content ka quality professional level", "Business opportunities ka hub hai ye channel",
+        "Technical discussion aur support top class", "Content variety beginners se experts tak covers"
+      ],
+
+      // Discord specific comments  
+      discord: [
+        "Discord server ka community vibe amazing! 💬", "Voice chat sessions bohot interactive hain",
+        "Gaming tournaments aur events regular organize hote", "Moderators active aur helpful hain 24/7",
+        "Different channels perfectly categorized hain", "Bot features aur commands useful hain",
+        "Server rules clear aur fairly enforced hain", "New member onboarding process smooth hai",
+        "Discussion quality intellectual aur engaging hai", "File sharing aur collaboration easy hai",
+        "Custom emojis aur server branding creative hai", "Role system aur permissions well-managed hain",
+        "Community challenges aur competitions fun hain", "Knowledge sharing aur learning environment positive"
+      ],
+
+      // Video Bundle comments
+      video: [
+        "Video bundle ka content variety incredible! 🎬", "Production quality Hollywood level ka hai",
+        "Editing aur effects professionally done hain", "Video length aur pacing perfect hai har content",
+        "Different genres ka mix bohot entertaining hai", "4K quality mein videos crystal clear hain", 
+        "Tutorial videos step-by-step clear explanation", "Entertainment content family-friendly hai",
+        "Video SEO aur thumbnails click-worthy hain", "Series format mein content well-organized hai",
+        "Behind-the-scenes footage exclusive aur interesting", "Video analytics aur performance metrics strong",
+        "Content calendar consistent aur reliable hai", "Video descriptions detailed aur SEO optimized"
+      ],
+
+      // Tools specific comments
+      tools: [
+        "Digital tools ka collection game-changer hai! 🛠️", "Automation tools productivity 10x increase karte",
+        "User interface clean aur intuitive hai", "Tool documentation comprehensive aur helpful hai",
+        "Regular updates aur feature additions milte rehte", "Customer support responsive aur knowledgeable hai",
+        "Integration capabilities other tools ke saath smooth", "Cost-effective solution multiple problems ka",
+        "Learning curve minimal, easy to implement hai", "Performance metrics aur analytics detailed hain",
+        "Custom configuration options flexible hain", "Security features robust aur reliable hain",
+        "Scalability options business growth ke saath adjust", "Training materials aur tutorials comprehensive hain"
+      ],
+
+      // Entertainment comments
+      Entertainment: [
+        "Comedy content has me rolling! 😂", "Entertainment value paisa vasool hai completely",
+        "Memes aur viral content ka timing perfect", "Celebrity interviews aur gossip interesting hain",
+        "Movie reviews unbiased aur helpful hain", "Music covers aur original content dono solid",
+        "Stand-up comedy clips hilarious hain yaar", "Trending topics ka coverage fresh perspective ke saath",
+        "Web series reviews aur recommendations spot on", "Behind-the-scenes content exclusive aur engaging",
+        "Live entertainment shows ka production quality high", "Pop culture references relatable aur funny hain",
+        "Reaction videos genuine aur entertaining hain", "Celebrity interactions authentic aur fun hain"
+      ],
+
+      // Default comments for other categories
+      default: [
+        "Content quality dekh ke impress ho gaya! ⭐", "Engagement rate bilkul solid hai bro",
+        "Audience response bohot positive hai", "Growth potential unlimited hai isme",
+        "Value for money ka perfect example", "Professional management clearly visible hai",
+        "Consistent posting schedule maintain kiya hai", "Community building excellent hai",
+        "Brand value aur reputation strong hai", "Market mein demand high hai is type ka content",
+        "Target audience perfectly aligned hai", "Monetization opportunities multiple hain",
+        "Content strategy well-planned aur executed", "Competition se clearly ahead hai ye channel"
+      ]
+    };
 
     const internationalComments = [
-      "This channel changed my business! 🔥", "Amazing engagement, worth every penny",
-      "Best channel ever! Highly recommended", "Superb quality, great follower base",
-      "Outstanding value for money", "Perfect for beginners and experts",
-      "Mind-blowing engagement rate here", "This is pure gold audience"
+      "This channel transformed my business completely! 🚀", "Content quality is absolutely phenomenal",
+      "Engagement metrics are off the charts!", "Best investment I've made this year",
+      "Professional management clearly shows results", "Audience quality is premium level",
+      "Growth potential is absolutely unlimited here", "ROI exceeded all my expectations",
+      "Content strategy is brilliantly executed", "Market positioning is perfect for growth",
+      "Brand value keeps increasing consistently", "Community engagement is incredibly strong",
+      "Monetization opportunities are endless", "Competition analysis shows clear advantages"
     ];
 
     const timeStamps = [
@@ -146,6 +259,22 @@ export function ChannelCard({ channel, onBuyNow }: ChannelCardProps) {
       "5 घंटे ago", "1 दिन ago", "2 days ago", "3 दिन ago", "1 हफ्ता ago"
     ];
 
+    // Smart comment selection based on category and service type
+    const getRelevantComments = () => {
+      const serviceType = channelData.serviceType || '';
+      const category = channelData.category || '';
+      
+      // Priority: Service type > Category > Default
+      if (serviceType && categoryComments[serviceType]) {
+        return categoryComments[serviceType];
+      } else if (category && categoryComments[category]) {
+        return categoryComments[category];
+      } else {
+        return categoryComments.default;
+      }
+    };
+
+    const relevantComments = getRelevantComments();
     const count = Math.floor(Math.random() * 25) + 5; // 5-30 comments
     const generatedComments = [];
 
@@ -155,8 +284,9 @@ export function ChannelCard({ channel, onBuyNow }: ChannelCardProps) {
         indianNames[Math.floor(Math.random() * indianNames.length)] :
         internationalNames[Math.floor(Math.random() * internationalNames.length)];
 
+      // Use relevant comments for Indians, international for others
       const comment = isIndian ?
-        indianComments[Math.floor(Math.random() * indianComments.length)] :
+        relevantComments[Math.floor(Math.random() * relevantComments.length)] :
         internationalComments[Math.floor(Math.random() * internationalComments.length)];
 
       generatedComments.push({
@@ -318,7 +448,7 @@ export function ChannelCard({ channel, onBuyNow }: ChannelCardProps) {
     });
   };
 
-    const handleComment = () => {
+    const handleComment = async () => {
     if (!comment.trim()) return;
 
     const newCommentObj: Comment = {
@@ -335,12 +465,42 @@ export function ChannelCard({ channel, onBuyNow }: ChannelCardProps) {
     setComment("");
     setShowCommentDialog(false);
 
-    // Store updated comments in localStorage
+    try {
+      // Save to Firebase Database in real-time
+      const { ref, push, set } = await import("firebase/database");
+      const { database } = await import("@/lib/firebase");
+      
+      const commentsRef = ref(database, `comments/${channelData.id}`);
+      const newCommentRef = push(commentsRef);
+      
+      await set(newCommentRef, {
+        ...newCommentObj,
+        userId: user?.uid,
+        channelId: channelData.id,
+        isVerified: true, // Real user comment
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString()
+      });
+
+      // Also update channel's comment count in Firebase
+      const { update } = await import("firebase/database");
+      const channelRef = ref(database, `channels/${channelData.id}`);
+      await update(channelRef, {
+        comments: updatedComments.length,
+        lastCommentAt: new Date().toISOString()
+      });
+
+      console.log('Real user comment saved to Firebase successfully');
+    } catch (error) {
+      console.error('Error saving comment to Firebase:', error);
+    }
+
+    // Store updated comments in localStorage as backup
     localStorage.setItem(`comments_${channelData.id}`, JSON.stringify(updatedComments));
 
     toast({
-      title: "Comment Added!",
-      description: "Your comment has been posted successfully",
+      title: "Comment Added! 🎉",
+      description: "आपका comment successfully post हो गया है",
     });
   };
 
