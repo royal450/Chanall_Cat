@@ -254,6 +254,12 @@ export default function Dashboard() {
           <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold bg-gradient-to-r from-purple-600 via-pink-600 to-cyan-600 bg-clip-text text-transparent mb-4 leading-tight">
             Digital Marketplace
           </h1>
+          
+          {/* Install App Button under Digital Marketplace */}
+          <div className="flex justify-center mb-4">
+            <DashboardInstallButton />
+          </div>
+          
           <p className="text-base sm:text-lg md:text-xl lg:text-2xl text-gray-600 dark:text-gray-300 mb-6 max-w-full px-2 font-medium">
             Premium YouTube channels, Instagram profiles, Discord servers, video bundles & digital services
           </p>
