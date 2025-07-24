@@ -227,13 +227,10 @@ export default function Dashboard() {
         <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-80 h-80 bg-pink-300 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-pulse delay-2000"></div>
       </div>
 
-      {/* Fixed Install App Button - Top Right */}
-      <div className="fixed top-4 right-4 z-50">
-        <DashboardInstallButton />
-      </div>
+
 
       {/* Profile Icon */}
-      <div className="fixed top-20 right-4 z-50">
+      <div className="fixed top-4 right-4 z-50">
         <Button
           onClick={() => setLocation("/profile")}
           className="w-12 h-12 rounded-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 shadow-xl hover:shadow-purple-500/30 transform hover:scale-110 transition-all duration-300 border-2 border-white/20"
@@ -264,10 +261,7 @@ export default function Dashboard() {
             Premium YouTube channels, Instagram profiles, Discord servers, video bundles & digital services
           </p>
 
-          {/* PWA Install Button */}
-          <div className="flex justify-center mb-4">
-            <PWAInstallButton />
-          </div>
+
 
           {/* Compact Stats Counter */}
           <div className="flex flex-wrap justify-center gap-2 mb-6 w-full px-2">

@@ -1,7 +1,6 @@
 
 import { GraduationCap } from "lucide-react";
 import { FaFacebookF, FaTwitter, FaInstagram, FaYoutube, FaPaypal, FaBitcoin } from "react-icons/fa";
-import { PWAInstallButton } from "@/components/pwa-install-button";
 import { DashboardInstallButton } from "@/components/dashboard-install-button";
 
 export function Footer() {
@@ -31,8 +30,7 @@ export function Footer() {
                 <FaYoutube />
               </a>
             </div>
-            <div className="flex flex-col space-y-3">
-              <PWAInstallButton />
+            <div className="flex justify-start">
               <DashboardInstallButton />
             </div>
           </div>
