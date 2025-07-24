@@ -25,6 +25,8 @@ This is a full-stack JavaScript application that serves as a marketplace for soc
   - Fixed install button positioned at top-right of dashboard
   - Never show again option added to PWA popup
   - Daily popup tracking prevents multiple popups on same day
+  - Install buttons positioned at Digital Marketplace heading and footer only
+  - Profile icon positioned below status bar to avoid UI conflicts
 - Converting from Course Market to Channel Market theme throughout the application
 - Adapting all course-related terminology to channel marketplace terminology
 
