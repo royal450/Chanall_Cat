@@ -60,12 +60,12 @@ export function PWAInstallPopup() {
         }
       };
 
-      // Show popup automatically for testing
+      // Show popup automatically only for new users (not if they dismissed permanently)
       setTimeout(() => {
-        if (!isInstalled) {
+        if (!isInstalled && permanentlyDismissed !== 'true') {
           setShowPopup(true);
         }
-      }, 2000);
+      }, 3000);
 
       window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
       window.addEventListener('appinstalled', handleAppInstalled);

@@ -16,10 +16,14 @@ This is a full-stack JavaScript application that serves as a marketplace for soc
 - January 23, 2025: Started migration from Replit Agent to standard Replit environment
 - July 23, 2025: Migration from Replit Agent to standard Replit environment completed successfully
 - July 24, 2025: Final migration steps completed with enhanced comment system
-  - Enhanced intelligent comment system for all service types
+  - Enhanced intelligent comment system for all service types  
   - Service-specific comment templates for realistic user feedback
-  - Fixed comment popup z-index issues for proper layering
+  - Fixed comment popup z-index issues for proper layering using React Portal
+  - Comment container now renders outside card boundaries preventing overflow
   - TypeScript type safety improvements for comment selection
+  - PWA install popup one-time display implemented with localStorage
+  - Added permanent install button in dashboard sidebar
+  - Never show again option added to PWA popup
 - Converting from Course Market to Channel Market theme throughout the application
 - Adapting all course-related terminology to channel marketplace terminology
 
