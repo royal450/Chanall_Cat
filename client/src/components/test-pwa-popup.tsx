@@ -100,24 +100,28 @@ export function TestPWAPopup() {
     <AnimatePresence>
       {showPopup && (
         <>
-          {/* Dark backdrop overlay with proper centering */}
+          {/* Full screen backdrop overlay */}
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black/30 backdrop-blur-sm z-[9998] flex items-center justify-center p-4"
+            className="fixed inset-0 bg-black/50 backdrop-blur-sm z-[9998]"
             onClick={handleClose}
           />
           
-          {/* Centered popup with proper positioning */}
+          {/* Perfectly centered popup */}
           <motion.div
             initial={{ opacity: 0, scale: 0.8 }}
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.8 }}
-            className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-[9999] max-w-sm w-full mx-4"
-            onClick={(e) => e.stopPropagation()}
+            className="fixed inset-0 z-[9999] flex items-center justify-center p-4"
+            onClick={handleClose}
           >
-            <Card className="shadow-2xl border-2 border-pink-200 bg-gradient-to-br from-pink-50 to-rose-50">
+            <div 
+              className="max-w-sm w-full"
+              onClick={(e) => e.stopPropagation()}
+            >
+            <Card className="shadow-2xl border-2 border-pink-300 dark:border-pink-600 bg-gradient-to-br from-pink-50 to-rose-50 dark:from-gray-800 dark:to-gray-900">
               <CardContent className="p-4">
                 {/* Error banner */}
                 {error && (
@@ -172,6 +176,7 @@ export function TestPWAPopup() {
                 </div>
               </CardContent>
             </Card>
+            </div>
           </motion.div>
         </>
       )}

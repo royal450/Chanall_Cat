@@ -149,25 +149,29 @@ export function PWAInstallPopup() {
     <AnimatePresence>
       {showPopup && (
         <>
-          {/* Backdrop with proper centering */}
+          {/* Full screen backdrop overlay */}
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black/50 z-[9998] backdrop-blur-sm flex items-center justify-center p-4"
+            className="fixed inset-0 bg-black/60 z-[9998] backdrop-blur-sm"
             onClick={handleClose}
           />
           
-          {/* Centered popup with proper positioning */}
+          {/* Perfectly centered popup */}
           <motion.div
-            initial={{ opacity: 0, scale: 0.9, y: 20 }}
+            initial={{ opacity: 0, scale: 0.8, y: 50 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.9, y: 20 }}
-            transition={{ type: "spring", stiffness: 300, damping: 25 }}
-            className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-[9999] w-full max-w-md mx-4"
-            onClick={(e) => e.stopPropagation()}
+            exit={{ opacity: 0, scale: 0.8, y: 50 }}
+            transition={{ type: "spring", stiffness: 400, damping: 30 }}
+            className="fixed inset-0 z-[9999] flex items-center justify-center p-4"
+            onClick={handleClose}
           >
-            <div className="bg-white dark:bg-gray-900 rounded-2xl shadow-2xl border border-pink-200 dark:border-pink-800 overflow-hidden">
+            <div 
+              className="w-full max-w-md"
+              onClick={(e) => e.stopPropagation()}
+            >
+            <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl border-2 border-pink-300 dark:border-pink-600 overflow-hidden">
               {/* Error banner */}
               {error && (
                 <div className="bg-red-50 border-b border-red-200 p-3">
@@ -244,6 +248,7 @@ export function PWAInstallPopup() {
                   </Button>
                 </div>
               </div>
+            </div>
             </div>
           </motion.div>
         </>
