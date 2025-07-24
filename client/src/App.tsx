@@ -13,11 +13,10 @@ import Profile from "@/pages/profile";
 import Referral from "@/pages/referral";
 import NotFound from "@/pages/not-found";
 import Withdrawal from "@/pages/withdrawal";
-
-
 // Lazy loaded admin and channel pages
 const SuperAdmin = lazy(() => import("@/pages/Super_Admin"));
 const ChannelCreation = lazy(() => import("@/pages/Channel_Creation"));
+import { ErrorBoundary } from "@/components/error-boundary";
 
 function ProtectedRoute({ component: Component }: { component: React.ComponentType }) {
   const { user, loading } = useAuth();
@@ -146,46 +145,48 @@ function ReferralDetector() {
 
 function App() {
   return (
-    <QueryClientProvider client={queryClient}>
-      <AuthProvider>
-        <ReferralDetector />
-        <Switch>
-          {/* Root redirect */}
-          <Route path="/" component={AutoRedirectRoute} />
-          
-          {/* Public routes */}
-          <Route path="/login" component={() => <PublicRoute component={Login} />} />
-          <Route path="/signup" component={() => <PublicRoute component={Signup} />} />
-          
-          {/* Protected routes */}
-          <Route path="/dashboard" component={() => <ProtectedRoute component={Dashboard} />} />
-          <Route path="/payment" component={() => <ProtectedRoute component={Payment} />} />
-          <Route path="/profile" component={() => <ProtectedRoute component={Profile} />} />
-          <Route path="/referral" component={() => <ProtectedRoute component={Referral} />} />
-          <Route path="/withdrawal" component={() => <ProtectedRoute component={Withdrawal} />} />
+    <ErrorBoundary>
+      <QueryClientProvider client={queryClient}>
+        <AuthProvider>
+          <ReferralDetector />
+          <Switch>
+            {/* Root redirect */}
+            <Route path="/" component={AutoRedirectRoute} />
 
-          
-          {/* Lazy loaded protected routes */}
-          <Route path="/create-channel" component={() => 
-            <ProtectedRoute component={() => 
+            {/* Public routes */}
+            <Route path="/login" component={() => <PublicRoute component={Login} />} />
+            <Route path="/signup" component={() => <PublicRoute component={Signup} />} />
+
+            {/* Protected routes */}
+            <Route path="/dashboard" component={() => <ProtectedRoute component={Dashboard} />} />
+            <Route path="/payment" component={() => <ProtectedRoute component={Payment} />} />
+            <Route path="/profile" component={() => <ProtectedRoute component={Profile} />} />
+            <Route path="/referral" component={() => <ProtectedRoute component={Referral} />} />
+            <Route path="/withdrawal" component={() => <ProtectedRoute component={Withdrawal} />} />
+
+
+            {/* Lazy loaded protected routes */}
+            <Route path="/create-channel" component={() => 
+              <ProtectedRoute component={() => 
+                <Suspense fallback={<div className="w-full h-screen flex items-center justify-center p-0 m-0"><div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div></div>}>
+                  <ChannelCreation />
+                </Suspense>
+              } />
+            } />
+
+            <Route path="/super-admin" component={() => 
               <Suspense fallback={<div className="w-full h-screen flex items-center justify-center p-0 m-0"><div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div></div>}>
-                <ChannelCreation />
+                <SuperAdmin />
               </Suspense>
             } />
-          } />
-          
-          <Route path="/super-admin" component={() => 
-            <Suspense fallback={<div className="w-full h-screen flex items-center justify-center p-0 m-0"><div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div></div>}>
-              <SuperAdmin />
-            </Suspense>
-          } />
-          
-          {/* 404 route */}
-          <Route component={NotFound} />
-        </Switch>
-        <Toaster />
-      </AuthProvider>
-    </QueryClientProvider>
+
+            {/* 404 route */}
+            <Route component={NotFound} />
+          </Switch>
+          <Toaster />
+        </AuthProvider>
+      </QueryClientProvider>
+    </ErrorBoundary>
   );
 }
 

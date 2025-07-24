@@ -1,7 +1,7 @@
+
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Download, Smartphone } from 'lucide-react';
-import { useToast } from '@/hooks/use-toast';
 
 interface BeforeInstallPromptEvent extends Event {
   prompt(): Promise<void>;
@@ -10,47 +10,54 @@ interface BeforeInstallPromptEvent extends Event {
 
 export function PWAInstallButton() {
   const [deferredPrompt, setDeferredPrompt] = useState<BeforeInstallPromptEvent | null>(null);
-  const [isInstallable, setIsInstallable] = useState(false);
   const [isInstalled, setIsInstalled] = useState(false);
-  const { toast } = useToast();
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    // Check if app is already installed
-    if (window.navigator && 'standalone' in window.navigator) {
-      // iOS Safari
-      setIsInstalled((window.navigator as any).standalone);
-    } else if (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches) {
-      // Desktop and Android
-      setIsInstalled(true);
+    try {
+      // Check if app is already installed
+      if (window.matchMedia('(display-mode: standalone)').matches) {
+        setIsInstalled(true);
+        return;
+      }
+
+      const handleBeforeInstallPrompt = (e: Event) => {
+        try {
+          e.preventDefault();
+          setDeferredPrompt(e as BeforeInstallPromptEvent);
+        } catch (error) {
+          console.error('Error handling beforeinstallprompt:', error);
+          setError('Failed to prepare installation');
+        }
+      };
+
+      const handleAppInstalled = () => {
+        try {
+          setIsInstalled(true);
+          setDeferredPrompt(null);
+          trackPWAInstall();
+        } catch (error) {
+          console.error('Error handling app installed:', error);
+        }
+      };
+
+      window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+      window.addEventListener('appinstalled', handleAppInstalled);
+
+      return () => {
+        window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+        window.removeEventListener('appinstalled', handleAppInstalled);
+      };
+    } catch (error) {
+      console.error('Error in PWAInstallButton setup:', error);
+      setError('Failed to initialize PWA installation');
     }
-
-    const handleBeforeInstallPrompt = (e: Event) => {
-      e.preventDefault();
-      setDeferredPrompt(e as BeforeInstallPromptEvent);
-      setIsInstallable(true);
-    };
-
-    const handleAppInstalled = () => {
-      setIsInstalled(true);
-      setIsInstallable(false);
-      setDeferredPrompt(null);
-      
-      // Track PWA installation
-      trackPWAInstall();
-    };
-
-    window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
-    window.addEventListener('appinstalled', handleAppInstalled);
-
-    return () => {
-      window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
-      window.removeEventListener('appinstalled', handleAppInstalled);
-    };
   }, []);
 
   const trackPWAInstall = async () => {
     try {
-      await fetch('/api/pwa-installs', {
+      const response = await fetch('/api/pwa-installs', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -62,86 +69,68 @@ export function PWAInstallButton() {
           timestamp: new Date().toISOString(),
         }),
       });
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
     } catch (error) {
-      console.log('PWA install tracking failed:', error);
+      console.error('PWA install tracking failed:', error);
+      // Don't show error to user for tracking failures
     }
   };
 
   const handleInstallClick = async () => {
-    if (deferredPrompt) {
-      try {
-        await deferredPrompt.prompt();
-        const { outcome } = await deferredPrompt.userChoice;
-        
-        if (outcome === 'accepted') {
-          setIsInstalled(true);
-          setIsInstallable(false);
-          setDeferredPrompt(null);
-          trackPWAInstall();
-          toast({
-            title: "App Successfully Installed! ⭐⭐⭐",
-            description: "Channel Market app is now on your home screen!",
-            duration: 5000,
-          });
-        }
-      } catch (error) {
-        console.error('Installation failed:', error);
+    if (!deferredPrompt) {
+      setError('Installation not available');
+      return;
+    }
+
+    try {
+      setIsLoading(true);
+      setError(null);
+      
+      await deferredPrompt.prompt();
+      const { outcome } = await deferredPrompt.userChoice;
+      
+      if (outcome === 'accepted') {
+        await trackPWAInstall();
       }
-    } else {
-      // Force PWA install prompt
-      try {
-        // Try to trigger service worker registration first
-        if ('serviceWorker' in navigator) {
-          const registration = await navigator.serviceWorker.register('/sw.js');
-          console.log('Service Worker registered:', registration);
-        }
-        
-        // Simulate install
-        trackPWAInstall();
-        setIsInstalled(true);
-        toast({
-          title: "App Installed Successfully! ⭐⭐⭐",
-          description: "Look for Channel Market app on your home screen!",
-          duration: 5000,
-        });
-      } catch (error) {
-        toast({
-          title: "Installing App... ⭐⭐⭐",
-          description: "For manual install: Chrome → Menu → Install Channel Market, Safari → Share → Add to Home Screen",
-          duration: 7000,
-        });
-      }
+      
+      setDeferredPrompt(null);
+    } catch (error) {
+      console.error('Install failed:', error);
+      setError('Installation failed. Please try again.');
+    } finally {
+      setIsLoading(false);
     }
   };
 
-  if (isInstalled) {
-    return (
-      <Button
-        variant="outline"
-        size="sm"
-        className="bg-green-50 text-green-700 border-green-200 hover:bg-green-100 cursor-default"
-      >
-        <Smartphone className="w-4 h-4 mr-2" />
-        App Installed
-      </Button>
-    );
+  if (isInstalled || !deferredPrompt) {
+    return null;
   }
 
-  // Always show button for testing - remove the installable check
   return (
-    <Button
-      onClick={handleInstallClick}
-      size="sm"
-      className="bg-gradient-to-r from-pink-500 to-rose-600 hover:from-pink-600 hover:to-rose-700 text-white shadow-lg transform hover:scale-105 transition-all duration-200 animate-pulse active:scale-95"
-      onMouseDown={(e) => {
-        e.currentTarget.style.transform = 'scale(0.95)';
-        setTimeout(() => {
-          e.currentTarget.style.transform = 'scale(1.05)';
-        }, 100);
-      }}
-    >
-      <Download className="w-4 h-4 mr-2" />
-      Install App ⭐
-    </Button>
+    <div className="flex flex-col items-center space-y-2">
+      {error && (
+        <p className="text-red-600 text-xs text-center">{error}</p>
+      )}
+      <Button
+        onClick={handleInstallClick}
+        disabled={isLoading}
+        className="bg-gradient-to-r from-pink-500 to-rose-600 hover:from-pink-600 hover:to-rose-700 text-white font-medium shadow-lg hover:shadow-xl transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+        size="sm"
+      >
+        {isLoading ? (
+          <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2" />
+        ) : (
+          <Download className="w-4 h-4 mr-2" />
+        )}
+        {isLoading ? 'Installing...' : 'Install App'}
+      </Button>
+      <div className="flex items-center space-x-1 text-xs text-gray-500">
+        <Smartphone className="w-3 h-3" />
+        <span>Get native app experience</span>
+      </div>
+    </div>
   );
 }
