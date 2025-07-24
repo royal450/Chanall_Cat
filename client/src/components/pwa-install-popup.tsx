@@ -32,6 +32,14 @@ export function PWAInstallPopup() {
       const lastShownDate = localStorage.getItem('pwa-popup-last-shown');
       const today = new Date().toDateString();
       
+      console.log('PWA Popup Check:', {
+        userInstalled,
+        permanentlyDismissed,
+        lastShownDate,
+        today,
+        shouldShow: !(userInstalled === 'true' || permanentlyDismissed === 'true' || lastShownDate === today)
+      });
+      
       if (userInstalled === 'true' || permanentlyDismissed === 'true' || lastShownDate === today) {
         return;
       }
@@ -65,20 +73,28 @@ export function PWAInstallPopup() {
       };
 
       // Show popup automatically only once per day
-      setTimeout(() => {
-        if (!isInstalled && permanentlyDismissed !== 'true' && lastShownDate !== today) {
+      const autoShowTimer = setTimeout(() => {
+        const currentLastShown = localStorage.getItem('pwa-popup-last-shown');
+        const currentDate = new Date().toDateString();
+        const currentPermanentlyDismissed = localStorage.getItem('pwa-permanently-dismissed');
+        
+        if (!isInstalled && currentPermanentlyDismissed !== 'true' && currentLastShown !== currentDate) {
           setShowPopup(true);
-          localStorage.setItem('pwa-popup-last-shown', today);
+          localStorage.setItem('pwa-popup-last-shown', currentDate);
         }
       }, 3000);
-
+      
       window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
       window.addEventListener('appinstalled', handleAppInstalled);
 
+      // Cleanup function
       return () => {
+        clearTimeout(autoShowTimer);
         window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
         window.removeEventListener('appinstalled', handleAppInstalled);
       };
+
+
     } catch (error) {
       console.error('Error in PWA setup:', error);
       setError('Failed to initialize PWA installation');
@@ -143,6 +159,7 @@ export function PWAInstallPopup() {
       // Mark popup as shown for today when user closes it
       const today = new Date().toDateString();
       localStorage.setItem('pwa-popup-last-shown', today);
+      console.log('PWA Popup closed, marked date:', today);
     } catch (error) {
       console.error('Error closing popup:', error);
     }
