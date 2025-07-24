@@ -24,12 +24,11 @@ export function PWAInstallPopup() {
         return;
       }
 
-      // Check if user has already dismissed the popup recently
-      const dismissedRecently = localStorage.getItem('pwa-popup-dismissed');
-      const lastDismissed = dismissedRecently ? parseInt(dismissedRecently) : 0;
-      const hoursSinceDismissed = (Date.now() - lastDismissed) / (1000 * 60 * 60);
-
-      if (hoursSinceDismissed < 24) {
+      // Check if user has already installed or permanently dismissed
+      const userInstalled = localStorage.getItem('pwa-user-installed');
+      const permanentlyDismissed = localStorage.getItem('pwa-permanently-dismissed');
+      
+      if (userInstalled === 'true' || permanentlyDismissed === 'true') {
         return;
       }
 
@@ -54,6 +53,7 @@ export function PWAInstallPopup() {
           setIsInstalled(true);
           setShowPopup(false);
           setDeferredPrompt(null);
+          localStorage.setItem('pwa-user-installed', 'true');
           trackPWAInstall();
         } catch (error) {
           console.error('Error handling app installed:', error);
@@ -134,10 +134,19 @@ export function PWAInstallPopup() {
   const handleClose = () => {
     try {
       setShowPopup(false);
-      localStorage.setItem('pwa-popup-dismissed', Date.now().toString());
       setError(null);
     } catch (error) {
       console.error('Error closing popup:', error);
+    }
+  };
+
+  const handleNeverShowAgain = () => {
+    try {
+      setShowPopup(false);
+      localStorage.setItem('pwa-permanently-dismissed', 'true');
+      setError(null);
+    } catch (error) {
+      console.error('Error permanently dismissing popup:', error);
     }
   };
 
@@ -226,11 +235,11 @@ export function PWAInstallPopup() {
                   </div>
                 </div>
 
-                <div className="flex space-x-3 mt-6">
+                <div className="flex flex-col space-y-3 mt-6">
                   <Button
                     onClick={handleInstallClick}
                     disabled={isLoading || !deferredPrompt}
-                    className="flex-1 bg-gradient-to-r from-pink-500 to-rose-600 hover:from-pink-600 hover:to-rose-700 text-white font-medium shadow-lg hover:shadow-xl transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="w-full bg-gradient-to-r from-pink-500 to-rose-600 hover:from-pink-600 hover:to-rose-700 text-white font-medium shadow-lg hover:shadow-xl transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     {isLoading ? (
                       <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2" />
@@ -240,14 +249,25 @@ export function PWAInstallPopup() {
                     {isLoading ? 'Installing...' : 'Install Now'}
                   </Button>
                   
-                  <Button
-                    onClick={handleClose}
-                    disabled={isLoading}
-                    variant="outline"
-                    className="px-6 border-pink-200 text-pink-600 hover:bg-pink-50 dark:border-pink-800 dark:text-pink-400 dark:hover:bg-pink-900/20 disabled:opacity-50"
-                  >
-                    Later
-                  </Button>
+                  <div className="flex space-x-3">
+                    <Button
+                      onClick={handleClose}
+                      disabled={isLoading}
+                      variant="outline"
+                      className="flex-1 border-pink-200 text-pink-600 hover:bg-pink-50 dark:border-pink-800 dark:text-pink-400 dark:hover:bg-pink-900/20 disabled:opacity-50"
+                    >
+                      Later
+                    </Button>
+                    
+                    <Button
+                      onClick={handleNeverShowAgain}
+                      disabled={isLoading}
+                      variant="ghost"
+                      className="flex-1 text-gray-500 hover:text-gray-700 text-sm disabled:opacity-50"
+                    >
+                      Never Show Again
+                    </Button>
+                  </div>
                 </div>
               </div>
             </div>

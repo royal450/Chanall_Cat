@@ -781,8 +781,8 @@ export function ChannelCard({ channel, onBuyNow }: ChannelCardProps) {
 
       {/* Comments View Modal */}
       {showCommentsView && (
-        <div className="fixed inset-0 bg-black/60 z-[999] flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[85vh] overflow-hidden flex flex-col">
+        <div className="fixed inset-0 bg-black/60 z-[9999] flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[85vh] overflow-visible flex flex-col">
             <div className="bg-blue-600 text-white p-4 flex items-center justify-between">
               <h3 className="text-lg font-bold">Comments ({commentCount})</h3>
               <Button
