@@ -32,8 +32,7 @@ import { Service } from "@/types/course";
 import { useAuth } from "@/hooks/use-auth";
 import { useFirebaseServices } from "@/hooks/use-firebase-realtime";
 import { PWAInstallButton } from "@/components/pwa-install-button";
-import { PWAInstallPopup } from "@/components/pwa-install-popup";
-import { TestPWAPopup } from "@/components/test-pwa-popup";
+
 import { DashboardInstallButton } from "@/components/dashboard-install-button";
 import { Toaster } from "@/components/ui/toaster";
 
@@ -241,8 +240,7 @@ export default function Dashboard() {
 
       {/* Hero Section */}
       <div className="relative w-full max-w-[95vw] mx-auto px-2.5 py-4">
-        <PWAInstallPopup />
-        <TestPWAPopup />
+
         <div className="text-center mb-6">
           <div className="inline-flex items-center space-x-2 bg-gradient-to-r from-purple-600 to-pink-600 text-white px-4 py-2 rounded-full text-xs md:text-sm font-medium mb-4 shadow-lg">
             <Sparkles className="w-3 h-3 md:w-4 md:h-4" />
@@ -798,8 +796,7 @@ export default function Dashboard() {
 
       <Footer />
       
-      {/* PWA Install Popup */}
-      <PWAInstallPopup />
+
     </div>
   );
 }

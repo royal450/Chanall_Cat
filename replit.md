@@ -21,12 +21,10 @@ This is a full-stack JavaScript application that serves as a marketplace for soc
   - Fixed comment popup z-index issues for proper layering using React Portal
   - Comment container now renders outside card boundaries preventing overflow
   - TypeScript type safety improvements for comment selection
-  - PWA install popup once-per-day display implemented with localStorage  
-  - Fixed install button positioned at top-right of dashboard
-  - Never show again option added to PWA popup
-  - Daily popup tracking prevents multiple popups on same day
+  - PWA install popup completely removed per user request  
   - Install buttons positioned at Digital Marketplace heading and footer only
   - Profile icon positioned below status bar to avoid UI conflicts
+  - Clean UI without any interrupting popups
 - Converting from Course Market to Channel Market theme throughout the application
 - Adapting all course-related terminology to channel marketplace terminology
 
